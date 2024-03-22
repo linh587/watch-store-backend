@@ -64,6 +64,7 @@ export async function signInUser(req: Request, res: Response) {
       accessToken,
       refreshToken,
       verified: userSignInResult.verified,
+      id: userSignInResult.id,
     });
   } else {
     res.status(404).json("Not found this user");
@@ -111,7 +112,7 @@ export async function forgotPassword(req: Request, res: Response) {
   const JWT_RESET_PASSWORD_SECRET_KEY =
     process.env.JWT_RESET_PASSWORD_SECRET_KEY || "token";
   const CLIENT_URL_FOR_RESET_PASSWORD =
-    process.env.CLIENT_URL_FOR_RESET_PASSWORD || "http://localhost:3000";
+    process.env.CLIENT_URL_FOR_RESET_PASSWORD || "http://localhost:4200";
   const resetPasswordToken = jwt.sign(
     { id: userAccountId },
     JWT_RESET_PASSWORD_SECRET_KEY,

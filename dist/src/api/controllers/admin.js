@@ -90,7 +90,7 @@ export async function updateProductSize(req, res) {
     const productSizeId = req.params["productSizeId"];
     const success = await ProductSizeService.updateProductSize(productSizeId, productSizeName);
     if (success) {
-        res.json("Upadte product size successful");
+        res.json("Update product size successful");
     }
     else {
         res.status(400).json("Update product size failure");

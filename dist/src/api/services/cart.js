@@ -16,7 +16,7 @@ export async function getExtraCartDetail(userAccountId, productPriceId) {
         product.name as product_name, product_size.id as product_size_id, \
         product_size.name as product_size_name, \
         product.cover_image as product_cover_image\
-        from ace_coffee_db.cart_detail \
+        from watch_db.cart_detail \
         inner join product_price on \
         cart_detail.product_price_id = product_price.id\
         inner join product on \

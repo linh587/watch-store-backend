@@ -3,7 +3,7 @@ import * as UserController from '../controllers/user.js';
 import { extractFormData } from '../middlewares/formDataExtract.js';
 import UserValidate from '../validations/user.js';
 const router = Router();
-router.get('/information', UserController.getInformation);
+router.get('/information/:userAccountId', UserController.getInformation);
 router.put('/information', extractFormData, UserValidate.updateInformation, UserController.updateInformation);
 router.patch('/password', UserValidate.updatePassword, UserController.updatePassword);
 router.delete('/account', UserController.deleteAccount);

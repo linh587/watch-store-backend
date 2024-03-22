@@ -33,6 +33,7 @@ export async function signInUser(req, res) {
             accessToken,
             refreshToken,
             verified: userSignInResult.verified,
+            id: userSignInResult.id,
         });
     }
     else {
@@ -66,7 +67,7 @@ export async function forgotPassword(req, res) {
         return;
     }
     const JWT_RESET_PASSWORD_SECRET_KEY = process.env.JWT_RESET_PASSWORD_SECRET_KEY || "token";
-    const CLIENT_URL_FOR_RESET_PASSWORD = process.env.CLIENT_URL_FOR_RESET_PASSWORD || "http://localhost:3000";
+    const CLIENT_URL_FOR_RESET_PASSWORD = process.env.CLIENT_URL_FOR_RESET_PASSWORD || "http://localhost:4200";
     const resetPasswordToken = jwt.sign({ id: userAccountId }, JWT_RESET_PASSWORD_SECRET_KEY, { expiresIn: EXPIRE_TIME_OF_RESET_PASSWORD_TOKEN });
     const mailContent = "Truy cập liên kết bên dưới để đặt lại mật khẩu\n" +
         `${CLIENT_URL_FOR_RESET_PASSWORD}/${resetPasswordToken}`;

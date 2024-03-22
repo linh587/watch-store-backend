@@ -1,5 +1,5 @@
-import Joi from 'joi';
-import * as GeneralValidate from './general.js';
+import Joi from "joi";
+import * as GeneralValidate from "./general.js";
 const updateInformationSchema = Joi.object({
     phone: GeneralValidate.phoneSchema,
     name: GeneralValidate.vietnameseSchema.required(),
@@ -8,31 +8,31 @@ const updateInformationSchema = Joi.object({
     avatar: Joi.string(),
     email: Joi.string().email().required(),
     address: Joi.string(),
-    longitude: Joi.string().regex(GeneralValidate.COORDINATE_REGEX).when('address', { is: Joi.exist(), then: Joi.required() }),
-    latitude: Joi.string().regex(GeneralValidate.COORDINATE_REGEX).when('address', { is: Joi.exist(), then: Joi.required() })
+    longitude: Joi.string(),
+    latitude: Joi.string(),
 }).unknown();
 const addToCartShema = Joi.object({
     productPriceId: Joi.string().required(),
-    quality: Joi.number().integer().positive().required()
+    quality: Joi.number().integer().positive().required(),
 }).unknown();
 const updateCartDetailSchema = Joi.object({
-    quality: Joi.number().integer().positive().required()
+    quality: Joi.number().integer().positive().required(),
 }).unknown();
 const markNotificationIsSeenSchema = Joi.object({
-    notificationIds: Joi.array().items(Joi.string()).min(1).required()
+    notificationIds: Joi.array().items(Joi.string()).min(1).required(),
 }).unknown();
 const addRatingSchema = Joi.object({
     star: Joi.number().min(1).max(5).integer().required(),
-    content: Joi.string().allow(null, ''),
+    content: Joi.string().allow(null, ""),
 }).unknown();
 const updateRatingSchema = Joi.object({
     star: Joi.number().min(1).max(5).integer().required(),
-    content: Joi.string().allow(null, ''),
+    content: Joi.string().allow(null, ""),
 }).unknown();
 export default class UserValidate {
     static updateInformation(req, res, next) {
         if (!req.fields) {
-            res.status(400).json('Unknown error');
+            res.status(400).json("Unknown error");
             return;
         }
         const validationResult = updateInformationSchema.validate(req.fields);

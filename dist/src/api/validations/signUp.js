@@ -1,5 +1,5 @@
-import Joi from 'joi';
-import * as GeneralValidate from './general.js';
+import Joi from "joi";
+import * as GeneralValidate from "./general.js";
 const signUpUserSchema = Joi.object({
     email: Joi.string().email().required(),
     name: GeneralValidate.vietnameseSchema.required(),
@@ -7,12 +7,12 @@ const signUpUserSchema = Joi.object({
     dateOfBirth: Joi.string().isoDate().required(),
     phone: GeneralValidate.phoneSchema,
     address: Joi.string(),
-    longitude: Joi.string().regex(GeneralValidate.COORDINATE_REGEX).when('address', { is: Joi.exist(), then: Joi.required() }),
-    latitude: Joi.string().regex(GeneralValidate.COORDINATE_REGEX).when('address', { is: Joi.exist(), then: Joi.required() }),
-    password: GeneralValidate.passwordSchema.required()
+    longitude: Joi.string(),
+    latitude: Joi.string(),
+    password: GeneralValidate.passwordSchema.required(),
 }).unknown();
 const checkExistsEmailSchema = Joi.object({
-    email: Joi.string().email().required()
+    email: Joi.string().email().required(),
 }).unknown();
 export default class SignUpValidate {
     static signUpUser(req, res, next) {

@@ -28,7 +28,7 @@ export async function signUpUser(req: FormDataRequest<Request>, res: Response) {
 
   if (userAccountId) {
     // const JWT_VERIFY_SECRET_KEY = process.env.JWT_VERIFY_SECRET_KEY || 'token'
-    // const CLIENT_URL_FOR_VERIFY_MAIL = process.env.CLIENT_URL_FOR_VERIFY_MAIL || 'localhost:3000'
+    // const CLIENT_URL_FOR_VERIFY_MAIL = process.env.CLIENT_URL_FOR_VERIFY_MAIL || 'localhost:4200'
     // const tokenVerify = jwt.sign({ id: userAccountId }, JWT_VERIFY_SECRET_KEY)
     // const mailContent = `Truy cập liên kết này để xác thực email\n${CLIENT_URL_FOR_VERIFY_MAIL}/${tokenVerify}`
     // const mailSubject = 'Xác thực email'
