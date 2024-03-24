@@ -20,7 +20,7 @@ import { deleteImage, uploadImage } from "../utils/storageImage.js";
 import { getSocketIO } from "../../socketIO.js";
 
 export async function getInformation(req: AdminRequest, res: Response) {
-  const username = req.username;
+  const { username } = req;
   if (username) {
     const information = await AdminService.getInformation(username);
     if (information) {

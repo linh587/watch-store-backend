@@ -20,7 +20,7 @@ import { calculateDeliveryCharge } from "../utils/misc.js";
 import { deleteImage, uploadImage } from "../utils/storageImage.js";
 
 export async function getInformation(req: UserRequest, res: Response) {
-  const userAccountId = req.params["userAccountId"];
+  const { userAccountId } = req;
   if (!userAccountId) {
     res.status(400).json("Unknown error");
     return;
@@ -69,7 +69,10 @@ export async function updateInformation(
       await deleteImage(oldAvatar);
     }
 
-    res.json(information);
+    res.json({
+      userAccountId,
+      ...information,
+    });
   } else {
     res.status(400).json("Update failure");
   }
@@ -153,7 +156,7 @@ export async function addToCart(req: UserRequest, res: Response) {
   if (success) {
     res.json({
       productPriceId: productPriceId,
-      quality: quality
+      quality: quality,
     });
   } else {
     res.status(400).json("Error");
@@ -276,8 +279,8 @@ export async function createOrder(req: UserRequest, res: Response) {
       details: orderDetailsBeMappingPrice,
       deliveryCharge,
     },
-    amountOfDecreaseMoney,
-    userAccountId
+    amountOfDecreaseMoney
+    // userAccountId
   );
 
   if (orderId) {

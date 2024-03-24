@@ -12,7 +12,7 @@ import * as MapUtil from "../utils/map.js";
 import { calculateDeliveryCharge } from "../utils/misc.js";
 import { deleteImage, uploadImage } from "../utils/storageImage.js";
 export async function getInformation(req, res) {
-    const userAccountId = req.params["userAccountId"];
+    const { userAccountId } = req;
     if (!userAccountId) {
         res.status(400).json("Unknown error");
         return;
@@ -47,7 +47,10 @@ export async function updateInformation(req, res) {
         if (information.avatar !== oldAvatar) {
             await deleteImage(oldAvatar);
         }
-        res.json(information);
+        res.json({
+            userAccountId,
+            ...information,
+        });
     }
     else {
         res.status(400).json("Update failure");
@@ -115,7 +118,7 @@ export async function addToCart(req, res) {
     if (success) {
         res.json({
             productPriceId: productPriceId,
-            quality: quality
+            quality: quality,
         });
     }
     else {
@@ -206,7 +209,9 @@ export async function createOrder(req, res) {
         ...information,
         details: orderDetailsBeMappingPrice,
         deliveryCharge,
-    }, amountOfDecreaseMoney, userAccountId);
+    }, amountOfDecreaseMoney
+    // userAccountId
+    );
     if (orderId) {
         const productPriceIdsInUserCart = information.details.map(({ productPriceId }) => productPriceId);
         await Promise.all(productPriceIdsInUserCart.map((productPriceId) => CartService.deleteCartDetail(userAccountId, productPriceId)));

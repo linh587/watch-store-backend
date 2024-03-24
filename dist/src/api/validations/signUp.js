@@ -2,7 +2,7 @@ import Joi from "joi";
 import * as GeneralValidate from "./general.js";
 const signUpUserSchema = Joi.object({
     email: Joi.string().email().required(),
-    name: GeneralValidate.vietnameseSchema.required(),
+    name: Joi.string().required(),
     gender: GeneralValidate.genderSchema.required(),
     dateOfBirth: Joi.string().isoDate().required(),
     phone: GeneralValidate.phoneSchema,

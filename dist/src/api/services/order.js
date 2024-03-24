@@ -96,9 +96,9 @@ export async function getOrderById(orderId) {
         details,
     });
 }
-export async function createOrder(information, amountOfDecreaseMoney, userAccountId) {
+export async function createOrder(information, amountOfDecreaseMoney) {
     const orderId = createUid(20);
-    const { customerName, phone, email, branchId, couponCode, receivedType, receivedAddress, deliveryCharge, details, } = information;
+    const { customerName, phone, email, branchId, couponCode, receivedType, receivedAddress, deliveryCharge, details, userAccountId } = information;
     if (details.length <= 0) {
         return "";
     }

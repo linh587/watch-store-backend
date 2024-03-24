@@ -27,13 +27,14 @@ export async function signUpUser(req: FormDataRequest<Request>, res: Response) {
   const userAccountId = await UserAccountService.createAccount(information);
 
   if (userAccountId) {
-    // const JWT_VERIFY_SECRET_KEY = process.env.JWT_VERIFY_SECRET_KEY || 'token'
-    // const CLIENT_URL_FOR_VERIFY_MAIL = process.env.CLIENT_URL_FOR_VERIFY_MAIL || 'localhost:4200'
-    // const tokenVerify = jwt.sign({ id: userAccountId }, JWT_VERIFY_SECRET_KEY)
-    // const mailContent = `Truy cập liên kết này để xác thực email\n${CLIENT_URL_FOR_VERIFY_MAIL}/${tokenVerify}`
-    // const mailSubject = 'Xác thực email'
-    // const userMailAddress = information.email
-    // sendMail(userMailAddress, mailContent, mailSubject)
+    const JWT_VERIFY_SECRET_KEY = process.env.JWT_VERIFY_SECRET_KEY || "token";
+    const CLIENT_URL_FOR_VERIFY_MAIL =
+      process.env.CLIENT_URL_FOR_VERIFY_MAIL || "localhost:4200";
+    const tokenVerify = jwt.sign({ id: userAccountId }, JWT_VERIFY_SECRET_KEY);
+    const mailContent = `Truy cập liên kết này để xác thực email\n${CLIENT_URL_FOR_VERIFY_MAIL}/${tokenVerify}`;
+    const mailSubject = "Xác thực email";
+    const userMailAddress = information.email;
+    sendMail(userMailAddress, mailContent, mailSubject);
     res.json("Need verify mail to finish!");
   } else {
     res.status(400).json("Create failure");

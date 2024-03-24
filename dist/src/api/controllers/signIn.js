@@ -15,7 +15,7 @@ export async function signInAdmin(req, res) {
         const { username, type, firstLogin } = adminSignInResult;
         const accessToken = jwt.sign({ username, type, firstLogin, role: "admin" }, JWT_SECRET_KEY, { expiresIn: EXPIRE_TIME_OF_ACCESS_TOKEN });
         const refreshToken = jwt.sign({ username, type, firstLogin, role: "admin" }, JWT_REFRESH_SECRET_KEY, { expiresIn: EXPIRE_TIME_OF_REFRESH_TOKEN });
-        res.json({ accessToken, refreshToken, firstLogin, username });
+        res.json({ accessToken, refreshToken, firstLogin });
     }
     else {
         res.status(404).json("Not found this admin");

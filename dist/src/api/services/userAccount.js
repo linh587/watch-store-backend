@@ -21,7 +21,7 @@ export async function getUserAccounts(limit) {
     return userAccountRowDatas.map(convertUnderscorePropertiesToCamelCase);
 }
 export async function getInformation(userAccountId) {
-    const findUserInformationQuery = "select phone, name, gender, date_of_birth, avatar, email, address, longitude, latitude from user_account where id=? and deleted_at is null";
+    const findUserInformationQuery = "select id, phone, name, gender, date_of_birth, avatar, email, address, longitude, latitude from user_account where id=? and deleted_at is null";
     const [userInformationRowDatas] = (await pool.query(findUserInformationQuery, [userAccountId]));
     if (Array.isArray(userInformationRowDatas) &&
         userInformationRowDatas.length > 0) {

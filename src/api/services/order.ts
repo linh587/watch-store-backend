@@ -204,7 +204,6 @@ export async function getOrderById(orderId: string) {
 export async function createOrder(
   information: InformationToCreateOrder,
   amountOfDecreaseMoney: number,
-  userAccountId?: string
 ) {
   const orderId = createUid(20);
   const {
@@ -217,6 +216,7 @@ export async function createOrder(
     receivedAddress,
     deliveryCharge,
     details,
+    userAccountId
   } = information;
   if (details.length <= 0) {
     return "";

@@ -7,7 +7,8 @@ import AdminValidate from "../validations/admin.js";
 
 const router = Router();
 
-router.get("/information/:username", AdminController.getInformation);
+router.get("/information", AdminController.getInformation);
+
 router.put(
   "/password/",
   AdminValidate.updatePassword,

@@ -36,7 +36,7 @@ export async function signInAdmin(req: Request, res: Response) {
       { expiresIn: EXPIRE_TIME_OF_REFRESH_TOKEN }
     );
 
-    res.json({ accessToken, refreshToken, firstLogin, username });
+    res.json({ accessToken, refreshToken, firstLogin });
   } else {
     res.status(404).json("Not found this admin");
   }

@@ -15,7 +15,7 @@ import * as NotificationService from "../services/notification.js";
 import { deleteImage, uploadImage } from "../utils/storageImage.js";
 import { getSocketIO } from "../../socketIO.js";
 export async function getInformation(req, res) {
-    const username = req.username;
+    const { username } = req;
     if (username) {
         const information = await AdminService.getInformation(username);
         if (information) {

@@ -5,7 +5,7 @@ import { extractFormData } from "../middlewares/formDataExtract.js";
 import { preventFirstLogin } from "../middlewares/requiredChangePassword.js";
 import AdminValidate from "../validations/admin.js";
 const router = Router();
-router.get("/information/:username", AdminController.getInformation);
+router.get("/information", AdminController.getInformation);
 router.put("/password/", AdminValidate.updatePassword, AdminController.updatePassword);
 router.post("/category", preventFirstLogin, validateStoreAdminPermision, AdminValidate.addCategory, AdminController.addCategory);
 router.put("/category/:categoryId", preventFirstLogin, validateStoreAdminPermision, AdminValidate.updateCategory, AdminController.updateCategory);
