@@ -98,7 +98,7 @@ export async function getOrderById(orderId) {
 }
 export async function createOrder(information, amountOfDecreaseMoney) {
     const orderId = createUid(20);
-    const { customerName, phone, email, branchId, couponCode, receivedType, receivedAddress, deliveryCharge, details, userAccountId } = information;
+    const { customerName, phone, email, branchId, couponCode, receivedType, receivedAddress, deliveryCharge, details, userAccountId, } = information;
     if (details.length <= 0) {
         return "";
     }

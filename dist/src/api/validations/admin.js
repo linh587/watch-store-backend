@@ -1,24 +1,26 @@
-import Joi from 'joi';
-import { APPLIED_SCOPES, COUPON_TYPE, COUPON_UNIT, LENGTH_OF_COUPON_CODE } from '../services/coupon.js';
-import * as GeneralValidate from './general.js';
+import Joi from "joi";
+import { APPLIED_SCOPES, COUPON_TYPE, COUPON_UNIT, LENGTH_OF_COUPON_CODE, } from "../services/coupon.js";
+import * as GeneralValidate from "./general.js";
 const addCategorySchema = Joi.object({
-    name: Joi.string().required()
+    name: Joi.string().required(),
 });
 const updateCategorySchema = Joi.object({
-    name: Joi.string().required()
+    name: Joi.string().required(),
 });
 const addProductSizeSchema = Joi.object({
-    name: Joi.string().required()
+    name: Joi.string().required(),
 });
 const updateProductSizeSchema = Joi.object({
-    name: Joi.string().required()
+    name: Joi.string().required(),
 });
 const addProductShema = Joi.object({
     name: Joi.string().required(),
     description: Joi.string().required(),
     categoryId: Joi.string().required(),
     status: GeneralValidate.productStatusSchema.required(),
-    priceInformationJsons: Joi.alternatives().try(Joi.string(), Joi.array().items(Joi.string()).min(1)).required()
+    priceInformationJsons: Joi.alternatives()
+        .try(Joi.string(), Joi.array().items(Joi.string()).min(1))
+        .required(),
 }).unknown();
 const updateProductShema = Joi.object({
     name: Joi.string().required(),
@@ -27,16 +29,18 @@ const updateProductShema = Joi.object({
     coverImage: Joi.string(),
     status: GeneralValidate.productStatusSchema.required(),
     images: Joi.alternatives().try(Joi.string(), Joi.array().items(Joi.string())),
-    priceInformationJsons: Joi.alternatives().try(Joi.string(), Joi.array().items(Joi.string()).min(1)).required()
+    priceInformationJsons: Joi.alternatives()
+        .try(Joi.string(), Joi.array().items(Joi.string()).min(1))
+        .required(),
 }).unknown();
 const informationToCreateProductPriceSchema = Joi.object({
     productSizeId: Joi.string().required(),
-    price: Joi.number().positive().required()
+    price: Joi.number().positive().required(),
 }).unknown();
 const informationToUpdateProductPriceSchema = Joi.object({
     productSizeId: Joi.string().required(),
     price: Joi.number().positive().required(),
-    productPriceId: Joi.string().allow('')
+    productPriceId: Joi.string().allow(""),
 }).unknown();
 const addBranchShema = Joi.object({
     name: Joi.string().required(),
@@ -62,66 +66,135 @@ const addStaffAccountSchema = Joi.object({
     branchId: Joi.string().required(),
     gender: GeneralValidate.genderSchema.required(),
     dateOfBirth: Joi.string().isoDate().required(),
-    email: Joi.string().email()
+    email: Joi.string().email(),
 }).unknown();
 const updateBranchForStaff = Joi.object({
-    branchId: Joi.string().required()
+    branchId: Joi.string().required(),
 }).unknown();
 const addNewsSchema = Joi.object({
     title: Joi.string().required(),
-    content: Joi.string().required()
+    content: Joi.string().required(),
 }).unknown();
 const updateNewsSchema = Joi.object({
     title: Joi.string().required(),
     content: Joi.string().required(),
-    coverImage: Joi.string()
+    coverImage: Joi.string(),
 }).unknown();
 const addCouponSchema = Joi.object({
     couponCode: Joi.string().length(LENGTH_OF_COUPON_CODE),
     type: Joi.valid(...COUPON_TYPE).required(),
     beginAt: Joi.date().iso().required(),
-    finishAt: Joi.date().iso().greater(Joi.ref('beginAt')).required(),
+    finishAt: Joi.date().iso().greater(Joi.ref("beginAt")).required(),
     decrease: Joi.number().positive().required(),
     unit: Joi.valid(...COUPON_UNIT).required(),
-    appliedScopes: Joi.array().items(...APPLIED_SCOPES).unique().min(1).required(),
+    appliedScopes: Joi.array()
+        .items(...APPLIED_SCOPES)
+        .unique()
+        .min(1)
+        .required(),
     branchIds: Joi.array().items(Joi.string()),
     productPriceIds: Joi.array().items(Joi.string()),
     totalPriceFrom: Joi.number().min(0),
-    totalPriceTo: Joi.number().min(Joi.ref('totalPriceFrom'))
+    totalPriceTo: Joi.number().min(Joi.ref("totalPriceFrom")),
 }).unknown();
 const updateCouponSchema = Joi.object({
     type: Joi.valid(...COUPON_TYPE).required(),
     beginAt: Joi.date().iso().required(),
-    finishAt: Joi.date().iso().greater(Joi.ref('beginAt')).required(),
+    finishAt: Joi.date().iso().greater(Joi.ref("beginAt")).required(),
     decrease: Joi.number().positive().required(),
     unit: Joi.valid(...COUPON_UNIT).required(),
-    appliedScopes: Joi.array().items(...APPLIED_SCOPES).unique().min(1).required(),
+    appliedScopes: Joi.array()
+        .items(...APPLIED_SCOPES)
+        .unique()
+        .min(1)
+        .required(),
     branchIds: Joi.array().items(Joi.string()),
     productPriceIds: Joi.array().items(Joi.string()),
     totalPriceFrom: Joi.number().min(0),
-    totalPriceTo: Joi.alternatives(Joi.number().min(Joi.ref('totalPriceFrom')), null)
+    totalPriceTo: Joi.alternatives(Joi.number().min(Joi.ref("totalPriceFrom")), null),
 }).unknown();
 const addPromotionSchema = Joi.object({
     title: Joi.string().required(),
     content: Joi.string().required(),
-    couponCode: Joi.string().required()
+    couponCode: Joi.string().required(),
 }).unknown();
 const updatePromotionSchema = Joi.object({
     title: Joi.string().required(),
     content: Joi.string().required(),
     coverImage: Joi.string(),
-    couponCode: Joi.string().required()
+    couponCode: Joi.string().required(),
 }).unknown();
 const addBannerSchema = Joi.object({
     title: Joi.string().required(),
-    linkTo: Joi.string().required()
+    linkTo: Joi.string().required(),
 }).unknown();
 const updateBannerSchema = Joi.object({
     title: Joi.string().required(),
     linkTo: Joi.string().required(),
-    image: Joi.string()
+    image: Joi.string(),
 }).unknown();
+const addSupplierSchema = Joi.object({
+    name: Joi.string().required(),
+    email: Joi.string().required().email(),
+    phone: GeneralValidate.phoneSchema,
+    address: Joi.string(),
+    longitude: Joi.string(),
+    latitude: Joi.string(),
+    note: Joi.string(),
+    status: Joi.string(),
+});
+const updateSupplierSchema = Joi.object({
+    name: Joi.string().required(),
+    email: Joi.string().required().email(),
+    phone: GeneralValidate.phoneSchema,
+    address: Joi.string(),
+    longitude: Joi.string(),
+    latitude: Joi.string(),
+    note: Joi.string(),
+    status: Joi.string(),
+});
+const temporaryGoodReiceptDetailSchema = Joi.object({
+    productId: Joi.string(),
+    quantity: Joi.number(),
+    price: Joi.string(),
+    note: Joi.string(),
+});
+const createGoodRecieptSchema = Joi.object({
+    deliver: Joi.string(),
+    deliveryDate: Joi.string(),
+    creator: Joi.string(),
+    note: Joi.string(),
+    supplierId: Joi.string(),
+    details: Joi.array()
+        .items(temporaryGoodReiceptDetailSchema)
+        .min(1)
+        .required(),
+});
 export default class AdminValidate {
+    static addGoodReceipt(req, res, next) {
+        const validationResult = createGoodRecieptSchema.validate(req.body);
+        if (validationResult.error) {
+            res.status(400).json(validationResult.error.message);
+            return;
+        }
+        next();
+    }
+    static addSupplier(req, res, next) {
+        const validationResult = addSupplierSchema.validate(req.body);
+        if (validationResult.error) {
+            res.status(400).json(validationResult.error.message);
+            return;
+        }
+        next();
+    }
+    static updateSupplier(req, res, next) {
+        const validationResult = updateSupplierSchema.validate(req.body);
+        if (validationResult.error) {
+            res.status(400).json(validationResult.error.message);
+            return;
+        }
+        next();
+    }
     static updatePassword(req, res, next) {
         const validationResult = GeneralValidate.updatePasswordSchema.validate(req.body);
         if (validationResult.error) {
@@ -169,7 +242,7 @@ export default class AdminValidate {
             return;
         }
         if (!req.fields) {
-            res.status(400).json('Unknown error');
+            res.status(400).json("Unknown error");
             return;
         }
         const priceInformationJsons = Array.isArray(req.fields.priceInformationJsons)
@@ -177,22 +250,25 @@ export default class AdminValidate {
             : [req.fields.priceInformationJsons];
         const priceInformations = [];
         try {
-            priceInformations.push(...priceInformationJsons.map(json => {
+            priceInformations.push(...priceInformationJsons.map((json) => {
                 return JSON.parse(json);
             }));
         }
         catch (error) {
             console.log(error);
-            res.status(400).json('Not parse product price information jsons');
+            res.status(400).json("Not parse product price information jsons");
             return;
         }
-        const priceInformationsValidateResult = Joi.array().min(1).items(informationToCreateProductPriceSchema).validate(priceInformations);
+        const priceInformationsValidateResult = Joi.array()
+            .min(1)
+            .items(informationToCreateProductPriceSchema)
+            .validate(priceInformations);
         if (priceInformationsValidateResult.error) {
             res.status(400).json(priceInformationsValidateResult.error.message);
             return;
         }
         if (!req.files) {
-            res.status(400).json('Require image files for product');
+            res.status(400).json("Require image files for product");
             return;
         }
         const coverImageFileValidateResult = GeneralValidate.imageFileSchema.validate(req.files.coverImageFile);
@@ -201,8 +277,12 @@ export default class AdminValidate {
             return;
         }
         if (req.files.imageFiles) {
-            const imageFiles = Array.isArray(req.files.imageFiles) ? req.files.imageFiles : [req.files.imageFiles];
-            const imageFilesValidateResult = Joi.array().items(GeneralValidate.imageFileSchema).validate(imageFiles);
+            const imageFiles = Array.isArray(req.files.imageFiles)
+                ? req.files.imageFiles
+                : [req.files.imageFiles];
+            const imageFilesValidateResult = Joi.array()
+                .items(GeneralValidate.imageFileSchema)
+                .validate(imageFiles);
             if (imageFilesValidateResult.error) {
                 res.status(400).json(imageFilesValidateResult.error.message);
                 return;
@@ -217,7 +297,7 @@ export default class AdminValidate {
             return;
         }
         if (!req.fields) {
-            res.status(400).json('Unknown error');
+            res.status(400).json("Unknown error");
             return;
         }
         const priceInformationJsons = Array.isArray(req.fields.priceInformationJsons)
@@ -225,22 +305,25 @@ export default class AdminValidate {
             : [req.fields.priceInformationJsons];
         const priceInformations = [];
         try {
-            priceInformations.push(...priceInformationJsons.map(json => {
+            priceInformations.push(...priceInformationJsons.map((json) => {
                 return JSON.parse(json);
             }));
         }
         catch (error) {
             console.log(error);
-            res.status(400).json('Not parse product price information jsons');
+            res.status(400).json("Not parse product price information jsons");
             return;
         }
-        const priceInformationsValidateResult = Joi.array().min(1).items(informationToUpdateProductPriceSchema).validate(priceInformations);
+        const priceInformationsValidateResult = Joi.array()
+            .min(1)
+            .items(informationToUpdateProductPriceSchema)
+            .validate(priceInformations);
         if (priceInformationsValidateResult.error) {
             res.status(400).json(priceInformationsValidateResult.error.message);
             return;
         }
         if (!req.fields.coverImage && (!req.files || !req.files.coverImageFile)) {
-            res.status(400).json('Require cover image file for product');
+            res.status(400).json("Require cover image file for product");
             return;
         }
         if (req.files) {
@@ -255,7 +338,9 @@ export default class AdminValidate {
                 const imageFiles = Array.isArray(req.files.imageFiles)
                     ? req.files.imageFiles
                     : [req.files.imageFiles];
-                const imageFilesValidateResult = Joi.array().items(GeneralValidate.imageFileSchema).validate(imageFiles);
+                const imageFilesValidateResult = Joi.array()
+                    .items(GeneralValidate.imageFileSchema)
+                    .validate(imageFiles);
                 if (imageFilesValidateResult.error) {
                     res.status(400).json(imageFilesValidateResult.error.message);
                     return;
@@ -310,7 +395,7 @@ export default class AdminValidate {
             return;
         }
         if (!req.files || !req.files.coverImageFile) {
-            res.status(400).json('Require cover image file for banner');
+            res.status(400).json("Require cover image file for banner");
             return;
         }
         const imageFileValidateResult = GeneralValidate.imageFileSchema.validate(req.files.coverImageFile);
@@ -327,7 +412,7 @@ export default class AdminValidate {
             return;
         }
         if (!req?.fields?.coverImage && (!req.files || !req.files.coverImageFile)) {
-            res.status(400).json('Require cover image file for news');
+            res.status(400).json("Require cover image file for news");
             return;
         }
         if (req.files && req.files.coverImageFile) {
@@ -362,7 +447,7 @@ export default class AdminValidate {
             return;
         }
         if (!req.files || !req.files.coverImageFile) {
-            res.status(400).json('Require cover image file for promotion');
+            res.status(400).json("Require cover image file for promotion");
             return;
         }
         const imageFileValidateResult = GeneralValidate.imageFileSchema.validate(req.files.coverImageFile);
@@ -379,7 +464,7 @@ export default class AdminValidate {
             return;
         }
         if (!req?.fields?.coverImage && (!req.files || !req.files.coverImageFile)) {
-            res.status(400).json('Require cover image file for promotion');
+            res.status(400).json("Require cover image file for promotion");
             return;
         }
         if (req.files && req.files.coverImageFile) {
@@ -398,7 +483,7 @@ export default class AdminValidate {
             return;
         }
         if (!req.files || !req.files.imageFile) {
-            res.status(400).json('Require image file for banner');
+            res.status(400).json("Require image file for banner");
             return;
         }
         const imageFileValidateResult = GeneralValidate.imageFileSchema.validate(req.files.imageFile);
@@ -415,7 +500,7 @@ export default class AdminValidate {
             return;
         }
         if (!req?.fields?.image && (!req.files || !req.files.imageFile)) {
-            res.status(400).json('Require image file for promotion');
+            res.status(400).json("Require image file for promotion");
             return;
         }
         if (req.files && req.files.imageFile) {

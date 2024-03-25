@@ -12,6 +12,8 @@ import * as RatingService from "../services/rating.js";
 import * as StaffService from "../services/staffAccount.js";
 import * as UserAccountService from "../services/userAccount.js";
 import * as NotificationService from "../services/notification.js";
+import * as SupplierService from "../services/supplier.js";
+import * as GoodReceiptService from "../services/goodReceipt.js";
 import { deleteImage, uploadImage } from "../utils/storageImage.js";
 import { getSocketIO } from "../../socketIO.js";
 export async function getInformation(req, res) {
@@ -53,6 +55,96 @@ export async function addCategory(req, res) {
     else {
         res.status(400).json("Add category failure");
     }
+}
+export async function addSupplier(req, res) {
+    const information = req.body;
+    const success = await SupplierService.addSupplier(information);
+    if (success) {
+        res.json("Add supplier successful");
+    }
+    else {
+        res.status(400).json("Add supplier failure");
+    }
+}
+export async function updateSupplier(req, res) {
+    const information = req.body;
+    const supplierId = req.params["supplierId"];
+    const success = await SupplierService.updateSupplier(supplierId, information);
+    if (success) {
+        res.json("Update supplier successful");
+    }
+    else {
+        res.status(400).json("Update supplier failure");
+    }
+}
+export async function deleteSupplier(req, res) {
+    const supplierId = req.params["supplierId"];
+    const success = await SupplierService.deleteSupplier(supplierId);
+    if (success) {
+        res.json("Delete supplier successful");
+    }
+    else {
+        res.status(400).json("Delete supplier failure");
+    }
+}
+export async function getSuppliers(req, res) {
+    const suppliers = await SupplierService.getSuppliers();
+    res.json(suppliers);
+}
+export async function getSupplier(req, res) {
+    const id = req.params["id"] || "";
+    if (!id) {
+        res.status(400).json("Miss id");
+        return;
+    }
+    const supplier = await SupplierService.getSupplier(id);
+    res.json(supplier);
+}
+export async function createGoodReceipt(req, res) {
+    const information = req.body["receipt"];
+    const supplierBeGoodReceipt = await SupplierService.getSupplier(information.supplierId);
+    if (!supplierBeGoodReceipt) {
+        res.status(400).json(`Supplier #${information.supplierId} not found`);
+        return;
+    }
+    const receiptId = await GoodReceiptService.createGoodReciept({
+        ...information,
+    });
+    if (receiptId) {
+        res.json(receiptId);
+    }
+    else {
+        res.status(400).json("Error when create good receipt");
+    }
+}
+export async function updateGoodReceipt(req, res) {
+    const { goodReceiptId } = req.params;
+    const updatedInformation = req.body["receipt"];
+    // Kiểm tra xem phiếu nhập có tồn tại không
+    const existingGoodReceipt = await GoodReceiptService.getGoodReceiptById(goodReceiptId);
+    if (!existingGoodReceipt) {
+        res.status(404).json(`Good receipt with ID ${goodReceiptId} not found`);
+        return;
+    }
+    // Thực hiện cập nhật thông tin phiếu nhập
+    const isSuccess = await GoodReceiptService.updateGoodReceipt(goodReceiptId, updatedInformation);
+    if (isSuccess) {
+        res.json({ message: "Good receipt updated successfully" });
+    }
+    else {
+        res.status(400).json("Error when updating good receipt");
+    }
+}
+export async function getAllGoodReceipts(req, res) {
+    const goodReceipts = await GoodReceiptService.getAllGoodReceipts();
+    res.json({
+        data: goodReceipts,
+    });
+}
+export async function getGoodReceipt(req, res) {
+    const goodReceiptId = req.params["goodReceiptId"];
+    const goodReceipt = await GoodReceiptService.getGoodReceiptById(goodReceiptId);
+    res.json(goodReceipt);
 }
 export async function updateCategory(req, res) {
     const categoryName = req.body["name"];

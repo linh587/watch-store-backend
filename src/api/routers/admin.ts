@@ -9,6 +9,32 @@ const router = Router();
 
 router.get("/information", AdminController.getInformation);
 
+router.post("/good-receipt", AdminController.createGoodReceipt);
+
+router.get("/good-receipt", AdminController.getAllGoodReceipts);
+
+router.get("/good-receipt/:goodReceiptId", AdminController.getGoodReceipt);
+
+router.put("/good-receipt/:goodReceiptId", AdminController.updateGoodReceipt);
+
+router.post(
+  "/supplier",
+  AdminValidate.addSupplier,
+  AdminController.addSupplier
+);
+
+router.put(
+  "/supplier/:supplierId",
+  AdminValidate.updateSupplier,
+  AdminController.updateSupplier
+);
+
+router.delete("/supplier/:supplierId", AdminController.deleteSupplier);
+
+router.get("/supplier", AdminController.getSuppliers);
+
+router.get("/supplier/:id", AdminController.getSupplier);
+
 router.put(
   "/password/",
   AdminValidate.updatePassword,
