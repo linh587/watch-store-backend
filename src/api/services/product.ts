@@ -63,6 +63,8 @@ export const SORT_TYPES = [
   "highRating",
   "newest",
   "oldest",
+  "priceASC",
+  "priceDESC",
 ] as const;
 export const DEFAULT_COUNT_BE_GOT_ITEM = 10;
 export const PRODUCT_STATUS = ["hide", "show"];
@@ -72,7 +74,7 @@ export async function getProducts(
   filters?: GetProductFilters
 ) {
   let getProductIdsQuery =
-    "select product.id, avg(rating.star) as avg_star, sum(order_detail.quality) as bought_count from watch_db.product \
+    "select product.id, avg(rating.star) as avg_star, sum(order_detail.quality) as bought_count, min(product_price.price) as price from watch_db.product \
         inner join product_price on product.id = product_price.product_id \
         inner join category on product.category_id = category.id \
         left join rating on product.id = rating.product_id \
@@ -98,8 +100,11 @@ export async function getProducts(
         case "newest":
           getProductIdsQuery += " order by product.created_at desc";
           break;
-        case "oldest":
-          getProductIdsQuery += " order by product.created_at asc";
+        case "priceASC":
+          getProductIdsQuery += " order by price asc";
+          break;
+        case "priceDESC":
+          getProductIdsQuery += " order by price desc";
           break;
         default:
           break;
