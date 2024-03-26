@@ -175,9 +175,9 @@ export async function verifyOrderByStaff(staffAccountId, orderId) {
     if (!staffAccount) {
         return false;
     }
-    if (!(await canVerifyOrder(staffAccountId))) {
-        return false;
-    }
+    // if (!(await canVerifyOrder(staffAccountId))) {
+    //   return false;
+    // }
     const verifyOrderQuery = `update ${MYSQL_DB}.order set status=? where branch_id=? and id=? and status in ?`;
     const poolConnection = await pool.getConnection();
     try {
@@ -209,9 +209,9 @@ export async function deliveryOrderByStaff(staffAccountId, orderId) {
     if (!staffAccount) {
         return false;
     }
-    if (!(await canDeliveryOrder(staffAccountId))) {
-        return false;
-    }
+    // if (!(await canDeliveryOrder(staffAccountId))) {
+    //   return false;
+    // }
     const deliveryOrderQuery = `update ${MYSQL_DB}.order set status=? where branch_id=? and id=? and status in ?`;
     const poolConnection = await pool.getConnection();
     try {
@@ -247,9 +247,9 @@ export async function verifyReceivedOrderByStaff(staffAccountId, orderId) {
     if (!staffAccount) {
         return false;
     }
-    if (!(await canVerifyReceivedOrder(staffAccountId, orderId))) {
-        return false;
-    }
+    // if (!(await canVerifyReceivedOrder(staffAccountId, orderId))) {
+    //   return false;
+    // }
     const verifyReceivedOrderQuery = `update ${MYSQL_DB}.order set status=?, received_at=? where branch_id=? and id=? and status in ?`;
     const poolConnection = await pool.getConnection();
     try {

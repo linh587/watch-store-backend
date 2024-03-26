@@ -173,22 +173,18 @@ const updateBannerSchema = Joi.object({
 const addSupplierSchema = Joi.object({
   name: Joi.string().required(),
   email: Joi.string().required().email(),
-  phone: GeneralValidate.phoneSchema,
-  address: Joi.string(),
-  longitude: Joi.string(),
-  latitude: Joi.string(),
-  note: Joi.string(),
+  phone: GeneralValidate.phoneSchema.required(),
+  address: Joi.string().required(),
+  note: Joi.string().allow(""),
   status: Joi.string(),
 });
 
 const updateSupplierSchema = Joi.object({
   name: Joi.string().required(),
   email: Joi.string().required().email(),
-  phone: GeneralValidate.phoneSchema,
-  address: Joi.string(),
-  longitude: Joi.string(),
-  latitude: Joi.string(),
-  note: Joi.string(),
+  phone: GeneralValidate.phoneSchema.required(),
+  address: Joi.string().required(),
+  note: Joi.string().allow(""),
   status: Joi.string(),
 });
 

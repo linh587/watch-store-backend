@@ -9,8 +9,6 @@ export interface GoodReceiptDetail {
   quantity: number;
   price: number;
   note?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
 }
 
 export async function getGoodReceiptDetails(
@@ -35,15 +33,13 @@ export async function addGoodReceiptDetails(
   connection: PoolConnection
 ) {
   const addGoodReceiptDetailsQuery =
-    "INSERT INTO good_receipt_detail(`receipt_id`, `product_id`, `quantity`, `price`, `note`, `created_at`, `updated_at`) VALUES ?";
+    "insert into good_receipt_detail(`receipt_id`, `product_id`, `quantity`, `price`, `note`) VALUES ?";
   const goodReceiptDetailRowDatas = details.map((detail) => [
     goodReceiptId,
     detail.productId,
     detail.quantity,
     detail.price,
     detail.note,
-    detail.createdAt,
-    detail.updatedAt,
   ]);
 
   const [result] = (await connection.query(addGoodReceiptDetailsQuery, [

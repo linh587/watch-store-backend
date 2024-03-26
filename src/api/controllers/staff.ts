@@ -201,7 +201,7 @@ export async function verifyOrder(req: StaffRequest, res: Response) {
       socketIO.to(order.userAccountId).emit("newNotification");
     }
 
-    res.json("Successful");
+    res.json("verified");
   } else {
     res.status(400).json("Failure");
   }
@@ -235,7 +235,7 @@ export async function deliveryOrder(req: StaffRequest, res: Response) {
       const socketIO = getSocketIO();
       socketIO.to(order.userAccountId).emit("newNotification");
     }
-    res.json("Successful");
+    res.json("waitReceive");
   } else {
     res.status(400).json("Failure");
   }
@@ -269,7 +269,7 @@ export async function verifyReceivedOrder(req: StaffRequest, res: Response) {
       const socketIO = getSocketIO();
       socketIO.to(order.userAccountId).emit("newNotification");
     }
-    res.json("Successful");
+    res.json("received");
   } else {
     res.status(400).json("Failure");
   }
@@ -305,7 +305,7 @@ export async function cancelOrder(req: StaffRequest, res: Response) {
       const socketIO = getSocketIO();
       socketIO.to(order.userAccountId).emit("newNotification");
     }
-    res.json("Successful");
+    res.json("cancelled");
   } else {
     res.status(400).json("Failure");
   }

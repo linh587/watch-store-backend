@@ -27,22 +27,6 @@ export function authorizationAdmin(req, res, next) {
         res.status(400).json("Miss access token");
     }
 }
-export function validateStoreAdminPermision(req, res, next) {
-    const { username, adminType } = req;
-    if (username === "" || adminType !== "store") {
-        res.status(403).json("Not permisson");
-        return;
-    }
-    next();
-}
-export function validateWebsiteAdminPermision(req, res, next) {
-    const { username, adminType } = req;
-    if (username === "" || adminType !== "website") {
-        res.status(403).json("Not permisson");
-        return;
-    }
-    next();
-}
 export function authorizationUser(req, res, next) {
     const accessToken = (req.headers.authorization || "").replace("Bearer ", "");
     if (accessToken) {

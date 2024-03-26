@@ -9,9 +9,8 @@ interface Supplier {
   email: string;
   phone: string;
   address: string;
-  note: string;
-  deletedAt: Date;
-  status: string;
+  note?: string;
+  status?: string;
 }
 
 export type InformationToCreateSupplier = Omit<Supplier, "id">;

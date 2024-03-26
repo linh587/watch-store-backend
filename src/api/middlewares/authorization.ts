@@ -57,36 +57,6 @@ export function authorizationAdmin(
   }
 }
 
-export function validateStoreAdminPermision(
-  req: AdminRequest,
-  res: Response,
-  next: NextFunction
-) {
-  const { username, adminType } = req;
-
-  if (username === "" || adminType !== "store") {
-    res.status(403).json("Not permisson");
-    return;
-  }
-
-  next();
-}
-
-export function validateWebsiteAdminPermision(
-  req: AdminRequest,
-  res: Response,
-  next: NextFunction
-) {
-  const { username, adminType } = req;
-
-  if (username === "" || adminType !== "website") {
-    res.status(403).json("Not permisson");
-    return;
-  }
-
-  next();
-}
-
 export function authorizationUser(
   req: UserRequest,
   res: Response,
