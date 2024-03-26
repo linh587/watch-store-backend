@@ -138,7 +138,7 @@ const addSupplierSchema = Joi.object({
     email: Joi.string().required().email(),
     phone: GeneralValidate.phoneSchema.required(),
     address: Joi.string().required(),
-    note: Joi.string().allow(""),
+    note: Joi.string().allow(null, ""),
     status: Joi.string(),
 });
 const updateSupplierSchema = Joi.object({
@@ -146,7 +146,7 @@ const updateSupplierSchema = Joi.object({
     email: Joi.string().required().email(),
     phone: GeneralValidate.phoneSchema.required(),
     address: Joi.string().required(),
-    note: Joi.string().allow(""),
+    note: Joi.string().allow(null, ""),
     status: Joi.string(),
 });
 const temporaryGoodReiceptDetailSchema = Joi.object({
