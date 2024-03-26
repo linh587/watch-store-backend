@@ -7,15 +7,13 @@ export async function getGoodReceiptDetails(receiptId, continueWithConnection) {
     return goodReceiptDetailRowDatas.map(convertUnderscorePropertiesToCamelCase);
 }
 export async function addGoodReceiptDetails(goodReceiptId, details, connection) {
-    const addGoodReceiptDetailsQuery = "INSERT INTO good_receipt_detail(`receipt_id`, `product_id`, `quantity`, `price`, `note`, `created_at`, `updated_at`) VALUES ?";
+    const addGoodReceiptDetailsQuery = "insert into good_receipt_detail(`receipt_id`, `product_id`, `quantity`, `price`, `note`) VALUES ?";
     const goodReceiptDetailRowDatas = details.map((detail) => [
         goodReceiptId,
         detail.productId,
         detail.quantity,
         detail.price,
         detail.note,
-        detail.createdAt,
-        detail.updatedAt,
     ]);
     const [result] = (await connection.query(addGoodReceiptDetailsQuery, [
         goodReceiptDetailRowDatas,
