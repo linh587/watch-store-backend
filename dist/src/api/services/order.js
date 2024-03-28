@@ -18,6 +18,29 @@ export const ORDER_STATUS = {
     received: "received",
     cancelled: "cancelled",
 };
+export const PAYMENT_STATUS = {
+    NOT_PAID: "not-paid",
+    PAID: "paid",
+    PAY_FAILED: "pay-failed",
+};
+export const VNP_RESPONSE_CODE = {
+    SUCCESS: "00",
+    TMC_CODE_NOT_FOUND: "02", // Mã định danh không hợp lệ,
+    WRONG_PAYLOAD: "03", // Dữ liệu gửi lên không hợp lệ
+    NOT_FOUND: "91", // Không tìm thấy giao dịch yêu cầu
+    DUPLICATE_REQUEST: "94", // Yêu cầu bị trùng lặp
+    NOT_AVAILABLE_CHECK_SUM: "97", // Check sum không hợp lệ
+    OTHER_ERROR: "99", // Các lỗi khác
+};
+export const VNP_TRANSACTION_STATUS = {
+    SUCCESS: "00", // Thanh toán thành công
+    NOT_COMPLETED: "01", // Chưa hoàn thành
+    ERROR: "02", // Bị lỗi
+    TRANSACTION: "04", // Giao dịch đảo
+    IN_PROGRESS: "05", // Đang xử lý (GD hoàn tiền)
+    REFUNED: "06", // Đã hoàn tiền
+    REJECT_REFUND: "09", // Từ chối hoàn tiền
+};
 export const TIME_TYPES = ["day", "month", "year"];
 export const SORT_TYPES = ["newest", "oldest"];
 const MYSQL_DB = process.env.MYSQL_DB || "watch_db";
@@ -41,7 +64,7 @@ export async function getAllOrders(options, filters) {
     return orderRowDatas.map(convertUnderscorePropertiesToCamelCase);
 }
 export async function getOrdersByUserAccount(userAccountId, options, filters) {
-    let getOrdersByUserAccountQuery = `select id, customer_name, phone, email, user_account_id, branch_id, coupon_code, received_type, received_address, received_at, delivery_charge, subtotal_price, total_price, status, note, created_at from ${MYSQL_DB}.order where user_account_id=?`;
+    let getOrdersByUserAccountQuery = `select id, customer_name, phone, email, user_account_id, branch_id, coupon_code, received_type, received_address, received_at, delivery_charge, subtotal_price, total_price, status, note, payment_status, payment_type, created_at from ${MYSQL_DB}.order where user_account_id=?`;
     if (filters) {
         const filterSql = createFilterSql(filters);
         if (filterSql) {
@@ -62,7 +85,7 @@ export async function getOrdersByUserAccount(userAccountId, options, filters) {
     return orderRowDatas.map(convertUnderscorePropertiesToCamelCase);
 }
 export async function getOrdersByBranch(branchId, options, filters) {
-    let getOrdersByBranchQuery = `select id, customer_name, phone, email, user_account_id, branch_id, coupon_code, received_type, received_address, received_at, delivery_charge, subtotal_price, total_price, status, note, created_at from ${MYSQL_DB}.order where branch_id=?`;
+    let getOrdersByBranchQuery = `select id, customer_name, phone, email, user_account_id, branch_id, coupon_code, received_type, received_address, received_at, delivery_charge, subtotal_price, total_price, status, note, payment_status, payment_type, created_at from ${MYSQL_DB}.order where branch_id=?`;
     if (filters) {
         const filterSql = createFilterSql(filters);
         if (filterSql) {
@@ -83,7 +106,7 @@ export async function getOrdersByBranch(branchId, options, filters) {
     return orderRowDatas.map(convertUnderscorePropertiesToCamelCase);
 }
 export async function getOrderById(orderId) {
-    const getOrderQuery = `select id, customer_name, phone, email, user_account_id, branch_id, coupon_code, received_type, received_address, received_at, delivery_charge, subtotal_price, total_price, status, note, created_at from ${MYSQL_DB}.order where id=?`;
+    const getOrderQuery = `select id, customer_name, phone, email, user_account_id, branch_id, coupon_code, received_type, received_address, received_at, delivery_charge, subtotal_price, total_price, status, note, payment_type, payment_status, created_at from ${MYSQL_DB}.order where id=?`;
     const [orderRowDatas] = (await pool.query(getOrderQuery, [
         orderId,
     ]));
@@ -98,7 +121,7 @@ export async function getOrderById(orderId) {
 }
 export async function createOrder(information, amountOfDecreaseMoney) {
     const orderId = createUid(20);
-    const { customerName, phone, email, branchId, couponCode, receivedType, receivedAddress, deliveryCharge, details, userAccountId, } = information;
+    const { customerName, phone, email, branchId, couponCode, receivedType, receivedAddress, deliveryCharge, paymentType, paymentStatus, details, userAccountId, } = information;
     if (details.length <= 0) {
         return "";
     }
@@ -116,7 +139,7 @@ export async function createOrder(information, amountOfDecreaseMoney) {
         Number(amountOfDecreaseMoney || 0);
     const createOrderQuery = "insert into " +
         MYSQL_DB +
-        ".order(`id`, `customer_name`, `phone`, `email`, `user_account_id`, `branch_id`, `coupon_code`, `received_type`, `received_address`, `delivery_charge`, `subtotal_price`, `total_price`, `status`, `created_at`) values (?)";
+        ".order(`id`, `customer_name`, `phone`, `email`, `user_account_id`, `branch_id`, `coupon_code`, `received_type`, `received_address`, `delivery_charge`, `subtotal_price`, `total_price`, `status`, `payment_type`, `payment_status`, `created_at`) values (?)";
     const poolConnection = await pool.getConnection();
     try {
         await poolConnection.beginTransaction();
@@ -135,12 +158,14 @@ export async function createOrder(information, amountOfDecreaseMoney) {
                 subtotalPrice,
                 totalPrice,
                 ORDER_STATUS.waitVerify,
+                paymentType,
+                paymentStatus,
                 new Date(),
             ],
         ]);
         await OrderDetailService.addOrderDetails(orderId, temporaryOrderDetails, poolConnection);
         await poolConnection.commit();
-        return orderId;
+        return { orderId, totalPrice };
     }
     catch (error) {
         await poolConnection.rollback();
@@ -167,6 +192,25 @@ export async function cancelOrderById(orderId) {
         ORDER_STATUS.cancelled,
         orderId,
         [[ORDER_STATUS.waitVerify]],
+    ]));
+    return result.affectedRows > 0;
+}
+export async function updatePaymentStatusById(orderId, responseCode) {
+    let paymentStatus;
+    let orderStatus;
+    if (responseCode === VNP_RESPONSE_CODE.SUCCESS) {
+        paymentStatus = PAYMENT_STATUS.PAID;
+        orderStatus = ORDER_STATUS.verified;
+    }
+    else {
+        paymentStatus = PAYMENT_STATUS.NOT_PAID;
+        orderStatus = ORDER_STATUS.waitVerify;
+    }
+    const updatePaymentQuery = `update ${MYSQL_DB}.order set payment_status=?, status=? where id=?`;
+    const [result] = (await pool.query(updatePaymentQuery, [
+        paymentStatus,
+        orderStatus,
+        orderId,
     ]));
     return result.affectedRows > 0;
 }

@@ -26,6 +26,8 @@ export interface Order {
   totalPrice: number;
   status: string;
   note?: string;
+  paymentStatus: string;
+  paymentType: string;
   createdAt: Date | string;
   details: OrderDetailService.OrderDetail[];
 }
@@ -50,6 +52,8 @@ export interface InformationToCreateOrder {
   couponCode?: string;
   receivedType: string;
   receivedAddress: string;
+  paymentType: string;
+  paymentStatus: string;
   deliveryCharge: number;
   details: Omit<TemporaryOrderDetail, "price">[];
 }
@@ -91,6 +95,32 @@ export const ORDER_STATUS = {
   cancelled: "cancelled",
 };
 
+export const PAYMENT_STATUS = {
+  NOT_PAID: "not-paid",
+  PAID: "paid",
+  PAY_FAILED: "pay-failed",
+};
+
+export const VNP_RESPONSE_CODE = {
+  SUCCESS: "00",
+  TMC_CODE_NOT_FOUND: "02", // Mã định danh không hợp lệ,
+  WRONG_PAYLOAD: "03", // Dữ liệu gửi lên không hợp lệ
+  NOT_FOUND: "91", // Không tìm thấy giao dịch yêu cầu
+  DUPLICATE_REQUEST: "94", // Yêu cầu bị trùng lặp
+  NOT_AVAILABLE_CHECK_SUM: "97", // Check sum không hợp lệ
+  OTHER_ERROR: "99", // Các lỗi khác
+};
+
+export const VNP_TRANSACTION_STATUS = {
+  SUCCESS: "00", // Thanh toán thành công
+  NOT_COMPLETED: "01", // Chưa hoàn thành
+  ERROR: "02", // Bị lỗi
+  TRANSACTION: "04", // Giao dịch đảo
+  IN_PROGRESS: "05", // Đang xử lý (GD hoàn tiền)
+  REFUNED: "06", // Đã hoàn tiền
+  REJECT_REFUND: "09", // Từ chối hoàn tiền
+};
+
 export const TIME_TYPES = ["day", "month", "year"] as const;
 export const SORT_TYPES = ["newest", "oldest"] as const;
 
@@ -129,7 +159,7 @@ export async function getOrdersByUserAccount(
   options?: GetOrderOptions,
   filters?: OrderFilters
 ) {
-  let getOrdersByUserAccountQuery = `select id, customer_name, phone, email, user_account_id, branch_id, coupon_code, received_type, received_address, received_at, delivery_charge, subtotal_price, total_price, status, note, created_at from ${MYSQL_DB}.order where user_account_id=?`;
+  let getOrdersByUserAccountQuery = `select id, customer_name, phone, email, user_account_id, branch_id, coupon_code, received_type, received_address, received_at, delivery_charge, subtotal_price, total_price, status, note, payment_status, payment_type, created_at from ${MYSQL_DB}.order where user_account_id=?`;
 
   if (filters) {
     const filterSql = createFilterSql(filters);
@@ -159,7 +189,7 @@ export async function getOrdersByBranch(
   options?: GetOrderOptions,
   filters?: OrderFilters
 ) {
-  let getOrdersByBranchQuery = `select id, customer_name, phone, email, user_account_id, branch_id, coupon_code, received_type, received_address, received_at, delivery_charge, subtotal_price, total_price, status, note, created_at from ${MYSQL_DB}.order where branch_id=?`;
+  let getOrdersByBranchQuery = `select id, customer_name, phone, email, user_account_id, branch_id, coupon_code, received_type, received_address, received_at, delivery_charge, subtotal_price, total_price, status, note, payment_status, payment_type, created_at from ${MYSQL_DB}.order where branch_id=?`;
 
   if (filters) {
     const filterSql = createFilterSql(filters);
@@ -185,7 +215,7 @@ export async function getOrdersByBranch(
 }
 
 export async function getOrderById(orderId: string) {
-  const getOrderQuery = `select id, customer_name, phone, email, user_account_id, branch_id, coupon_code, received_type, received_address, received_at, delivery_charge, subtotal_price, total_price, status, note, created_at from ${MYSQL_DB}.order where id=?`;
+  const getOrderQuery = `select id, customer_name, phone, email, user_account_id, branch_id, coupon_code, received_type, received_address, received_at, delivery_charge, subtotal_price, total_price, status, note, payment_type, payment_status, created_at from ${MYSQL_DB}.order where id=?`;
   const [orderRowDatas] = (await pool.query(getOrderQuery, [
     orderId,
   ])) as RowDataPacket[][];
@@ -215,6 +245,8 @@ export async function createOrder(
     receivedType,
     receivedAddress,
     deliveryCharge,
+    paymentType,
+    paymentStatus,
     details,
     userAccountId,
   } = information;
@@ -244,7 +276,7 @@ export async function createOrder(
   const createOrderQuery =
     "insert into " +
     MYSQL_DB +
-    ".order(`id`, `customer_name`, `phone`, `email`, `user_account_id`, `branch_id`, `coupon_code`, `received_type`, `received_address`, `delivery_charge`, `subtotal_price`, `total_price`, `status`, `created_at`) values (?)";
+    ".order(`id`, `customer_name`, `phone`, `email`, `user_account_id`, `branch_id`, `coupon_code`, `received_type`, `received_address`, `delivery_charge`, `subtotal_price`, `total_price`, `status`, `payment_type`, `payment_status`, `created_at`) values (?)";
   const poolConnection = await pool.getConnection();
   try {
     await poolConnection.beginTransaction();
@@ -263,6 +295,8 @@ export async function createOrder(
         subtotalPrice,
         totalPrice,
         ORDER_STATUS.waitVerify,
+        paymentType,
+        paymentStatus,
         new Date(),
       ],
     ]);
@@ -272,7 +306,7 @@ export async function createOrder(
       poolConnection
     );
     await poolConnection.commit();
-    return orderId;
+    return { orderId, totalPrice } as any;
   } catch (error) {
     await poolConnection.rollback();
     console.log(error);
@@ -302,6 +336,31 @@ export async function cancelOrderById(orderId: string) {
     ORDER_STATUS.cancelled,
     orderId,
     [[ORDER_STATUS.waitVerify]],
+  ])) as OkPacket[];
+  return result.affectedRows > 0;
+}
+
+export async function updatePaymentStatusById(
+  orderId: string,
+  responseCode: string
+) {
+  let paymentStatus;
+  let orderStatus;
+
+  if (responseCode === VNP_RESPONSE_CODE.SUCCESS) {
+    paymentStatus = PAYMENT_STATUS.PAID;
+    orderStatus = ORDER_STATUS.verified;
+  } else {
+    paymentStatus = PAYMENT_STATUS.NOT_PAID;
+    orderStatus = ORDER_STATUS.waitVerify;
+  }
+
+  const updatePaymentQuery = `update ${MYSQL_DB}.order set payment_status=?, status=? where id=?`;
+
+  const [result] = (await pool.query(updatePaymentQuery, [
+    paymentStatus,
+    orderStatus,
+    orderId,
   ])) as OkPacket[];
   return result.affectedRows > 0;
 }

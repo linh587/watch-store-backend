@@ -5,6 +5,7 @@ import * as OrderService from "../services/order.js";
 import * as ProductPriceService from "../services/productPrice.js";
 import * as MapUtil from "../utils/map.js";
 import { calculateDeliveryCharge } from "../utils/misc.js";
+import * as PaymentService from "../services/payment.js";
 
 export async function getOrder(req: Request, res: Response) {
   const orderId = req.params["orderId"];
@@ -63,7 +64,7 @@ export async function createOrder(req: Request, res: Response) {
     information.receivedType === "delivery"
       ? calculateDeliveryCharge(deliveryDistanceByMeter)
       : 0;
-  const orderId = await OrderService.createOrder(
+  const { orderId, totalPrice } = await OrderService.createOrder(
     {
       ...information,
       details: orderDetailsBeMappingPrice,
@@ -73,10 +74,31 @@ export async function createOrder(req: Request, res: Response) {
   );
 
   if (orderId) {
-    res.json(orderId);
+    if (information.paymentType === "1") {
+      const vpnUrl = await PaymentService.createPayment(
+        req,
+        res,
+        orderId,
+        totalPrice
+      );
+      res.json({ orderId, vpnUrl });
+    } else {
+      res.json(orderId);
+    }
   } else {
     res.status(400).json("Error when create order");
   }
+}
+
+export async function updatePaymentStatus(req: Request, res: Response) {
+  const body: any = await PaymentService.queryDr(req, res);
+
+  const update = await OrderService.updatePaymentStatusById(
+    body.vnp_TxnRef,
+    body.vnp_ResponseCode
+  );
+
+  if (update) res.json(update);
 }
 
 export async function cancelOrder(req: Request, res: Response) {
