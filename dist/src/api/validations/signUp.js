@@ -21,13 +21,6 @@ export default class SignUpValidate {
             res.status(400).json(validationResult.error.message);
             return;
         }
-        if (req.files && req.files.avatarFile) {
-            const imageValidateResult = GeneralValidate.imageFileSchema.validate(req.files.avatarFile);
-            if (imageValidateResult.error) {
-                res.status(400).json(imageValidateResult.error.message);
-                return;
-            }
-        }
         next();
     }
     static checkExistsEmail(req, res, next) {

@@ -22,7 +22,6 @@ interface UserAccount {
   name: string;
   gender: string;
   dateOfBirth: Date | string;
-  avatar?: string;
   email: string;
   address?: string;
   longitude?: string;
@@ -32,7 +31,6 @@ interface UserAccount {
 interface ShortUserAccount {
   id: string;
   name: string;
-  avatar?: string;
   locked: boolean;
 }
 
@@ -56,7 +54,7 @@ export async function signIn(email: string, password: string) {
 
 export async function getUserAccounts(limit?: LimitOptions) {
   let getUserAccountsQuery =
-    "select id, name, phone, gender, date_of_birth, email, address, avatar, locked from user_account where deleted_at is null";
+    "select id, name, phone, gender, date_of_birth, email, address, locked from user_account where deleted_at is null";
   if (limit) {
     getUserAccountsQuery += " " + createLimitSql(limit);
   }
@@ -71,7 +69,7 @@ export async function getUserAccounts(limit?: LimitOptions) {
 
 export async function getInformation(userAccountId: string) {
   const findUserInformationQuery =
-    "select id, phone, name, gender, date_of_birth, avatar, email, address, longitude, latitude from user_account where id=? and deleted_at is null";
+    "select id, phone, name, gender, date_of_birth, email, address, longitude, latitude from user_account where id=? and deleted_at is null";
   const [userInformationRowDatas] = (await pool.query(
     findUserInformationQuery,
     [userAccountId]
@@ -103,19 +101,17 @@ export async function updateInformation(
     gender,
     dateOfBirth,
     phone,
-    avatar,
     address,
     longitude,
     latitude,
   } = information;
   const updateUserInformationQuery =
-    "update user_account set phone=?, name=?, gender=?, date_of_birth=?, avatar=?, email=?, address=?, longitude=?, latitude=?  where id=? and deleted_at is null";
+    "update user_account set phone=?, name=?, gender=?, date_of_birth=?, email=?, address=?, longitude=?, latitude=?  where id=? and deleted_at is null";
   const [result] = (await pool.query(updateUserInformationQuery, [
     phone,
     name,
     encodeGender(gender as string),
     new Date(dateOfBirth as string),
-    avatar,
     email,
     address,
     longitude,
@@ -206,14 +202,13 @@ export async function createAccount(
     password,
     gender,
     dateOfBirth,
-    avatar,
     address,
     longitude,
     latitude,
   } = information;
   const hashedPassword = hashText(password);
   const createUserAccountQuery =
-    "insert into user_account(`id`, `email`, `phone`, `name`, `password`, `gender`, `date_of_birth`, `avatar`, `address`, `longitude`, `latitude`) values(?)";
+    "insert into user_account(`id`, `email`, `phone`, `name`, `password`, `gender`, `date_of_birth`, `address`, `longitude`, `latitude`) values(?)";
   const poolConnection = await pool.getConnection();
 
   try {
@@ -233,7 +228,6 @@ export async function createAccount(
         hashedPassword,
         encodeGender(gender as string),
         new Date(dateOfBirth as string),
-        avatar,
         address,
         longitude,
         latitude,

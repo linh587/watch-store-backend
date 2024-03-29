@@ -17,13 +17,6 @@ export async function signUpUser(req: FormDataRequest<Request>, res: Response) {
   const information =
     req.fields as UserAccountService.InformationToCreateUserAccount;
 
-  if (req.files && req.files.avatarFile) {
-    const avatarFile = Array.isArray(req.files.avatarFile)
-      ? req.files.avatarFile[0]
-      : req.files.avatarFile;
-    information.avatar = await uploadImage(avatarFile.filepath);
-  }
-
   const userAccountId = await UserAccountService.createAccount(information);
 
   if (userAccountId) {

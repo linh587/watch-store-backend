@@ -13,7 +13,7 @@ export async function signIn(email, password) {
     return convertUnderscorePropertiesToCamelCase(userAccountRowDatas[0] || null);
 }
 export async function getUserAccounts(limit) {
-    let getUserAccountsQuery = "select id, name, phone, gender, date_of_birth, email, address, avatar, locked from user_account where deleted_at is null";
+    let getUserAccountsQuery = "select id, name, phone, gender, date_of_birth, email, address, locked from user_account where deleted_at is null";
     if (limit) {
         getUserAccountsQuery += " " + createLimitSql(limit);
     }
@@ -21,7 +21,7 @@ export async function getUserAccounts(limit) {
     return userAccountRowDatas.map(convertUnderscorePropertiesToCamelCase);
 }
 export async function getInformation(userAccountId) {
-    const findUserInformationQuery = "select id, phone, name, gender, date_of_birth, avatar, email, address, longitude, latitude from user_account where id=? and deleted_at is null";
+    const findUserInformationQuery = "select id, phone, name, gender, date_of_birth, email, address, longitude, latitude from user_account where id=? and deleted_at is null";
     const [userInformationRowDatas] = (await pool.query(findUserInformationQuery, [userAccountId]));
     if (Array.isArray(userInformationRowDatas) &&
         userInformationRowDatas.length > 0) {
@@ -32,14 +32,13 @@ export async function getInformation(userAccountId) {
     return null;
 }
 export async function updateInformation(userAccountId, information) {
-    const { email, name, gender, dateOfBirth, phone, avatar, address, longitude, latitude, } = information;
-    const updateUserInformationQuery = "update user_account set phone=?, name=?, gender=?, date_of_birth=?, avatar=?, email=?, address=?, longitude=?, latitude=?  where id=? and deleted_at is null";
+    const { email, name, gender, dateOfBirth, phone, address, longitude, latitude, } = information;
+    const updateUserInformationQuery = "update user_account set phone=?, name=?, gender=?, date_of_birth=?, email=?, address=?, longitude=?, latitude=?  where id=? and deleted_at is null";
     const [result] = (await pool.query(updateUserInformationQuery, [
         phone,
         name,
         encodeGender(gender),
         new Date(dateOfBirth),
-        avatar,
         email,
         address,
         longitude,
@@ -106,9 +105,9 @@ export async function getId(email) {
 }
 export async function createAccount(information) {
     const id = createUid(20);
-    const { email, phone, name, password, gender, dateOfBirth, avatar, address, longitude, latitude, } = information;
+    const { email, phone, name, password, gender, dateOfBirth, address, longitude, latitude, } = information;
     const hashedPassword = hashText(password);
-    const createUserAccountQuery = "insert into user_account(`id`, `email`, `phone`, `name`, `password`, `gender`, `date_of_birth`, `avatar`, `address`, `longitude`, `latitude`) values(?)";
+    const createUserAccountQuery = "insert into user_account(`id`, `email`, `phone`, `name`, `password`, `gender`, `date_of_birth`, `address`, `longitude`, `latitude`) values(?)";
     const poolConnection = await pool.getConnection();
     try {
         await poolConnection.beginTransaction();
@@ -125,7 +124,6 @@ export async function createAccount(information) {
                 hashedPassword,
                 encodeGender(gender),
                 new Date(dateOfBirth),
-                avatar,
                 address,
                 longitude,
                 latitude,

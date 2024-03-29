@@ -31,16 +31,6 @@ export default class SignUpValidate {
       return;
     }
 
-    if (req.files && req.files.avatarFile) {
-      const imageValidateResult = GeneralValidate.imageFileSchema.validate(
-        req.files.avatarFile
-      );
-      if (imageValidateResult.error) {
-        res.status(400).json(imageValidateResult.error.message);
-        return;
-      }
-    }
-
     next();
   }
 

@@ -10,7 +10,6 @@ import * as RatingService from "../services/rating.js";
 import * as UserAccountService from "../services/userAccount.js";
 import * as MapUtil from "../utils/map.js";
 import { calculateDeliveryCharge } from "../utils/misc.js";
-import { deleteImage, uploadImage } from "../utils/storageImage.js";
 export async function getInformation(req, res) {
     const { userAccountId } = req;
     if (!userAccountId) {
@@ -32,21 +31,8 @@ export async function updateInformation(req, res) {
         return;
     }
     const information = req.fields;
-    const oldInfomation = await UserAccountService.getInformation(userAccountId);
-    const oldAvatar = String(oldInfomation?.avatar || "");
-    information.avatar = oldAvatar;
-    if (req.files && req.files.avatarFile) {
-        const avatarFile = Array.isArray(req.files.avatarFile)
-            ? req.files.avatarFile[0]
-            : req.files.avatarFile;
-        const newAvatar = await uploadImage(avatarFile.filepath);
-        information.avatar = newAvatar;
-    }
     const success = await UserAccountService.updateInformation(userAccountId, information);
     if (success) {
-        if (information.avatar !== oldAvatar) {
-            await deleteImage(oldAvatar);
-        }
         res.json({
             userAccountId,
             ...information,

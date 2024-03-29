@@ -118,7 +118,7 @@ export async function vnpayIpn(req: Request, res: Response) {
 
 function sortObject(obj: any) {
   let sorted: any = {};
-  let str = [];
+  let str: any = [];
   let key: any;
   for (key in obj) {
     if (obj.hasOwnProperty(key)) {

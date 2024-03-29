@@ -2,7 +2,6 @@ import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import * as UserAccountService from "../services/userAccount.js";
 import { sendMail } from "../utils/mail.js";
-import { uploadImage } from "../utils/storageImage.js";
 dotenv.config();
 export async function signUpUser(req, res) {
     if (!req.fields) {
@@ -10,12 +9,6 @@ export async function signUpUser(req, res) {
         return;
     }
     const information = req.fields;
-    if (req.files && req.files.avatarFile) {
-        const avatarFile = Array.isArray(req.files.avatarFile)
-            ? req.files.avatarFile[0]
-            : req.files.avatarFile;
-        information.avatar = await uploadImage(avatarFile.filepath);
-    }
     const userAccountId = await UserAccountService.createAccount(information);
     if (userAccountId) {
         const JWT_VERIFY_SECRET_KEY = process.env.JWT_VERIFY_SECRET_KEY || "token";

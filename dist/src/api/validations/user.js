@@ -5,7 +5,6 @@ const updateInformationSchema = Joi.object({
     name: GeneralValidate.vietnameseSchema.required(),
     gender: GeneralValidate.genderSchema.required(),
     dateOfBirth: Joi.string().isoDate().required(),
-    avatar: Joi.string(),
     email: Joi.string().email().required(),
     address: Joi.string(),
     longitude: Joi.string(),
@@ -39,13 +38,6 @@ export default class UserValidate {
         if (validationResult.error) {
             res.status(400).json(validationResult.error.message);
             return;
-        }
-        if (req.files && req.files.avatarFile) {
-            const imageValidateResult = GeneralValidate.imageFileSchema.validate(req.files.avatarFile);
-            if (imageValidateResult.error) {
-                res.status(400).json(imageValidateResult.error.message);
-                return;
-            }
         }
         next();
     }
