@@ -67,6 +67,10 @@ const addStaffAccountSchema = Joi.object({
     gender: GeneralValidate.genderSchema.required(),
     dateOfBirth: Joi.string().isoDate().required(),
     email: Joi.string().email(),
+    address: Joi.string().required(),
+    longitude: Joi.string().regex(GeneralValidate.COORDINATE_REGEX).required(),
+    latitude: Joi.string().regex(GeneralValidate.COORDINATE_REGEX).required(),
+    identificationCard: Joi.string().required(),
 }).unknown();
 const updateBranchForStaff = Joi.object({
     branchId: Joi.string().required(),

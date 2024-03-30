@@ -280,7 +280,7 @@ export async function deleteProduct(
 }
 
 function createFilterSql(filter: GetProductFilters) {
-  let filterStatements = [];
+  let filterStatements: any = [];
   if (filter.status && filter.status !== "all") {
     filterStatements.push(`product.status=${escape(filter.status)}`);
   }
@@ -298,7 +298,7 @@ function createFilterSql(filter: GetProductFilters) {
   }
 
   if (filter.searchString) {
-    const subFilterStatements = [];
+    const subFilterStatements: any = [];
     subFilterStatements.push(
       `product.name like ${escape(`%${filter.searchString}%`)}`
     );

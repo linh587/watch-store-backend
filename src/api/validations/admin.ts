@@ -13,7 +13,6 @@ import {
   InformationToUpdateProductPrice,
 } from "../services/productPrice.js";
 import * as GeneralValidate from "./general.js";
-import { omit } from "lodash";
 
 const addCategorySchema = Joi.object({
   name: Joi.string().required(),
@@ -91,6 +90,10 @@ const addStaffAccountSchema = Joi.object({
   gender: GeneralValidate.genderSchema.required(),
   dateOfBirth: Joi.string().isoDate().required(),
   email: Joi.string().email(),
+  address: Joi.string().required(),
+  longitude: Joi.string().regex(GeneralValidate.COORDINATE_REGEX).required(),
+  latitude: Joi.string().regex(GeneralValidate.COORDINATE_REGEX).required(),
+  identificationCard: Joi.string().required(),
 }).unknown();
 
 const updateBranchForStaff = Joi.object({

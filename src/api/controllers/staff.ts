@@ -68,7 +68,7 @@ export async function updateInformation(
       await deleteImage(oldAvatar);
     }
 
-    res.json("Update successful");
+    res.json(information);
   } else {
     res.status(400).json("Update failure");
   }

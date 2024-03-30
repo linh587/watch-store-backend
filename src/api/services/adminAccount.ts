@@ -8,13 +8,12 @@ type AdminAccountType = "store" | "website";
 interface AdminSignInResult {
   username: string;
   type: AdminAccountType;
-  firstLogin: boolean;
 }
 
 type AdminAccount = AdminSignInResult;
 
 export async function signIn(username: string, password: string) {
-  const findAdminAccountQuery = `select username, type, first_login from admin_account where username=? and password=?`;
+  const findAdminAccountQuery = `select username, type from admin_account where username=? and password=?`;
   const [adminAccountRowDatas] = (await pool.query(findAdminAccountQuery, [
     username,
     password,
@@ -27,7 +26,7 @@ export async function signIn(username: string, password: string) {
 
 export async function getInformation(username: string) {
   const getInformationQuery =
-    "select username, type, first_login from admin_account where username=?";
+    "select username, type from admin_account where username=?";
   const [adminAccountRowDatas] = (await pool.query(getInformationQuery, [
     username,
   ])) as RowDataPacket[][];
@@ -45,7 +44,7 @@ export async function updatePassword(
   newPassword: string
 ) {
   const updatePasswordQuery =
-    "update admin_account set password=?, first_login=false where username=? and password=?";
+    "update admin_account set password=? where username=? and password=?";
   const hashedOldPassword = hashText(oldPassword);
   const hashedNewPassword = hashText(newPassword);
   const [result] = (await pool.query(updatePasswordQuery, [

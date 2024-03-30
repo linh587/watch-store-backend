@@ -24,19 +24,19 @@ export async function signInAdmin(req: Request, res: Response) {
     const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || "token";
     const JWT_REFRESH_SECRET_KEY =
       process.env.JWT_REFRESH_SECRET_KEY || "refresh";
-    const { username, type, firstLogin } = adminSignInResult;
+    const { username, type } = adminSignInResult;
     const accessToken = jwt.sign(
-      { username, type, firstLogin, role: "admin" },
+      { username, type, role: "admin" },
       JWT_SECRET_KEY,
       { expiresIn: EXPIRE_TIME_OF_ACCESS_TOKEN }
     );
     const refreshToken = jwt.sign(
-      { username, type, firstLogin, role: "admin" },
+      { username, type, role: "admin" },
       JWT_REFRESH_SECRET_KEY,
       { expiresIn: EXPIRE_TIME_OF_REFRESH_TOKEN }
     );
 
-    res.json({ accessToken, refreshToken, firstLogin });
+    res.json({ accessToken, refreshToken });
   } else {
     res.status(404).json("Not found this admin");
   }
@@ -76,21 +76,21 @@ export async function signInStaff(req: Request, res: Response) {
 
   const staffSigInResult = await StaffAccountSerive.signIn(phone, password);
   if (staffSigInResult) {
-    const { id: staffAccountId, firstLogin } = staffSigInResult;
+    const { id: staffAccountId } = staffSigInResult;
     const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || "token";
     const JWT_REFRESH_SECRET_KEY =
       process.env.JWT_REFRESH_SECRET_KEY || "refresh";
     const accessToken = jwt.sign(
-      { id: staffAccountId, firstLogin, role: "staff" },
+      { id: staffAccountId, role: "staff" },
       JWT_SECRET_KEY,
       { expiresIn: EXPIRE_TIME_OF_ACCESS_TOKEN }
     );
     const refreshToken = jwt.sign(
-      { id: staffAccountId, firstLogin, role: "staff" },
+      { id: staffAccountId, role: "staff" },
       JWT_REFRESH_SECRET_KEY,
       { expiresIn: EXPIRE_TIME_OF_REFRESH_TOKEN }
     );
-    res.json({ accessToken, refreshToken, firstLogin });
+    res.json({ accessToken, refreshToken });
   } else {
     res.status(404).json("Not found this staff");
   }

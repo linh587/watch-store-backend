@@ -1,6 +1,6 @@
 import { OkPacket, RowDataPacket } from "mysql2";
-import { escape, PoolConnection } from "mysql2/promise";
-import { LimitOptions, MAX_DELIVERING_ORDER } from "../config.js";
+import { escape } from "mysql2/promise";
+import { LimitOptions } from "../config.js";
 import pool from "../db.js";
 import {
   convertUnderscorePropertiesToCamelCase,
@@ -12,7 +12,6 @@ import { createUid } from "../utils/uid.js";
 
 interface StaffSignInResult {
   id: string;
-  firstLogin: boolean;
 }
 
 interface StaffAccount {
@@ -21,8 +20,13 @@ interface StaffAccount {
   branchName: string;
   name: string;
   phone: string;
-  deliveringCount: number;
   avatar?: string;
+  address: string;
+  longitude: string;
+  latitude: string;
+  identificationCard: string;
+  gender: string;
+  dateOfBirth: string;
 }
 
 interface ExtraStaffAccount {
@@ -31,31 +35,36 @@ interface ExtraStaffAccount {
   name: string;
   branchId: string;
   branchName: string;
-  deliveringCount: number;
   gender: string;
   dateOfBirth: Date | string;
   avatar?: string;
   email?: string;
-  firstLogin: boolean;
+  address: string;
+  longitude: string;
+  latitude: string;
+  identificationCard: string;
 }
+
+// còn thiếu căn cước công dân, địa chỉ
 
 export type InformationToCreateStaffAccount = Omit<
   ExtraStaffAccount,
-  "id" | "branchName" | "firstLogin" | "deliveringCount"
+  "id" | "branchName"
 >;
 export type InformationToUpdateStaffAccount = Omit<
   ExtraStaffAccount,
-  "id" | "branchName" | "firstLogin" | "deliveringCount" | "branchId"
+  "id" | "branchName" | "branchId"
 >;
 
 const DEFAULT_PASSWORD = "default0";
 
 export async function signIn(phone: string, password: string) {
   const findStaffIdQuery =
-    "select id, first_login from staff_account where phone=? and password=? and deleted_at is null";
+    "select id from staff_account where phone=? and password=? and deleted_at is null";
+  const hashedPassword = hashText(password);
   const [staffRowDatas] = (await pool.query(findStaffIdQuery, [
     phone,
-    password,
+    hashedPassword,
   ])) as RowDataPacket[][];
   return convertUnderscorePropertiesToCamelCase(
     staffRowDatas[0] || null
@@ -64,7 +73,7 @@ export async function signIn(phone: string, password: string) {
 
 export async function getStaffAccounts(limit?: LimitOptions) {
   let getStaffAccountsQuery =
-    "select staff_account.id, branch_id, branch.name as branch_name, staff_account.name, staff_account.phone, delivering_count, avatar from staff_account inner join branch on branch_id=branch.id where staff_account.deleted_at is null";
+    "select staff_account.id, branch_id, branch.name as branch_name, staff_account.name, staff_account.date_of_birth, staff_account.phone, staff_account.gender, avatar, staff_account.address, staff_account.longitude, staff_account.latitude, staff_account.identificationCard from staff_account inner join branch on branch_id=branch.id where staff_account.deleted_at is null";
   if (limit) {
     getStaffAccountsQuery += " " + createLimitSql(limit);
   }
@@ -79,7 +88,7 @@ export async function getStaffAccounts(limit?: LimitOptions) {
 
 export async function getInformation(staffAccountId: string) {
   const getInformationQuery =
-    "select staff_account.id, branch_id, branch.name as branch_name, staff_account.name, staff_account.phone, delivering_count, gender, date_of_birth, avatar, email, first_login from staff_account inner join branch on branch_id=branch.id where staff_account.id=? and staff_account.deleted_at is null";
+    "select staff_account.id, branch_id, branch.name as branch_name, staff_account.name, staff_account.phone, gender, date_of_birth, avatar, staff_account.email, staff_account.address, staff_account.longitude, staff_account.latitude, staff_account.identificationCard from staff_account inner join branch on branch_id=branch.id where staff_account.id=? and staff_account.deleted_at is null";
   const [staffRowDatas] = (await pool.query(getInformationQuery, [
     staffAccountId,
   ])) as RowDataPacket[][];
@@ -100,8 +109,19 @@ export async function addStaffAccount(
   staffInformation: InformationToCreateStaffAccount
 ) {
   const id = createUid(20);
-  const { name, branchId, phone, gender, dateOfBirth, avatar, email } =
-    staffInformation;
+  const {
+    name,
+    branchId,
+    phone,
+    gender,
+    dateOfBirth,
+    avatar,
+    email,
+    address,
+    longitude,
+    latitude,
+    identificationCard,
+  } = staffInformation;
 
   const existsPhone = await checkExistsPhone(phone);
   if (existsPhone) {
@@ -109,19 +129,22 @@ export async function addStaffAccount(
   }
 
   const addStaffAccountQuery =
-    "insert into staff_account(`id`, `branch_id`, `name`, `phone`, `password`, `gender`, `date_of_birth`, `avatar`, `email`, `first_login`) values(?)";
+    "insert into staff_account(`id`, `branch_id`, `name`, `phone`, `password`, `gender`, `date_of_birth`, `avatar`, `email`, `address`, `longitude`, `latitude`, `identificationCard`) values(?)";
   const [result] = (await pool.query(addStaffAccountQuery, [
     [
       id,
       branchId,
       name,
       phone,
-      DEFAULT_PASSWORD,
+      hashText(DEFAULT_PASSWORD),
       encodeGender(gender as string),
       new Date(dateOfBirth as Date | string),
       avatar,
       email,
-      true,
+      address,
+      longitude,
+      latitude,
+      identificationCard,
     ],
   ])) as OkPacket[];
   return result.affectedRows > 0;
@@ -133,7 +156,7 @@ export async function updatePassword(
   newPassword: string
 ) {
   const updatePasswordQuery =
-    "update staff_account set password=?, first_login=false where id=? and password=?";
+    "update staff_account set password=? where id=? and password=?";
   const hashedOldPassword = hashText(oldPassword);
   const hashedNewPassword = hashText(newPassword);
   const [result] = (await pool.query(updatePasswordQuery, [
@@ -146,7 +169,7 @@ export async function updatePassword(
 
 export async function updateBranch(staffAccountId: string, branchId: string) {
   const updateBranchQuery =
-    "update staff_account set branch_id=? where id=? and deleted_at is null and delivering_count=0";
+    "update staff_account set branch_id=? where id=? and deleted_at is null";
   const [result] = (await pool.query(updateBranchQuery, [
     branchId,
     staffAccountId,
@@ -158,7 +181,18 @@ export async function updateInformation(
   staffAccountId: string,
   information: InformationToUpdateStaffAccount
 ) {
-  const { name, phone, gender, dateOfBirth, avatar, email } = information;
+  const {
+    name,
+    phone,
+    gender,
+    dateOfBirth,
+    avatar,
+    email,
+    address,
+    longitude,
+    latitude,
+    identificationCard,
+  } = information;
 
   const existsPhone = await checkExistsPhone(phone, staffAccountId);
   if (existsPhone) {
@@ -166,7 +200,7 @@ export async function updateInformation(
   }
 
   const updateInformationQuery =
-    "update staff_account set name=?, phone=?, gender=?, date_of_birth=?, avatar=?, email=? where id=? and deleted_at is null";
+    "update staff_account set name=?, phone=?, gender=?, date_of_birth=?, avatar=?, email=?, address=?, longitude=?, latitude=?, identificationCard=? where id=? and deleted_at is null";
   const [result] = (await pool.query(updateInformationQuery, [
     name,
     phone,
@@ -174,6 +208,10 @@ export async function updateInformation(
     new Date(dateOfBirth as string),
     avatar,
     email,
+    address,
+    longitude,
+    latitude,
+    identificationCard,
     staffAccountId,
   ])) as OkPacket[];
   return result.affectedRows > 0;
@@ -181,7 +219,7 @@ export async function updateInformation(
 
 export async function deleteAccount(staffAccountId: string) {
   const deleteAccountQuery =
-    "update staff_account set deleted_at=? where id=? and deleted_at is null and delivering_count=0";
+    "update staff_account set deleted_at=? where id=? and deleted_at is null";
   const [result] = (await pool.query(deleteAccountQuery, [
     new Date(),
     staffAccountId,
@@ -194,7 +232,7 @@ export async function resetPassword(
   defaultPassword = DEFAULT_PASSWORD
 ) {
   const resetPasswordQuery =
-    "update staff_account set password=?, first_login=true where id=? and deleted_at is null";
+    "update staff_account set password=? where id=? and deleted_at is null";
   const hashedDefaultPassword = hashText(defaultPassword);
   const [result] = (await pool.query(resetPasswordQuery, [
     hashedDefaultPassword,
@@ -214,36 +252,4 @@ export async function checkExistsPhone(phone: string, staffAccountId?: string) {
     phone,
   ])) as RowDataPacket[][];
   return result.length > 0;
-}
-
-export async function countNotDeliveringStaff(branchId: string) {
-  const countNotDeliveringStaffQuery =
-    "select count(id) as not_delivering_staff_count from staff_account where branch_id=? and delivering_count=0 and deleted_at is null";
-  const [rowDatas] = (await pool.query(countNotDeliveringStaffQuery, [
-    branchId,
-  ])) as RowDataPacket[][];
-  return Number(rowDatas?.[0]?.["not_delivering_staff_count"]) || 0;
-}
-
-export async function increaseDeliveringCount(
-  staffAccountId: string,
-  connection: PoolConnection
-) {
-  const setDeliveryQuery = `update staff_account set delivering_count=delivering_count + 1 where id=? and delivering_count<${MAX_DELIVERING_ORDER}`;
-  const [result] = (await connection.query(setDeliveryQuery, [
-    staffAccountId,
-  ])) as OkPacket[];
-  return result.affectedRows > 0;
-}
-
-export async function decreaseDeliveringCount(
-  staffAccountId: string,
-  connection: PoolConnection
-) {
-  const setDeliveryQuery =
-    "update staff_account set delivering_count=delivering_count-1 where id=? and delivering_count>0";
-  const [result] = (await connection.query(setDeliveryQuery, [
-    staffAccountId,
-  ])) as OkPacket[];
-  return result.affectedRows > 0;
 }

@@ -8,7 +8,6 @@ dotenv.config();
 export interface AdminRequest extends Request {
   username?: string;
   adminType?: string;
-  firstLogin?: boolean;
 }
 
 export interface UserRequest extends Request {
@@ -17,7 +16,6 @@ export interface UserRequest extends Request {
 
 export interface StaffRequest extends Request {
   staffAccountId?: string;
-  firstLogin?: boolean;
 }
 
 export function authorizationAdmin(
@@ -45,7 +43,6 @@ export function authorizationAdmin(
 
       req.username = adminPayload.username;
       req.adminType = adminPayload.type;
-      req.firstLogin = adminPayload.firstLogin;
 
       next();
     } catch (error) {
@@ -104,7 +101,6 @@ export function authorizationStaff(
         return;
       }
       req.staffAccountId = staffPayload.id;
-      req.firstLogin = staffPayload.firstLognIn;
       next();
     } catch (error) {
       console.log((error as Error).message);

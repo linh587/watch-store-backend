@@ -1,6 +1,6 @@
-import Joi from 'joi';
-import { TIME_TYPES } from '../services/order.js';
-import * as GeneralValidate from './general.js';
+import Joi from "joi";
+import { TIME_TYPES } from "../services/order.js";
+import * as GeneralValidate from "./general.js";
 const updateInformationSchema = Joi.object({
     phone: GeneralValidate.phoneSchema.required(),
     name: GeneralValidate.vietnameseSchema.required(),
@@ -8,17 +8,21 @@ const updateInformationSchema = Joi.object({
     dateOfBirth: Joi.string().isoDate().required(),
     avatar: Joi.string(),
     email: Joi.string().email(),
+    address: Joi.string().required(),
+    longitude: Joi.string(),
+    latitude: Joi.string(),
+    identificationCard: Joi.string().required(),
 }).unknown();
 const checkExistsPhoneSchema = Joi.object({
-    phone: GeneralValidate.phoneSchema.required()
+    phone: GeneralValidate.phoneSchema.required(),
 }).unknown();
 const cancelOrderSchema = Joi.object({
-    reason: Joi.string().required()
+    reason: Joi.string().required(),
 }).unknown();
 const statisOrdersSchema = Joi.object({
     fromDate: Joi.string().isoDate().required(),
     toDate: Joi.string().isoDate().required(),
-    timeType: Joi.valid(...TIME_TYPES)
+    timeType: Joi.valid(...TIME_TYPES),
 }).unknown();
 export default class StaffValidate {
     static updateInformation(req, res, next) {

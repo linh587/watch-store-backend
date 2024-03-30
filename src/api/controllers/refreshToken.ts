@@ -12,10 +12,10 @@ export function refreshTokenForAdmin(req: Request, res: Response) {
         const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || 'token'
         const JWT_REFRESH_SECRET_KEY = process.env.JWT_REFRESH_SECRET_KEY || 'refresh'
         const adminPayload = jwt.verify(refreshToken, JWT_REFRESH_SECRET_KEY) as JwtPayload
-        const { username, type, role, firstLogin } = adminPayload
+        const { username, type, role } = adminPayload
 
         if (username && type && role === 'admin') {
-            const accessToken = jwt.sign({ username, type, role, firstLogin }, JWT_SECRET_KEY, { expiresIn: EXPIRE_TIME_OF_ACCESS_TOKEN })
+            const accessToken = jwt.sign({ username, type, role }, JWT_SECRET_KEY, { expiresIn: EXPIRE_TIME_OF_ACCESS_TOKEN })
             res.json({ accessToken })
             return
         }
@@ -57,10 +57,10 @@ export async function refreshTokenForStaff(req: Request, res: Response) {
         const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || 'token'
         const JWT_REFRESH_SECRET_KEY = process.env.JWT_REFRESH_SECRET_KEY || 'refresh'
         const userPayload = jwt.verify(refreshToken, JWT_REFRESH_SECRET_KEY) as JwtPayload
-        const { id, role, firstLogIn } = userPayload
+        const { id, role } = userPayload
 
         if (id && role === 'staff') {
-            const accessToken = jwt.sign({ id, role, firstLogIn }, JWT_SECRET_KEY, { expiresIn: EXPIRE_TIME_OF_ACCESS_TOKEN })
+            const accessToken = jwt.sign({ id, role }, JWT_SECRET_KEY, { expiresIn: EXPIRE_TIME_OF_ACCESS_TOKEN })
             res.json({ accessToken })
             return
         }

@@ -1,6 +1,5 @@
 import dotenv from "dotenv";
 import { escape } from "mysql2";
-import { MAX_DELIVERING_ORDER } from "../config.js";
 import pool from "../db.js";
 import { convertUnderscorePropertiesToCamelCase } from "../utils/dataMapping.js";
 import { createLimitSql } from "../utils/misc.js";
@@ -269,10 +268,6 @@ export async function deliveryOrderByStaff(staffAccountId, orderId) {
         if (statusUpdateResult.affectedRows <= 0) {
             throw new Error(`Don't delivery order #${orderId}`);
         }
-        const setDeliveryForStaffResult = await StaffAccountService.increaseDeliveringCount(staffAccountId, poolConnection);
-        if (!setDeliveryForStaffResult) {
-            throw new Error(`Don't set delivery for staff #${staffAccountId}`);
-        }
         await OrderConfirmService.confirmOrder({ staffAccountId, orderId, action: "delivery" }, poolConnection);
         await poolConnection.commit();
         return true;
@@ -307,10 +302,6 @@ export async function verifyReceivedOrderByStaff(staffAccountId, orderId) {
         ]));
         if (statusUpdateResult.affectedRows <= 0) {
             throw new Error(`Don't verify received order #${orderId}`);
-        }
-        const unsetDeliveryForStaffResult = await StaffAccountService.decreaseDeliveringCount(staffAccountId, poolConnection);
-        if (!unsetDeliveryForStaffResult) {
-            throw new Error(`Don't unset delivery for staff #${staffAccountId}`);
         }
         await OrderConfirmService.confirmOrder({ staffAccountId, orderId, action: "verifyReceived" }, poolConnection);
         await poolConnection.commit();
@@ -347,12 +338,6 @@ export async function cancelOrderByStaff(staffAccountId, orderId, reason) {
         if (statusUpdateResult.affectedRows <= 0) {
             throw new Error(`Don't cancel order #${orderId}`);
         }
-        if (staffAccount.deliveringCount > 0) {
-            const unsetDeliveryForStaffResult = await StaffAccountService.decreaseDeliveringCount(staffAccountId, poolConnection);
-            if (!unsetDeliveryForStaffResult) {
-                throw new Error(`Don't unset delivery for staff #${staffAccountId}`);
-            }
-        }
         await OrderConfirmService.confirmOrder({ staffAccountId, orderId, action: "cancel" }, poolConnection);
         await poolConnection.commit();
         return true;
@@ -367,27 +352,9 @@ export async function cancelOrderByStaff(staffAccountId, orderId, reason) {
     }
 }
 export async function canVerifyOrder(staffAccountId) {
-    const staffAccount = await StaffAccountService.getInformation(staffAccountId);
-    const deliveringCount = Number(staffAccount?.["deliveringCount"]);
-    if (deliveringCount >= MAX_DELIVERING_ORDER) {
-        return false;
-    }
     return true;
 }
 export async function canDeliveryOrder(staffAccountId) {
-    const staffAccount = await StaffAccountService.getInformation(staffAccountId);
-    if (!staffAccount) {
-        return false;
-    }
-    // if this staff is delivering and not greater or equal max delivering order then allow deliver
-    if (staffAccount.deliveringCount !== 0 &&
-        staffAccount.deliveringCount < MAX_DELIVERING_ORDER)
-        return true;
-    // else check current staff count at shop have less than min staff allowed at shop
-    const notDeliveringAtBranchCount = await StaffAccountService.countNotDeliveringStaff(staffAccount.branchId);
-    if (notDeliveringAtBranchCount <= MIN_STAFF_AT_SHOP) {
-        return false;
-    }
     return true;
 }
 export async function canVerifyReceivedOrder(staffAccountId, orderId) {
@@ -400,14 +367,10 @@ export async function canCancelOrder(staffAccountId, orderId) {
     if (!order || !staffAccount) {
         return false;
     }
-    const isDeliveryStaffOfOrder = await OrderConfirmService.isDeliveryStaffOfOrder(staffAccountId, orderId);
     if (order.status === ORDER_STATUS.waitReceive) {
-        return isDeliveryStaffOfOrder;
+        return false;
     }
-    if (order.status === ORDER_STATUS.waitVerify) {
-        return staffAccount.deliveringCount <= 0;
-    }
-    return false;
+    return true;
 }
 export function calculateTemporaryTotalPrice(orderItems) {
     const totalPrice = orderItems
