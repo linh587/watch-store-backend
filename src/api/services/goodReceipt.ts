@@ -45,6 +45,7 @@ export interface TemporaryGoodReciept {
 export interface TemporaryGoodRecieptDetail {
   productId: string;
   quantity: number;
+  sizeId: string;
   price: number;
   note?: string;
   createdAt?: Date;
