@@ -10,6 +10,7 @@ import * as RatingService from "../services/rating.js";
 import * as UserAccountService from "../services/userAccount.js";
 import * as MapUtil from "../utils/map.js";
 import { calculateDeliveryCharge } from "../utils/misc.js";
+import * as PaymentService from "../services/payment.js";
 export async function getInformation(req, res) {
     const { userAccountId } = req;
     if (!userAccountId) {
@@ -33,10 +34,7 @@ export async function updateInformation(req, res) {
     const information = req.fields;
     const success = await UserAccountService.updateInformation(userAccountId, information);
     if (success) {
-        res.json({
-            userAccountId,
-            ...information,
-        });
+        res.json(information);
     }
     else {
         res.status(400).json("Update failure");
@@ -191,19 +189,17 @@ export async function createOrder(req, res) {
     const deliveryCharge = information.receivedType === "delivery"
         ? calculateDeliveryCharge(deliveryDistanceByMeter)
         : 0;
-    const orderId = await OrderService.createOrder({
+    const { orderId, totalPrice } = await OrderService.createOrder({
         ...information,
         details: orderDetailsBeMappingPrice,
         deliveryCharge,
-    }, amountOfDecreaseMoney
-    // userAccountId
-    );
+    }, amountOfDecreaseMoney, userAccountId);
     if (orderId) {
         const productPriceIdsInUserCart = information.details.map(({ productPriceId }) => productPriceId);
         await Promise.all(productPriceIdsInUserCart.map((productPriceId) => CartService.deleteCartDetail(userAccountId, productPriceId)));
         const notificationContent = `Đơn hàng #${orderId} đã được đặt`;
         const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:4200";
-        const notificationLink = CLIENT_ORIGIN + "/user/order-history/" + orderId;
+        const notificationLink = CLIENT_ORIGIN + "/order-history/" + orderId;
         await NotificationService.addNotification({
             content: notificationContent,
             linkTo: notificationLink,
@@ -211,7 +207,11 @@ export async function createOrder(req, res) {
         });
         const socketIO = getSocketIO();
         socketIO.to(userAccountId).emit("newNotification");
-        res.json(orderId);
+        if (information.paymentType === "1") {
+            const vpnUrl = await PaymentService.createPayment(req, res, orderId, totalPrice);
+            return res.json({ orderId, vpnUrl });
+        }
+        return res.json(orderId);
     }
     else {
         res.status(400).json("Error when create order");
@@ -308,7 +308,7 @@ export async function cancelOrder(req, res) {
     if (success) {
         const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:4200";
         const notificationContent = `Đơn hàng #${orderId} đã được hủy`;
-        const notificationLink = CLIENT_ORIGIN + "/user/order-history/" + orderId;
+        const notificationLink = CLIENT_ORIGIN + "/order-history/" + orderId;
         await NotificationService.addNotification({
             content: notificationContent,
             linkTo: notificationLink,

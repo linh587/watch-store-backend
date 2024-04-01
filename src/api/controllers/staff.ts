@@ -190,7 +190,7 @@ export async function verifyOrder(req: StaffRequest, res: Response) {
       const notificationContent = `Đơn hàng #${orderId} đã được duyệt`;
       const CLIENT_ORIGIN =
         process.env.CLIENT_ORIGIN || "http://localhost:4200";
-      const notificationLink = CLIENT_ORIGIN + "/user/order-history/" + orderId;
+      const notificationLink = CLIENT_ORIGIN + "/order-history/" + orderId;
 
       await NotificationService.addNotification({
         content: notificationContent,
@@ -225,7 +225,7 @@ export async function deliveryOrder(req: StaffRequest, res: Response) {
       const notificationContent = `Đơn hàng #${orderId} đã được vận chuyển`;
       const CLIENT_ORIGIN =
         process.env.CLIENT_ORIGIN || "http://localhost:4200";
-      const notificationLink = CLIENT_ORIGIN + "/user/order-history/" + orderId;
+      const notificationLink = CLIENT_ORIGIN + "/order-history/" + orderId;
 
       await NotificationService.addNotification({
         content: notificationContent,
@@ -259,7 +259,7 @@ export async function verifyReceivedOrder(req: StaffRequest, res: Response) {
       const notificationContent = `Đơn hàng #${orderId} đã được nhận`;
       const CLIENT_ORIGIN =
         process.env.CLIENT_ORIGIN || "http://localhost:4200";
-      const notificationLink = CLIENT_ORIGIN + "/user/order-history/" + orderId;
+      const notificationLink = CLIENT_ORIGIN + "/order-history/" + orderId;
 
       await NotificationService.addNotification({
         content: notificationContent,
@@ -295,7 +295,7 @@ export async function cancelOrder(req: StaffRequest, res: Response) {
       const notificationContent = `Đơn hàng #${orderId} đã được hủy`;
       const CLIENT_ORIGIN =
         process.env.CLIENT_ORIGIN || "http://localhost:4200";
-      const notificationLink = CLIENT_ORIGIN + "/user/order-history/" + orderId;
+      const notificationLink = CLIENT_ORIGIN + "/order-history/" + orderId;
 
       await NotificationService.addNotification({
         content: notificationContent,

@@ -7,14 +7,12 @@ export function authorizationAdmin(req, res, next) {
         try {
             const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || "token";
             const adminPayload = jwt.verify(accessToken, JWT_SECRET_KEY);
-            // if (
-            //   adminPayload.role !== "admin" ||
-            //   adminPayload.username === "" ||
-            //   adminPayload.type === ""
-            // ) {
-            //   res.status(403).json("Not permisson");
-            //   return;
-            // }
+            if (adminPayload.role !== "admin" ||
+                adminPayload.username === "" ||
+                adminPayload.type === "") {
+                res.status(403).json("Not permisson");
+                return;
+            }
             req.username = adminPayload.username;
             req.adminType = adminPayload.type;
             next();
@@ -56,10 +54,10 @@ export function authorizationStaff(req, res, next) {
         try {
             const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || "token";
             const staffPayload = jwt.verify(accessToken, JWT_SECRET_KEY);
-            // if (staffPayload.role !== "staff") {
-            //   res.status(403).json("Not permisson");
-            //   return;
-            // }
+            if (staffPayload.role !== "staff") {
+                res.status(403).json("Not permisson");
+                return;
+            }
             req.staffAccountId = staffPayload.id;
             next();
         }

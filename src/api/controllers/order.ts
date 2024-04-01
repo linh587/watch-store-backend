@@ -6,6 +6,8 @@ import * as ProductPriceService from "../services/productPrice.js";
 import * as MapUtil from "../utils/map.js";
 import { calculateDeliveryCharge } from "../utils/misc.js";
 import * as PaymentService from "../services/payment.js";
+import { UserRequest } from "../middlewares/authorization.js";
+import * as UserAccountService from "../services/userAccount.js";
 
 export async function getOrder(req: Request, res: Response) {
   const orderId = req.params["orderId"];
@@ -13,7 +15,20 @@ export async function getOrder(req: Request, res: Response) {
   res.json(order);
 }
 
-export async function createOrder(req: Request, res: Response) {
+export async function createOrder(req: UserRequest, res: Response) {
+  const { userAccountId } = req;
+
+  if (!userAccountId) {
+    res.status(400).json("Unknown error");
+    return;
+  }
+
+  const isLockedUser = await UserAccountService.checkLock(userAccountId);
+  if (isLockedUser) {
+    res.status(403).json("User not allowed order");
+    return;
+  }
+
   const information: OrderService.InformationToCreateOrder = req.body["order"];
   const orderDetailsBeMappingPrice = await Promise.all(
     information.details.map(async (detail) => {
@@ -70,7 +85,8 @@ export async function createOrder(req: Request, res: Response) {
       details: orderDetailsBeMappingPrice,
       deliveryCharge,
     },
-    amountOfDecreaseMoney
+    amountOfDecreaseMoney,
+    userAccountId
   );
 
   if (orderId) {
