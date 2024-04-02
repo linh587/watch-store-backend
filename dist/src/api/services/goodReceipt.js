@@ -116,3 +116,23 @@ export async function getGoodReceiptById(receiptId) {
         details,
     });
 }
+export async function deleteReceipt(id, continueWithConnection) {
+    const deleteReceiptQuery = "update good_receipt set deleted_at=? where id=?";
+    const connection = continueWithConnection || (await pool.getConnection());
+    const deletedDateTime = new Date();
+    try {
+        await connection.beginTransaction();
+        await connection.query(deleteReceiptQuery, [deletedDateTime, id]);
+        await GoodReceiptDetailService.deleteReceiptDetailByReceipId(id, connection);
+        await connection.commit();
+        return true;
+    }
+    catch (error) {
+        console.log(error);
+        await connection.rollback();
+        return false;
+    }
+    finally {
+        connection.release();
+    }
+}

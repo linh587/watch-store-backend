@@ -166,6 +166,17 @@ export async function updateGoodReceipt(req: Request, res: Response) {
   }
 }
 
+export async function deleteGoodReceipt(req: Request, res: Response) {
+  const receiptId = req.params["receiptId"];
+  const success = await GoodReceiptService.deleteReceipt(receiptId);
+
+  if (success) {
+    res.json("Delete receipt successful");
+  } else {
+    res.status(400).json("Delete receipt failure");
+  }
+}
+
 export async function getAllGoodReceipts(req: Request, res: Response) {
   const goodReceipts = await GoodReceiptService.getAllGoodReceipts();
   res.json({

@@ -14,6 +14,7 @@ router.get("/good-receipt", AdminController.getAllGoodReceipts);
 router.get("/good-receipt/:goodReceiptId", AdminController.getGoodReceipt);
 
 router.put("/good-receipt/:goodReceiptId", AdminController.updateGoodReceipt);
+router.delete("/good-receipt/:goodReceiptId", AdminController.deleteGoodReceipt);
 
 router.post(
   "/supplier",

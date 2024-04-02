@@ -36,6 +36,36 @@ export async function addGoodReceiptDetails(
 ) {
   const addGoodReceiptDetailsQuery =
     //"insert into good_receipt_detail(`receipt_id`, `product_id`, `quantity`, `price`, `note`) VALUES ?";
+    "insert into good_receipt_detail(`receipt_id`, `product_id`, `quantity`, `size_id`, `price`, `note`) VALUES (?)";
+  
+  const updateQuantityQuery="update product_price\
+  set quantity = product_price.quantity + ?\
+  where product_price.product_id= ? \
+  and product_price.product_size_id= ?";
+
+  const goodReceiptDetailRowDatas = details.map((detail) => [
+    goodReceiptId,
+    detail.productId,
+    detail.quantity,
+    detail.sizeId,
+    detail.price,
+    detail.note,
+  ]);
+
+  for(const detail of goodReceiptDetailRowDatas){
+    await connection.query(addGoodReceiptDetailsQuery, [detail]);
+    await connection.query(updateQuantityQuery, [detail[2], detail[1], detail[3]]);
+  }
+  return true;
+}
+
+export async function addGoodReceiptDetails1(
+  goodReceiptId: string,
+  details: TemporaryGoodRecieptDetail[],
+  connection: PoolConnection
+) {
+  const addGoodReceiptDetailsQuery =
+    //"insert into good_receipt_detail(`receipt_id`, `product_id`, `quantity`, `price`, `note`) VALUES ?";
     "insert into good_receipt_detail(`receipt_id`, `product_id`, `quantity`, `size_id`, `price`, `note`) VALUES ?";
   const goodReceiptDetailRowDatas = details.map((detail) => [
     goodReceiptId,
@@ -57,23 +87,18 @@ export async function addGoodReceiptDetails(
     and product_price.product_size_id= ?";
     const quantityRowData = details.map((details)=>[
       details.quantity,
-      // details.productId,
-      // details.sizeId
     ]);
     const productIdRowData = details.map((details)=>[
-      //details.quantity,
        details.productId,
-      // details.sizeId
     ]);
     const sizeIdRowData = details.map((details)=>[
-      //details.quantity,
-      // details.productId,
        details.sizeId
     ]);
     await connection.query(updateQuantityQuery, [quantityRowData, productIdRowData, sizeIdRowData]);
   }
   return result.affectedRows > 0;
 }
+
 
 export async function updateGoodReceiptDetails(
   goodReceiptId: string,
@@ -82,7 +107,7 @@ export async function updateGoodReceiptDetails(
 ) {
   const updateGoodReceiptDetailsQuery =
     //"UPDATE good_receipt_detail SET quantity = ?, price = ?, note = ?, updated_at = ? WHERE receipt_id = ? AND product_id = ?";
-    "UPDATE good_receipt_detail SET quantity = ?, size=?, price = ?, note = ?, updated_at = ? WHERE receipt_id = ? AND product_id = ?";
+    "UPDATE good_receipt_detail SET quantity = ?, size=?, price = ?, note = ? WHERE receipt_id = ? AND product_id = ?";
 
   const updateOperations = details.map(async (detail) => {
     const values = [
@@ -90,7 +115,6 @@ export async function updateGoodReceiptDetails(
       detail.sizeId,
       detail.price,
       detail.note,
-      detail.updatedAt,
       goodReceiptId,
       detail.productId,
     ];
@@ -98,4 +122,10 @@ export async function updateGoodReceiptDetails(
   });
 
   await Promise.all(updateOperations);
+}
+
+export async function deleteReceiptDetailByReceipId(receipId: string, connection: PoolConnection) {
+  const deleteReceiptDetailByReceipIdQuery = 'update good_receipt_detail set deleted_at=? where receipt_id=?'
+  const [result] = await connection.query(deleteReceiptDetailByReceipIdQuery, [new Date(), receipId]) as OkPacket[]
+  return result.affectedRows > 0
 }
