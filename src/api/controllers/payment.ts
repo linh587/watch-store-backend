@@ -23,7 +23,6 @@ export async function createPayment(
   let secretKey = "ZTROUYMIQQHFNZBOSCOIVCONQECAQMMT";
   let vnpUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
   let returnUrl = "http://localhost:4200/order/vnpay_return";
-  // let orderId = moment(date).format("DDHHmmss");
   let amount = totalPrice;
   let bankCode = req.body.bankCode;
 

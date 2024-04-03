@@ -5,7 +5,7 @@ import AdminValidate from "../validations/admin.js";
 
 const router = Router();
 
-router.get("/all-orders", AdminController.getAllOrders)
+router.get("/all-orders", AdminController.getAllOrders);
 
 router.get("/information", AdminController.getInformation);
 
@@ -16,7 +16,10 @@ router.get("/good-receipt", AdminController.getAllGoodReceipts);
 router.get("/good-receipt/:goodReceiptId", AdminController.getGoodReceipt);
 
 router.put("/good-receipt/:goodReceiptId", AdminController.updateGoodReceipt);
-router.delete("/good-receipt/:goodReceiptId", AdminController.deleteGoodReceipt);
+router.delete(
+  "/good-receipt/:goodReceiptId",
+  AdminController.deleteGoodReceipt
+);
 
 router.post(
   "/supplier",

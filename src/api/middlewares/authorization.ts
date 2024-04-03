@@ -28,21 +28,14 @@ export function authorizationAdmin(
   if (accessToken) {
     try {
       const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || "token";
-      const adminPayload = jwt.verify(
-        accessToken,
-        JWT_SECRET_KEY
-      ) as JwtPayload;
-      // if (
-      //   adminPayload.role !== "admin" ||
-      //   adminPayload.username === "" ||
-      //   adminPayload.type === ""
-      // ) {
-      //   res.status(403).json("Not permisson");
-      //   return;
-      // }
+      const payload = jwt.verify(accessToken, JWT_SECRET_KEY) as JwtPayload;
+      if (payload.role !== "admin" && payload.role !== "staff") {
+        res.status(403).json("Not permisson");
+        return;
+      }
 
-      req.username = adminPayload.username;
-      req.adminType = adminPayload.type;
+      req.username = payload.username;
+      req.adminType = payload.type;
 
       next();
     } catch (error) {
@@ -91,16 +84,13 @@ export function authorizationStaff(
   if (accessToken) {
     try {
       const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || "token";
-      const staffPayload = jwt.verify(
-        accessToken,
-        JWT_SECRET_KEY
-      ) as JwtPayload;
+      const payload = jwt.verify(accessToken, JWT_SECRET_KEY) as JwtPayload;
 
-      // if (staffPayload.role !== "staff") {
-      //   res.status(403).json("Not permisson");
-      //   return;
-      // }
-      req.staffAccountId = staffPayload.id;
+      if (payload.role !== "staff" && payload.role !== "admin") {
+        res.status(403).json("Not permisson");
+        return;
+      }
+      req.staffAccountId = payload.id;
       next();
     } catch (error) {
       console.log((error as Error).message);

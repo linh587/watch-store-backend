@@ -54,7 +54,7 @@ export interface TemporaryGoodRecieptDetail {
 dotenv.config();
 
 export async function getAllGoodReceipts() {
-  let getAllGoodReceiptsQuery = `select id, total_amount, deliver, delivery_date, creator, note, supplier_id from ${MYSQL_DB}.good_receipt`;
+  let getAllGoodReceiptsQuery = `select id, total_amount, deliver, delivery_date, creator, note, supplier_id from ${MYSQL_DB}.good_receipt where deleted_at is null`;
 
   const [goodReceiptRowDatas] = (await pool.query(
     getAllGoodReceiptsQuery
@@ -192,7 +192,7 @@ export function calculateTemporaryTotalPrice(
 }
 
 export async function getGoodReceiptById(receiptId: string) {
-  const getGoodReceiptQuery = `select id, total_amount, deliver, delivery_date, creator, note, supplier_id from ${MYSQL_DB}.good_receipt where id=?`;
+  const getGoodReceiptQuery = `select id, total_amount, deliver, delivery_date, creator, note, supplier_id from ${MYSQL_DB}.good_receipt where id=? and deleted_at is null`;
   const [goodReceiptRowDatas] = (await pool.query(getGoodReceiptQuery, [
     receiptId,
   ])) as RowDataPacket[][];
@@ -220,7 +220,10 @@ export async function deleteReceipt(
   try {
     await connection.beginTransaction();
     await connection.query(deleteReceiptQuery, [deletedDateTime, id]);
-    await GoodReceiptDetailService.deleteReceiptDetailByReceipId(id, connection);
+    await GoodReceiptDetailService.deleteReceiptDetailByReceipId(
+      id,
+      connection
+    );
     await connection.commit();
     return true;
   } catch (error) {

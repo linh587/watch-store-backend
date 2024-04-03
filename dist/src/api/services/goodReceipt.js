@@ -7,7 +7,7 @@ import { convertUnderscorePropertiesToCamelCase } from "../utils/dataMapping.js"
 const MYSQL_DB = process.env.MYSQL_DB || "watch_db";
 dotenv.config();
 export async function getAllGoodReceipts() {
-    let getAllGoodReceiptsQuery = `select id, total_amount, deliver, delivery_date, creator, note, supplier_id from ${MYSQL_DB}.good_receipt`;
+    let getAllGoodReceiptsQuery = `select id, total_amount, deliver, delivery_date, creator, note, supplier_id from ${MYSQL_DB}.good_receipt where deleted_at is null`;
     const [goodReceiptRowDatas] = (await pool.query(getAllGoodReceiptsQuery));
     return goodReceiptRowDatas.map(convertUnderscorePropertiesToCamelCase);
 }
@@ -103,7 +103,7 @@ export function calculateTemporaryTotalPrice(goodReceiptItems) {
     return totalAmount;
 }
 export async function getGoodReceiptById(receiptId) {
-    const getGoodReceiptQuery = `select id, total_amount, deliver, delivery_date, creator, note, supplier_id from ${MYSQL_DB}.good_receipt where id=?`;
+    const getGoodReceiptQuery = `select id, total_amount, deliver, delivery_date, creator, note, supplier_id from ${MYSQL_DB}.good_receipt where id=? and deleted_at is null`;
     const [goodReceiptRowDatas] = (await pool.query(getGoodReceiptQuery, [
         receiptId,
     ]));
