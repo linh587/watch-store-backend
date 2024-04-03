@@ -5,6 +5,7 @@ import * as GoodReceiptDetailService from "./goodReceiptDetail.js";
 import * as ProductService from "./product.js";
 import { RowDataPacket } from "mysql2";
 import { convertUnderscorePropertiesToCamelCase } from "../utils/dataMapping.js";
+import { PoolConnection } from "mysql2/promise";
 
 const MYSQL_DB = process.env.MYSQL_DB || "watch_db";
 
@@ -45,10 +46,9 @@ export interface TemporaryGoodReciept {
 export interface TemporaryGoodRecieptDetail {
   productId: string;
   quantity: number;
+  sizeId: string;
   price: number;
   note?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
 }
 
 dotenv.config();
@@ -208,4 +208,26 @@ export async function getGoodReceiptById(receiptId: string) {
     ...goodReceiptRowDatas[0],
     details,
   }) as GoodReceipt;
+}
+
+export async function deleteReceipt(
+  id: string,
+  continueWithConnection?: PoolConnection
+) {
+  const deleteReceiptQuery = "update good_receipt set deleted_at=? where id=?";
+  const connection = continueWithConnection || (await pool.getConnection());
+  const deletedDateTime = new Date();
+  try {
+    await connection.beginTransaction();
+    await connection.query(deleteReceiptQuery, [deletedDateTime, id]);
+    await GoodReceiptDetailService.deleteReceiptDetailByReceipId(id, connection);
+    await connection.commit();
+    return true;
+  } catch (error) {
+    console.log(error);
+    await connection.rollback();
+    return false;
+  } finally {
+    connection.release();
+  }
 }
