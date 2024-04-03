@@ -140,7 +140,7 @@ export async function verifyOrder(req, res) {
         if (order && order.userAccountId) {
             const notificationContent = `Đơn hàng #${orderId} đã được duyệt`;
             const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:4200";
-            const notificationLink = CLIENT_ORIGIN + "/user/order-history/" + orderId;
+            const notificationLink = CLIENT_ORIGIN + "/order-history/" + orderId;
             await NotificationService.addNotification({
                 content: notificationContent,
                 linkTo: notificationLink,
@@ -168,7 +168,7 @@ export async function deliveryOrder(req, res) {
         if (order && order.userAccountId) {
             const notificationContent = `Đơn hàng #${orderId} đã được vận chuyển`;
             const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:4200";
-            const notificationLink = CLIENT_ORIGIN + "/user/order-history/" + orderId;
+            const notificationLink = CLIENT_ORIGIN + "/order-history/" + orderId;
             await NotificationService.addNotification({
                 content: notificationContent,
                 linkTo: notificationLink,
@@ -196,7 +196,7 @@ export async function verifyReceivedOrder(req, res) {
         if (order && order.userAccountId) {
             const notificationContent = `Đơn hàng #${orderId} đã được nhận`;
             const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:4200";
-            const notificationLink = CLIENT_ORIGIN + "/user/order-history/" + orderId;
+            const notificationLink = CLIENT_ORIGIN + "/order-history/" + orderId;
             await NotificationService.addNotification({
                 content: notificationContent,
                 linkTo: notificationLink,
@@ -225,7 +225,7 @@ export async function cancelOrder(req, res) {
         if (order && order.userAccountId) {
             const notificationContent = `Đơn hàng #${orderId} đã được hủy`;
             const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:4200";
-            const notificationLink = CLIENT_ORIGIN + "/user/order-history/" + orderId;
+            const notificationLink = CLIENT_ORIGIN + "/order-history/" + orderId;
             await NotificationService.addNotification({
                 content: notificationContent,
                 linkTo: notificationLink,

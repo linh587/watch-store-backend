@@ -3,6 +3,7 @@ import * as AdminController from "../controllers/admin.js";
 import { extractFormData } from "../middlewares/formDataExtract.js";
 import AdminValidate from "../validations/admin.js";
 const router = Router();
+router.get("/all-orders", AdminController.getAllOrders);
 router.get("/information", AdminController.getInformation);
 router.post("/good-receipt", AdminController.createGoodReceipt);
 router.get("/good-receipt", AdminController.getAllGoodReceipts);

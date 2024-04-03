@@ -20,6 +20,7 @@ import * as SupplierService from "../services/supplier.js";
 import * as GoodReceiptService from "../services/goodReceipt.js";
 import { deleteImage, uploadImage } from "../utils/storageImage.js";
 import { getSocketIO } from "../../socketIO.js";
+import * as OrderService from "../services/order.js";
 
 export async function getInformation(req: AdminRequest, res: Response) {
   const { username } = req;
@@ -850,4 +851,10 @@ export async function unlockRating(req: AdminRequest, res: Response) {
   } else {
     res.status(400).json("Unlocked user failure");
   }
+}
+
+export async function getAllOrders(req: AdminRequest, res: Response) {
+  const orders = await OrderService.getAllOrders();
+
+  res.json({ data: orders });
 }

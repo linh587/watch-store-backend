@@ -5,6 +5,8 @@ import AdminValidate from "../validations/admin.js";
 
 const router = Router();
 
+router.get("/all-orders", AdminController.getAllOrders)
+
 router.get("/information", AdminController.getInformation);
 
 router.post("/good-receipt", AdminController.createGoodReceipt);
