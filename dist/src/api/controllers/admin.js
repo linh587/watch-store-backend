@@ -693,6 +693,54 @@ export async function unlockRating(req, res) {
     }
 }
 export async function getAllOrders(req, res) {
-    const orders = await OrderService.getAllOrders();
-    res.json({ data: orders });
+    const { username } = req;
+    if (!username) {
+        res.status(400).json("Unknown error");
+        return;
+    }
+    const adminAccount = await AdminService.getInformation(username);
+    if (!adminAccount) {
+        res.status(400).json("Unknown error");
+        return;
+    }
+    const options = {};
+    const filters = {};
+    if (req.query["sort"]) {
+        const sortType = String(req.query["sort"] || "");
+        if (OrderService.SORT_TYPES.includes(sortType)) {
+            options.sort = sortType;
+        }
+    }
+    if (req.query["createdFrom"]) {
+        const createdFrom = new Date(String(req.query["createdFrom"]));
+        if (!isNaN(createdFrom.getTime())) {
+            filters.createdFrom = createdFrom;
+        }
+    }
+    if (req.query["createdTo"]) {
+        const createdTo = new Date(String(req.query["createdTo"]));
+        if (!isNaN(createdTo.getTime())) {
+            filters.createdTo = createdTo;
+        }
+    }
+    if (req.query["status"]) {
+        filters.status = String(req.query["status"]);
+    }
+    if (req.query["q"]) {
+        filters.searchString = String(req.query["q"]);
+    }
+    if (req.query["page"]) {
+        const page = Number(req.query["page"]);
+        if (Number.isSafeInteger(page) && page > 0) {
+            options.limit = {
+                amount: ITEM_COUNT_PER_PAGE,
+                offset: ITEM_COUNT_PER_PAGE * (page - 1),
+            };
+        }
+    }
+    const orders = await OrderService.getAllOrders(options, filters);
+    res.json({
+        hasNextPage: orders.length === ITEM_COUNT_PER_PAGE,
+        data: orders,
+    });
 }
