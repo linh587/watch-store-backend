@@ -246,11 +246,6 @@ export async function createOrder(req: UserRequest, res: Response) {
     return;
   }
 
-  if (deliveryDistanceByMeter > MAX_DISTANCE_ALLOWED_ORDER) {
-    res.status(400).json("Orver max distance allowed order");
-    return;
-  }
-
   const deliveryCharge =
     information.receivedType === "delivery"
       ? calculateDeliveryCharge(deliveryDistanceByMeter)

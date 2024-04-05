@@ -1,5 +1,5 @@
 import { getSocketIO } from "../../socketIO.js";
-import { ITEM_COUNT_PER_PAGE, MAX_DISTANCE_ALLOWED_ORDER, } from "../config.js";
+import { ITEM_COUNT_PER_PAGE, } from "../config.js";
 import * as BranchService from "../services/branch.js";
 import * as CartService from "../services/cart.js";
 import * as CouponService from "../services/coupon.js";
@@ -180,10 +180,6 @@ export async function createOrder(req, res) {
     const deliveryDistanceByMeter = await MapUtil.getLengthFromOriginToDestinationGoongIo(branchCoordinate, receivedAddressCoordinate);
     if (deliveryDistanceByMeter < 0) {
         res.status(400).json("Error calculate delivery distance");
-        return;
-    }
-    if (deliveryDistanceByMeter > MAX_DISTANCE_ALLOWED_ORDER) {
-        res.status(400).json("Orver max distance allowed order");
         return;
     }
     const deliveryCharge = information.receivedType === "delivery"
