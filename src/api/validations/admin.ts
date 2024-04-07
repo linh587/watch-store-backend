@@ -210,6 +210,20 @@ const createGoodRecieptSchema = Joi.object({
     .required(),
 });
 
+const temporaryDamageDetailSchema = Joi.object({
+  productId: Joi.string(),
+  quantity: Joi.number(),
+  descript: Joi.string(),
+});
+
+const createDamageSchema = Joi.object({
+  creator: Joi.string(),
+  details: Joi.array()
+    .items(temporaryDamageDetailSchema)
+    .min(1)
+    .required(),
+});
+
 export default class AdminValidate {
   static addGoodReceipt(req: Request, res: Response, next: NextFunction) {
     const validationResult = createGoodRecieptSchema.validate(req.body);
@@ -218,6 +232,15 @@ export default class AdminValidate {
       return;
     }
 
+    next();
+  }
+
+  static addDamge (req: Request, res: Response, next: NextFunction){
+    const validationResult = createDamageSchema.validate(req.body);
+    if(validationResult.error){
+      res.status(400).json(validationResult.error.message);
+      return;
+    }
     next();
   }
 
