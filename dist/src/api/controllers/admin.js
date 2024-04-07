@@ -14,6 +14,7 @@ import * as UserAccountService from "../services/userAccount.js";
 import * as NotificationService from "../services/notification.js";
 import * as SupplierService from "../services/supplier.js";
 import * as GoodReceiptService from "../services/goodReceipt.js";
+import * as DamageService from "../services/damage.js";
 import { deleteImage, uploadImage } from "../utils/storageImage.js";
 import { getSocketIO } from "../../socketIO.js";
 import * as OrderService from "../services/order.js";
@@ -55,6 +56,27 @@ export async function addCategory(req, res) {
     }
     else {
         res.status(400).json("Add category failure");
+    }
+}
+export async function updateCategory(req, res) {
+    const categoryName = req.body["name"];
+    const categoryId = req.params["categoryId"];
+    const success = await CategoryService.updateCategory(categoryId, categoryName);
+    if (success) {
+        res.json("Update category successful");
+    }
+    else {
+        res.status(400).json("Update category failure");
+    }
+}
+export async function deleteCategory(req, res) {
+    const categoryId = req.params["categoryId"];
+    const success = await CategoryService.deleteCategory(categoryId);
+    if (success) {
+        res.json("Delete category successful");
+    }
+    else {
+        res.status(400).json("Delete category failure");
     }
 }
 export async function addSupplier(req, res) {
@@ -157,25 +179,35 @@ export async function getGoodReceipt(req, res) {
     const goodReceipt = await GoodReceiptService.getGoodReceiptById(goodReceiptId);
     res.json(goodReceipt);
 }
-export async function updateCategory(req, res) {
-    const categoryName = req.body["name"];
-    const categoryId = req.params["categoryId"];
-    const success = await CategoryService.updateCategory(categoryId, categoryName);
-    if (success) {
-        res.json("Update category successful");
+export async function getAllDamages(req, res) {
+    const damages = await DamageService.getAllDamages();
+    res.json({
+        data: damages,
+    });
+}
+export async function getDamage(req, res) {
+    const damageId = req.params["damageId"];
+    const damage = await DamageService.getDamageById(damageId);
+    res.json(damage);
+}
+export async function createDamage(req, res) {
+    const information = req.body["damage"];
+    const damageId = await DamageService.createDamage(information);
+    if (damageId) {
+        res.json(damageId);
     }
     else {
-        res.status(400).json("Update category failure");
+        res.status(400).json("Error when created damage");
     }
 }
-export async function deleteCategory(req, res) {
-    const categoryId = req.params["categoryId"];
-    const success = await CategoryService.deleteCategory(categoryId);
+export async function deleteDamage(req, res) {
+    const damageId = req.params["damageId"];
+    const success = await DamageService.deleteDamage(damageId);
     if (success) {
-        res.json("Delete category successful");
+        res.json("Delete damage successful");
     }
     else {
-        res.status(400).json("Delete category failure");
+        res.status(400).json("Delete damage failure");
     }
 }
 export async function addProductSize(req, res) {

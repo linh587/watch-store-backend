@@ -170,9 +170,29 @@ const createGoodRecieptSchema = Joi.object({
         .min(1)
         .required(),
 });
+const temporaryDamageDetailSchema = Joi.object({
+    productId: Joi.string(),
+    quantity: Joi.number(),
+    descript: Joi.string(),
+});
+const createDamageSchema = Joi.object({
+    creator: Joi.string(),
+    details: Joi.array()
+        .items(temporaryDamageDetailSchema)
+        .min(1)
+        .required(),
+});
 export default class AdminValidate {
     static addGoodReceipt(req, res, next) {
         const validationResult = createGoodRecieptSchema.validate(req.body);
+        if (validationResult.error) {
+            res.status(400).json(validationResult.error.message);
+            return;
+        }
+        next();
+    }
+    static addDamge(req, res, next) {
+        const validationResult = createDamageSchema.validate(req.body);
         if (validationResult.error) {
             res.status(400).json(validationResult.error.message);
             return;

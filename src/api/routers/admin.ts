@@ -10,16 +10,16 @@ router.get("/all-orders", AdminController.getAllOrders);
 router.get("/information", AdminController.getInformation);
 
 router.post("/good-receipt", AdminController.createGoodReceipt);
-
 router.get("/good-receipt", AdminController.getAllGoodReceipts);
-
 router.get("/good-receipt/:goodReceiptId", AdminController.getGoodReceipt);
-
 router.put("/good-receipt/:goodReceiptId", AdminController.updateGoodReceipt);
-router.delete(
-  "/good-receipt/:goodReceiptId",
-  AdminController.deleteGoodReceipt
-);
+router.delete("/good-receipt/:goodReceiptId",AdminController.deleteGoodReceipt);
+
+router.post("/damage", AdminController.createDamage);
+router.get("/damage", AdminController.getAllGoodReceipts);
+router.get("/damage/:damageId", AdminController.getDamage);
+router.delete("/damage/:damageId",AdminController.deleteDamage);
+
 
 router.post(
   "/supplier",
