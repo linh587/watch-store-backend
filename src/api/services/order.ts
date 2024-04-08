@@ -50,6 +50,7 @@ export interface InformationToCreateOrder {
   userAccountId?: string;
   branchId: string;
   couponCode?: string;
+  note?: string;
   receivedType: string;
   receivedAddress: string;
   paymentType: string;
@@ -84,8 +85,6 @@ export type TimeType = (typeof TIME_TYPES)[number];
 export type SortType = (typeof SORT_TYPES)[number];
 
 dotenv.config();
-
-const MIN_STAFF_AT_SHOP = 2;
 
 export const ORDER_STATUS = {
   waitVerify: "waitVerify",
@@ -244,12 +243,13 @@ export async function createOrder(
     email,
     branchId,
     couponCode,
+    note,
     receivedType,
     receivedAddress,
     deliveryCharge,
     paymentType,
     paymentStatus,
-    details
+    details,
   } = information;
   if (details.length <= 0) {
     return "";
@@ -277,7 +277,7 @@ export async function createOrder(
   const createOrderQuery =
     "insert into " +
     MYSQL_DB +
-    ".order(`id`, `customer_name`, `phone`, `email`, `user_account_id`, `branch_id`, `coupon_code`, `received_type`, `received_address`, `delivery_charge`, `subtotal_price`, `total_price`, `status`, `payment_type`, `payment_status`, `created_at`) values (?)";
+    ".order(`id`, `customer_name`, `phone`, `email`, `user_account_id`, `note`, `branch_id`, `coupon_code`, `received_type`, `received_address`, `delivery_charge`, `subtotal_price`, `total_price`, `status`, `payment_type`, `payment_status`, `created_at`) values (?)";
   const poolConnection = await pool.getConnection();
   try {
     await poolConnection.beginTransaction();
@@ -288,6 +288,7 @@ export async function createOrder(
         phone,
         email,
         userAccountId,
+        note,
         branchId,
         couponCode,
         receivedType,
@@ -464,7 +465,7 @@ export async function verifyReceivedOrderByStaff(
   //   return false;
   // }
 
-  const verifyReceivedOrderQuery = `update ${MYSQL_DB}.order set status=?, received_at=? where branch_id=? and id=? and status in ?`;
+  const verifyReceivedOrderQuery = `update ${MYSQL_DB}.order set status=?, payment_status=?, received_at=? where branch_id=? and id=? and status in ?`;
   const poolConnection = await pool.getConnection();
 
   try {
@@ -473,6 +474,7 @@ export async function verifyReceivedOrderByStaff(
       verifyReceivedOrderQuery,
       [
         ORDER_STATUS.received,
+        PAYMENT_STATUS.PAID,
         new Date(),
         staffAccount.branchId,
         orderId,

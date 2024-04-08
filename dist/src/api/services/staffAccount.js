@@ -39,6 +39,7 @@ export async function addStaffAccount(staffInformation) {
     const { name, branchId, phone, gender, dateOfBirth, avatar, email, address, longitude, latitude, identificationCard, } = staffInformation;
     const existsPhone = await checkExistsPhone(phone);
     if (existsPhone) {
+        console.log('this number is existed');
         return false;
     }
     const addStaffAccountQuery = "insert into staff_account(`id`, `branch_id`, `name`, `phone`, `password`, `gender`, `date_of_birth`, `avatar`, `email`, `address`, `longitude`, `latitude`, `identificationCard`) values(?)";
@@ -84,6 +85,7 @@ export async function updateInformation(staffAccountId, information) {
     const { name, phone, gender, dateOfBirth, avatar, email, address, longitude, latitude, identificationCard, } = information;
     const existsPhone = await checkExistsPhone(phone, staffAccountId);
     if (existsPhone) {
+        console.log("this number is existed");
         return false;
     }
     const updateInformationQuery = "update staff_account set name=?, phone=?, gender=?, date_of_birth=?, avatar=?, email=?, address=?, longitude=?, latitude=?, identificationCard=? where id=? and deleted_at is null";

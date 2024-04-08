@@ -9,7 +9,6 @@ import * as OrderDetailService from "./orderDetail.js";
 import * as ProductPriceService from "./productPrice.js";
 import * as StaffAccountService from "./staffAccount.js";
 dotenv.config();
-const MIN_STAFF_AT_SHOP = 2;
 export const ORDER_STATUS = {
     waitVerify: "waitVerify",
     verified: "verified",
@@ -120,7 +119,7 @@ export async function getOrderById(orderId) {
 }
 export async function createOrder(information, amountOfDecreaseMoney, userAccountId) {
     const orderId = createUid(20);
-    const { customerName, phone, email, branchId, couponCode, receivedType, receivedAddress, deliveryCharge, paymentType, paymentStatus, details } = information;
+    const { customerName, phone, email, branchId, couponCode, note, receivedType, receivedAddress, deliveryCharge, paymentType, paymentStatus, details, } = information;
     if (details.length <= 0) {
         return "";
     }
@@ -138,7 +137,7 @@ export async function createOrder(information, amountOfDecreaseMoney, userAccoun
         Number(amountOfDecreaseMoney || 0);
     const createOrderQuery = "insert into " +
         MYSQL_DB +
-        ".order(`id`, `customer_name`, `phone`, `email`, `user_account_id`, `branch_id`, `coupon_code`, `received_type`, `received_address`, `delivery_charge`, `subtotal_price`, `total_price`, `status`, `payment_type`, `payment_status`, `created_at`) values (?)";
+        ".order(`id`, `customer_name`, `phone`, `email`, `user_account_id`, `note`, `branch_id`, `coupon_code`, `received_type`, `received_address`, `delivery_charge`, `subtotal_price`, `total_price`, `status`, `payment_type`, `payment_status`, `created_at`) values (?)";
     const poolConnection = await pool.getConnection();
     try {
         await poolConnection.beginTransaction();
@@ -149,6 +148,7 @@ export async function createOrder(information, amountOfDecreaseMoney, userAccoun
                 phone,
                 email,
                 userAccountId,
+                note,
                 branchId,
                 couponCode,
                 receivedType,
@@ -289,12 +289,13 @@ export async function verifyReceivedOrderByStaff(staffAccountId, orderId) {
     // if (!(await canVerifyReceivedOrder(staffAccountId, orderId))) {
     //   return false;
     // }
-    const verifyReceivedOrderQuery = `update ${MYSQL_DB}.order set status=?, received_at=? where branch_id=? and id=? and status in ?`;
+    const verifyReceivedOrderQuery = `update ${MYSQL_DB}.order set status=?, payment_status=?, received_at=? where branch_id=? and id=? and status in ?`;
     const poolConnection = await pool.getConnection();
     try {
         await poolConnection.beginTransaction();
         const [statusUpdateResult] = (await poolConnection.query(verifyReceivedOrderQuery, [
             ORDER_STATUS.received,
+            PAYMENT_STATUS.PAID,
             new Date(),
             staffAccount.branchId,
             orderId,

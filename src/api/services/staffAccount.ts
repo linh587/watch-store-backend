@@ -125,6 +125,7 @@ export async function addStaffAccount(
 
   const existsPhone = await checkExistsPhone(phone);
   if (existsPhone) {
+    console.log('this number is existed')
     return false;
   }
 
@@ -196,6 +197,7 @@ export async function updateInformation(
 
   const existsPhone = await checkExistsPhone(phone, staffAccountId);
   if (existsPhone) {
+    console.log("this number is existed")
     return false;
   }
 
