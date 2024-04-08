@@ -16,7 +16,7 @@ router.put("/good-receipt/:goodReceiptId", AdminController.updateGoodReceipt);
 router.delete("/good-receipt/:goodReceiptId",AdminController.deleteGoodReceipt);
 
 router.post("/damage", AdminController.createDamage);
-router.get("/damage", AdminController.getAllGoodReceipts);
+router.get("/damage", AdminController.getAllDamages);
 router.get("/damage/:damageId", AdminController.getDamage);
 router.delete("/damage/:damageId",AdminController.deleteDamage);
 

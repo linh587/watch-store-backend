@@ -48,7 +48,7 @@ export interface InformationToUpdateDamage {
 dotenv.config();
 
 export async function getAllDamages() {
-  let getAllDamagisQuery = `select id, total_amount, creator, create_at, note from ${MYSQL_DB}.damage where deleted_at is null`;
+  let getAllDamagisQuery = `select id, total_amount, creator, created_at, note from ${MYSQL_DB}.damage where deleted_at is null`;
 
   const [damageRowDatas] = (await pool.query(
     getAllDamagisQuery
@@ -179,7 +179,7 @@ export function calculateTemporaryTotalQuantity(damageItems: TemporaryDamageDeta
 }
 
 export async function getDamageById(damageId: string) {
-  const getDamageQuery = `select id, total_amount, creator, created_at, note, from ${MYSQL_DB}.damage where id=? and deleted_at is null`;
+  const getDamageQuery = `select id, total_amount, creator, created_at, note from ${MYSQL_DB}.damage where id=? and deleted_at is null`;
   const [damageRowDatas] = (await pool.query(getDamageQuery, [
     damageId,
   ])) as RowDataPacket[][];

@@ -7,7 +7,7 @@ import { convertUnderscorePropertiesToCamelCase } from "../utils/dataMapping.js"
 const MYSQL_DB = process.env.MYSQL_DB || "watch_db";
 dotenv.config();
 export async function getAllDamages() {
-    let getAllDamagisQuery = `select id, total_amount, creator, create_at, note from ${MYSQL_DB}.damage where deleted_at is null`;
+    let getAllDamagisQuery = `select id, total_amount, creator, created_at, note from ${MYSQL_DB}.damage where deleted_at is null`;
     const [damageRowDatas] = (await pool.query(getAllDamagisQuery));
     return damageRowDatas.map(convertUnderscorePropertiesToCamelCase);
 }
@@ -98,7 +98,7 @@ export function calculateTemporaryTotalQuantity(damageItems) {
     return totalAmount;
 }
 export async function getDamageById(damageId) {
-    const getDamageQuery = `select id, total_amount, creator, created_at, note, from ${MYSQL_DB}.damage where id=? and deleted_at is null`;
+    const getDamageQuery = `select id, total_amount, creator, created_at, note from ${MYSQL_DB}.damage where id=? and deleted_at is null`;
     const [damageRowDatas] = (await pool.query(getDamageQuery, [
         damageId,
     ]));
