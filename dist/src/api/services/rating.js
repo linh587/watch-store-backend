@@ -9,7 +9,7 @@ const RATING_STATUS = {
 };
 export const SORT_TYPES = ["newest", "oldest"];
 export async function getAllRatings(options, filters) {
-    let getAllRatingsQuery = "select product_id, user_account_id, star, content, status, created_at, updated_at, user_account.name as user_name, user_account.avatar as user_avatar from rating inner join user_account on rating.user_account_id = user_account.id";
+    let getAllRatingsQuery = "select product_id, user_account_id, star, content, status, created_at, updated_at, user_account.name as user_name from rating inner join user_account on rating.user_account_id = user_account.id";
     if (filters) {
         const filterSql = createFilterSql(filters);
         if (filterSql) {
@@ -28,7 +28,7 @@ export async function getAllRatings(options, filters) {
     return ratingRowDatas.map(convertUnderscorePropertiesToCamelCase);
 }
 export async function getRatings(productId, options, filters) {
-    let getRatingsQuery = "select product_id, user_account_id, star, content, status, created_at, updated_at, user_account.name as user_name, user_account.avatar as user_avatar from rating inner join user_account on rating.user_account_id = user_account.id where product_id=? and status is null";
+    let getRatingsQuery = "select product_id, user_account_id, star, content, status, created_at, updated_at, user_account.name as user_name from rating inner join user_account on rating.user_account_id = user_account.id where product_id=? and status is null";
     if (filters) {
         const filterSql = createFilterSql(filters);
         if (filterSql) {
@@ -49,7 +49,7 @@ export async function getRatings(productId, options, filters) {
     return ratingRowDatas.map(convertUnderscorePropertiesToCamelCase);
 }
 export async function getOwnRating(userAccountId, productId) {
-    const getOwnRatingQuery = "select product_id, user_account_id, star, content, status, created_at, updated_at, user_account.name as user_name, user_account.avatar as user_avatar from rating inner join user_account on rating.user_account_id = user_account.id where product_id=? and user_account_id=? and status is null";
+    const getOwnRatingQuery = "select product_id, user_account_id, star, content, status, created_at, updated_at, user_account.name as user_name as user_avatar from rating inner join user_account on rating.user_account_id = user_account.id where product_id=? and user_account_id=? and status is null";
     const [ratingRowDatas] = (await pool.query(getOwnRatingQuery, [
         productId,
         userAccountId,

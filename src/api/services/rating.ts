@@ -50,7 +50,7 @@ export async function getAllRatings(
   filters: RatingFilters
 ) {
   let getAllRatingsQuery =
-    "select product_id, user_account_id, star, content, status, created_at, updated_at, user_account.name as user_name, user_account.avatar as user_avatar from rating inner join user_account on rating.user_account_id = user_account.id";
+    "select product_id, user_account_id, star, content, status, created_at, updated_at, user_account.name as user_name from rating inner join user_account on rating.user_account_id = user_account.id";
 
   if (filters) {
     const filterSql = createFilterSql(filters);
@@ -81,7 +81,7 @@ export async function getRatings(
   filters?: RatingFilters
 ) {
   let getRatingsQuery =
-    "select product_id, user_account_id, star, content, status, created_at, updated_at, user_account.name as user_name, user_account.avatar as user_avatar from rating inner join user_account on rating.user_account_id = user_account.id where product_id=? and status is null";
+    "select product_id, user_account_id, star, content, status, created_at, updated_at, user_account.name as user_name from rating inner join user_account on rating.user_account_id = user_account.id where product_id=? and status is null";
 
   if (filters) {
     const filterSql = createFilterSql(filters);
@@ -107,7 +107,7 @@ export async function getRatings(
 
 export async function getOwnRating(userAccountId: string, productId: string) {
   const getOwnRatingQuery =
-    "select product_id, user_account_id, star, content, status, created_at, updated_at, user_account.name as user_name, user_account.avatar as user_avatar from rating inner join user_account on rating.user_account_id = user_account.id where product_id=? and user_account_id=? and status is null";
+    "select product_id, user_account_id, star, content, status, created_at, updated_at, user_account.name as user_name as user_avatar from rating inner join user_account on rating.user_account_id = user_account.id where product_id=? and user_account_id=? and status is null";
   const [ratingRowDatas] = (await pool.query(getOwnRatingQuery, [
     productId,
     userAccountId,
