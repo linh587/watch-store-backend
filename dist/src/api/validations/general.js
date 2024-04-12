@@ -1,4 +1,4 @@
-import Joi from 'joi';
+import Joi from "joi";
 export const KB = 1024;
 export const MB = 1024 * KB;
 export const MIN_IMAGE_SIZE = 20 * KB;
@@ -23,11 +23,11 @@ export const temporaryOrderDetailSchema = Joi.object({
 }).unknown();
 export const TemporaryOrderSchema = Joi.object({
     branchId: Joi.string().required(),
-    details: Joi.array().items(temporaryOrderDetailSchema).min(1).required()
+    details: Joi.array().items(temporaryOrderDetailSchema).min(1).required(),
 }).unknown();
 export const imageFileSchema = Joi.object({
     mimetype: Joi.string().required().pattern(IMAGE_MIMETYPE_REGEX),
-    size: Joi.number().min(MIN_IMAGE_SIZE).max(MAX_IMAGE_SIZE).required()
+    size: Joi.number().min(MIN_IMAGE_SIZE).max(MAX_IMAGE_SIZE).required(),
 }).unknown();
 export const coordinateChema = Joi.object({
     longitude: Joi.string().regex(COORDINATE_REGEX).required(),
@@ -36,18 +36,18 @@ export const coordinateChema = Joi.object({
 export const informationToCreateOrderSchema = Joi.object({
     customerName: vietnameseSchema.required(),
     phone: phoneSchema.required(),
-    email: Joi.string().email().allow(''),
+    email: Joi.string().email().allow(""),
     branchId: Joi.string().required(),
-    couponCode: Joi.string(),
+    couponCode: Joi.string().allow("").allow(null),
     receivedType: Joi.string(),
     receivedAddress: Joi.string().required(),
-    details: Joi.array().items(temporaryOrderDetailSchema).min(1).required()
+    details: Joi.array().items(temporaryOrderDetailSchema).min(1).required(),
 }).unknown();
 export const createOrderSchema = Joi.object({
     order: informationToCreateOrderSchema.required(),
-    receivedAddressCoordinate: coordinateChema.required()
+    receivedAddressCoordinate: coordinateChema.required(),
 }).unknown();
 export const updatePasswordSchema = Joi.object({
     oldPassword: passwordSchema.required(),
-    newPassword: passwordSchema.required().not(Joi.ref('oldPassword'))
+    newPassword: passwordSchema.required().not(Joi.ref("oldPassword")),
 }).unknown();
