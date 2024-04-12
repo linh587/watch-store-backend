@@ -23,42 +23,42 @@ export const timeSchema = Joi.string().regex(TIME_REGEX);
 export const productStatusSchema = Joi.string().regex(PRODUCT_STATUS_REGEX);
 
 export const temporaryOrderDetailSchema = Joi.object({
-  productPriceId: Joi.string().required(),
-  quality: Joi.number().integer().positive().required(),
+    productPriceId: Joi.string().required(),
+    quality: Joi.number().integer().positive().required(),
 }).unknown();
 
 export const TemporaryOrderSchema = Joi.object({
-  branchId: Joi.string().required(),
-  details: Joi.array().items(temporaryOrderDetailSchema).min(1).required(),
+    branchId: Joi.string().required(),
+    details: Joi.array().items(temporaryOrderDetailSchema).min(1).required()
 }).unknown();
 
 export const imageFileSchema = Joi.object({
-  mimetype: Joi.string().required().pattern(IMAGE_MIMETYPE_REGEX),
-  size: Joi.number().min(MIN_IMAGE_SIZE).max(MAX_IMAGE_SIZE).required(),
+    mimetype: Joi.string().required().pattern(IMAGE_MIMETYPE_REGEX),
+    size: Joi.number().min(MIN_IMAGE_SIZE).max(MAX_IMAGE_SIZE).required()
 }).unknown();
 
 export const coordinateChema = Joi.object({
-  longitude: Joi.string().regex(COORDINATE_REGEX).required(),
-  latitude: Joi.string().regex(COORDINATE_REGEX).required(),
+    longitude: Joi.string().regex(COORDINATE_REGEX).required(),
+    latitude: Joi.string().regex(COORDINATE_REGEX).required(),
 }).unknown();
 
 export const informationToCreateOrderSchema = Joi.object({
-  customerName: vietnameseSchema.required(),
-  phone: phoneSchema.required(),
-  email: Joi.string().email().allow(""),
-  branchId: Joi.string().required(),
-  couponCode: Joi.string().allow("").allow(null),
-  receivedType: Joi.string(),
-  receivedAddress: Joi.string().required(),
-  details: Joi.array().items(temporaryOrderDetailSchema).min(1).required(),
+    customerName: vietnameseSchema.required(),
+    phone: phoneSchema.required(),
+    email: Joi.string().email().allow(""),
+    branchId: Joi.string().required(),
+    couponCode: Joi.string().allow("").allow(null),
+    receivedType: Joi.string(),
+    receivedAddress: Joi.string().required(),
+    details: Joi.array().items(temporaryOrderDetailSchema).min(1).required(),
 }).unknown();
 
 export const createOrderSchema = Joi.object({
-  order: informationToCreateOrderSchema.required(),
-  receivedAddressCoordinate: coordinateChema.required(),
+    order: informationToCreateOrderSchema.required(),
+    receivedAddressCoordinate: coordinateChema.required(),
 }).unknown();
 
 export const updatePasswordSchema = Joi.object({
-  oldPassword: passwordSchema.required(),
-  newPassword: passwordSchema.required().not(Joi.ref("oldPassword")),
+    oldPassword: passwordSchema.required(),
+    newPassword: passwordSchema.required().not(Joi.ref('oldPassword')),
 }).unknown();

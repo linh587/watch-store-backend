@@ -23,11 +23,11 @@ export const temporaryOrderDetailSchema = Joi.object({
 }).unknown();
 export const TemporaryOrderSchema = Joi.object({
     branchId: Joi.string().required(),
-    details: Joi.array().items(temporaryOrderDetailSchema).min(1).required(),
+    details: Joi.array().items(temporaryOrderDetailSchema).min(1).required()
 }).unknown();
 export const imageFileSchema = Joi.object({
     mimetype: Joi.string().required().pattern(IMAGE_MIMETYPE_REGEX),
-    size: Joi.number().min(MIN_IMAGE_SIZE).max(MAX_IMAGE_SIZE).required(),
+    size: Joi.number().min(MIN_IMAGE_SIZE).max(MAX_IMAGE_SIZE).required()
 }).unknown();
 export const coordinateChema = Joi.object({
     longitude: Joi.string().regex(COORDINATE_REGEX).required(),
@@ -49,5 +49,5 @@ export const createOrderSchema = Joi.object({
 }).unknown();
 export const updatePasswordSchema = Joi.object({
     oldPassword: passwordSchema.required(),
-    newPassword: passwordSchema.required().not(Joi.ref("oldPassword")),
+    newPassword: passwordSchema.required().not(Joi.ref('oldPassword')),
 }).unknown();
