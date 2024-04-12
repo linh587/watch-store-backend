@@ -11,17 +11,28 @@ export async function getOrderDetails(orderId, continueWithConnection) {
     return orderDetailRowDatas.map(convertUnderscorePropertiesToCamelCase);
 }
 export async function addOrderDetails(orderId, details, connection) {
-    const addOrderDetailsQuery = "insert into order_detail(`order_id`, `product_price_id`, `quality`, `price_at_purchase`) values ?";
+    const addOrderDetailsQuery = "insert into order_detail(`order_id`, `product_price_id`, `quality`, `price_at_purchase`) values (?)";
+    const updateQuantityQuery = "update product_price\
+  set quantity = product_price.quantity - ?\
+  where product_price.id=?";
     const orderDetailRowDatas = details.map((detail) => [
         orderId,
         detail.productPriceId,
         detail.quality,
         detail.price,
     ]);
-    const [result] = (await connection.query(addOrderDetailsQuery, [
-        orderDetailRowDatas,
-    ]));
-    return result.affectedRows > 0;
+    for (const detail of orderDetailRowDatas) {
+        await connection.query(addOrderDetailsQuery, [detail]);
+        await connection.query(updateQuantityQuery, [
+            detail[2],
+            detail[1],
+        ]);
+    }
+    return true;
+    // const [result] = (await connection.query(addOrderDetailsQuery, [
+    //   orderDetailRowDatas,
+    // ])) as OkPacket[];
+    // return result.affectedRows > 0;
 }
 export async function boughtProduct(userAccountId, productId) {
     const productPricesOfProduct = await ProductPriceService.getProductPricesByProductId(productId);

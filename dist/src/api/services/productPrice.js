@@ -25,18 +25,22 @@ export async function getProductPricesByProductId(productId, continueWithConnect
 export async function addProductPrices(productId, informations, connection) {
     const productPriceRowDatas = informations.map((information) => {
         const productPriceId = createUid(20);
-        const { productSizeId, price } = information;
+        if (information.quantity == null) {
+            information.quantity = 0;
+        }
+        const { productSizeId, price, quantity } = information;
         const createdAt = new Date();
         const priceRowData = [
             productPriceId,
             productId,
             productSizeId,
             price,
+            quantity,
             createdAt,
         ];
         return priceRowData;
     });
-    const addProductPricesQuery = "insert into product_price(`id`, `product_id`, `product_size_id`, `price`, `created_at`) values ?";
+    const addProductPricesQuery = "insert into product_price(`id`, `product_id`, `product_size_id`, `price`, `quantity`, `created_at`) values ?";
     const [result] = (await connection.query(addProductPricesQuery, [
         productPriceRowDatas,
     ]));
