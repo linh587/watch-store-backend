@@ -18,6 +18,7 @@ export interface Product {
   categoryId: string;
   categoryName: string;
   coverImage: string;
+  avgStar: number;
   images?: string[];
   priceSizeCombines?: PriceSizeCombine[];
 }
@@ -31,12 +32,22 @@ export interface PriceSizeCombine {
 
 export type InformationToCreateProduct = Omit<
   Product,
-  "id" | "categoryName" | "priceSizeCombines" | "images" | "createdAt"
+  | "id"
+  | "categoryName"
+  | "priceSizeCombines"
+  | "images"
+  | "createdAt"
+  | "avgStar"
 >;
 
 export type InformationToUpdateProduct = Omit<
   Product,
-  "id" | "categoryName" | "priceSizeCombines" | "images" | "createdAt"
+  | "id"
+  | "categoryName"
+  | "priceSizeCombines"
+  | "images"
+  | "createdAt"
+  | "avgStar"
 >;
 
 export interface GetProductFilters {
@@ -127,8 +138,8 @@ export async function getProducts(
 }
 
 export async function getProduct(id: string, include?: IncludeOptions) {
-  const getProductsQuery = `select product.id as id, product.name as name, description, status, created_at, category_id, category.name as category_name, cover_image \
-        from product inner join category on product.category_id = category.id where product.id=? and product.deleted_at is null`;
+  const getProductsQuery = `select product.id as id, product.name as name, description, product.status, product.created_at, category_id, category.name as category_name, cover_image, avg(rating.star) as avg_star \
+        from product inner join category on product.category_id = category.id left join rating on product.id = rating.product_id where product.id=? and product.deleted_at is null`;
 
   const [productRowDatas] = (await pool.query(getProductsQuery, [
     id,
