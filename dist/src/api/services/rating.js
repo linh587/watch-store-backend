@@ -56,14 +56,6 @@ export async function getOwnRating(userAccountId, productId) {
     ]));
     return convertUnderscorePropertiesToCamelCase(ratingRowDatas[0] || null);
 }
-export async function getAverageStar(productId) {
-    const getAverageStarQuery = "select avg(star) as average_star from rating where product_id=? and status is null";
-    const [rowDatas] = (await pool.query(getAverageStarQuery, [
-        productId,
-    ]));
-    const averageStar = Number(rowDatas?.[0]?.["average_star"]) || null;
-    return averageStar;
-}
 export async function addRating(userAccountId, information) {
     const { productId, star, content } = information;
     const addRatingQuery = "insert into rating(`product_id`, `user_account_id`, `star`, `content`, `created_at`) values (?)";

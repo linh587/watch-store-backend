@@ -34,8 +34,3 @@ export async function getRatings(req, res) {
         data: ratings,
     });
 }
-export async function getAverageStar(req, res) {
-    const productId = req.params["productId"];
-    const averageStar = await RatingService.getAverageStar(productId);
-    res.json(averageStar);
-}

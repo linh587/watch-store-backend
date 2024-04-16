@@ -117,16 +117,6 @@ export async function getOwnRating(userAccountId: string, productId: string) {
   ) as Rating | null;
 }
 
-export async function getAverageStar(productId: string) {
-  const getAverageStarQuery =
-    "select avg(star) as average_star from rating where product_id=? and status is null";
-  const [rowDatas] = (await pool.query(getAverageStarQuery, [
-    productId,
-  ])) as RowDataPacket[][];
-  const averageStar = Number(rowDatas?.[0]?.["average_star"]) || null;
-  return averageStar;
-}
-
 export async function addRating(
   userAccountId: string,
   information: InformationToCreateRating
