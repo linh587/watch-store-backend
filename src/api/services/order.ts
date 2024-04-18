@@ -129,7 +129,7 @@ export async function getAllOrders(
   options?: GetOrderOptions,
   filters?: OrderFilters
 ) {
-  let getAllOrdersQuery = `select id, customer_name, phone, email, user_account_id, branch_id, coupon_code, received_type, received_address, received_at, delivery_charge, subtotal_price, total_price, status, note, created_at from ${MYSQL_DB}.order`;
+  let getAllOrdersQuery = `select id, customer_name, phone, email, user_account_id, branch_id, coupon_code, payment_status, received_type, received_address, received_at, delivery_charge, subtotal_price, total_price, status, note, created_at from ${MYSQL_DB}.order`;
 
   if (filters) {
     const filterSql = createFilterSql(filters);
@@ -586,7 +586,6 @@ export function calculateTemporaryTotalPrice(
 }
 
 export async function statisOrdersByBranch(
-  branchId: string,
   fromDate: Date,
   toDate: Date,
   timeType: TimeType = "day",
@@ -601,7 +600,7 @@ export async function statisOrdersByBranch(
     sum(if(status='cancelled', total_price, 0)) as cancelled_total_price,\
     date_format(created_at, ?) as date\
     from ${MYSQL_DB}.order \
-    where branch_id=? and date(created_at) >= date(?) and date(created_at) <= date(?)\
+    where date(created_at) >= date(?) and date(created_at) <= date(?)\
     group by date order by created_at`;
   const DAY_SPECIFIER = "%d";
   const MONTH_SPECIFIER = "%m";
@@ -614,7 +613,6 @@ export async function statisOrdersByBranch(
 
   const [statisOrdersRowDatas] = (await pool.query(statisOrdersQuery, [
     STATIS_DATE_FORMATE[timeType],
-    branchId,
     fromDate,
     toDate,
   ])) as RowDataPacket[][];

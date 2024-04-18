@@ -183,6 +183,10 @@ function createFilterSql(filter) {
     if (filter.toDate) {
         filterStatements.push(`product.created_at <= ${escape(filter.toDate)}`);
     }
+    if (filter.fromPrice && filter.toPrice) {
+        filterStatements.push(`product.id = product_price.product_id`);
+        filterStatements.push(`product_price.price between ${escape(filter.fromPrice)} and ${escape(filter.toPrice)}`);
+    }
     if (filter.searchString) {
         const subFilterStatements = [];
         subFilterStatements.push(`product.name like ${escape(`%${filter.searchString}%`)}`);

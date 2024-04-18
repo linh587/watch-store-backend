@@ -56,6 +56,8 @@ export interface GetProductFilters {
   fromDate?: Date;
   toDate?: Date;
   categoryId?: string;
+  fromPrice?: string;
+  toPrice?: string;
 }
 
 export interface GetProductOptions {
@@ -306,6 +308,15 @@ function createFilterSql(filter: GetProductFilters) {
 
   if (filter.toDate) {
     filterStatements.push(`product.created_at <= ${escape(filter.toDate)}`);
+  }
+
+  if (filter.fromPrice && filter.toPrice) {
+    filterStatements.push(`product.id = product_price.product_id`);
+    filterStatements.push(
+      `product_price.price between ${escape(filter.fromPrice)} and ${escape(
+        filter.toPrice
+      )}`
+    );
   }
 
   if (filter.searchString) {

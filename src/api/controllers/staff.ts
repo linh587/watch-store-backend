@@ -363,24 +363,11 @@ export async function canCancelOrder(req: StaffRequest, res: Response) {
 }
 
 export async function statisOrders(req: StaffRequest, res: Response) {
-  const { staffAccountId } = req;
   const timeType = req.query["timeType"] as OrderService.TimeType;
   const fromDate = new Date(String(req.query["fromDate"]));
   const toDate = new Date(String(req.query["toDate"]));
 
-  if (!staffAccountId) {
-    res.status(400).json("Unknown error");
-    return;
-  }
-
-  const staffAccount = await StaffAccountService.getInformation(staffAccountId);
-  if (!staffAccount) {
-    res.status(400).json("Unknown error");
-    return;
-  }
-
   const result = await OrderService.statisOrdersByBranch(
-    staffAccount.branchId,
     fromDate,
     toDate,
     timeType

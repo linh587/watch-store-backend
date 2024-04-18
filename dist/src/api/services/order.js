@@ -43,7 +43,7 @@ export const TIME_TYPES = ["day", "month", "year"];
 export const SORT_TYPES = ["newest", "oldest"];
 const MYSQL_DB = process.env.MYSQL_DB || "watch_db";
 export async function getAllOrders(options, filters) {
-    let getAllOrdersQuery = `select id, customer_name, phone, email, user_account_id, branch_id, coupon_code, received_type, received_address, received_at, delivery_charge, subtotal_price, total_price, status, note, created_at from ${MYSQL_DB}.order`;
+    let getAllOrdersQuery = `select id, customer_name, phone, email, user_account_id, branch_id, coupon_code, payment_status, received_type, received_address, received_at, delivery_charge, subtotal_price, total_price, status, note, created_at from ${MYSQL_DB}.order`;
     if (filters) {
         const filterSql = createFilterSql(filters);
         if (filterSql) {
@@ -379,7 +379,7 @@ export function calculateTemporaryTotalPrice(orderItems) {
         .reduce((totalPrice, price) => totalPrice + price, 0);
     return totalPrice;
 }
-export async function statisOrdersByBranch(branchId, fromDate, toDate, timeType = "day", separated = "-") {
+export async function statisOrdersByBranch(fromDate, toDate, timeType = "day", separated = "-") {
     const statisOrdersQuery = `select\ 
     sum(if(status = 'received', 1, 0 )) as received_count,\
     sum(if (status='received' or status='cancelled',  1, 0)) as total_count,\
@@ -389,7 +389,7 @@ export async function statisOrdersByBranch(branchId, fromDate, toDate, timeType 
     sum(if(status='cancelled', total_price, 0)) as cancelled_total_price,\
     date_format(created_at, ?) as date\
     from ${MYSQL_DB}.order \
-    where branch_id=? and date(created_at) >= date(?) and date(created_at) <= date(?)\
+    where date(created_at) >= date(?) and date(created_at) <= date(?)\
     group by date order by created_at`;
     const DAY_SPECIFIER = "%d";
     const MONTH_SPECIFIER = "%m";
@@ -401,7 +401,6 @@ export async function statisOrdersByBranch(branchId, fromDate, toDate, timeType 
     };
     const [statisOrdersRowDatas] = (await pool.query(statisOrdersQuery, [
         STATIS_DATE_FORMATE[timeType],
-        branchId,
         fromDate,
         toDate,
     ]));
