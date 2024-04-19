@@ -327,7 +327,7 @@ export async function cancelOrderByUser(
     ORDER_STATUS.cancelled,
     userAccountId,
     orderId,
-    [[ORDER_STATUS.waitVerify]],
+    [[ORDER_STATUS.waitVerify, ORDER_STATUS.verified]],
   ])) as OkPacket[];
   return result.affectedRows > 0;
 }
@@ -337,7 +337,7 @@ export async function cancelOrderById(orderId: string) {
   const [result] = (await pool.query(cancelOrderQuery, [
     ORDER_STATUS.cancelled,
     orderId,
-    [[ORDER_STATUS.waitVerify]],
+    [[ORDER_STATUS.waitVerify, ORDER_STATUS.verified]],
   ])) as OkPacket[];
   return result.affectedRows > 0;
 }
@@ -375,9 +375,6 @@ export async function verifyOrderByStaff(
   if (!staffAccount) {
     return false;
   }
-  // if (!(await canVerifyOrder(staffAccountId))) {
-  //   return false;
-  // }
 
   const verifyOrderQuery = `update ${MYSQL_DB}.order set status=? where branch_id=? and id=? and status in ?`;
   const poolConnection = await pool.getConnection();
@@ -416,9 +413,6 @@ export async function deliveryOrderByStaff(
   if (!staffAccount) {
     return false;
   }
-  // if (!(await canDeliveryOrder(staffAccountId))) {
-  //   return false;
-  // }
 
   const deliveryOrderQuery = `update ${MYSQL_DB}.order set status=? where branch_id=? and id=? and status in ?`;
   const poolConnection = await pool.getConnection();
@@ -461,9 +455,6 @@ export async function verifyReceivedOrderByStaff(
   if (!staffAccount) {
     return false;
   }
-  // if (!(await canVerifyReceivedOrder(staffAccountId, orderId))) {
-  //   return false;
-  // }
 
   const verifyReceivedOrderQuery = `update ${MYSQL_DB}.order set status=?, payment_status=?, received_at=? where branch_id=? and id=? and status in ?`;
   const poolConnection = await pool.getConnection();
