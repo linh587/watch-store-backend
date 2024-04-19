@@ -60,7 +60,7 @@ export async function getProducts(options, filters) {
     return productsWithOptions.flatMap((product) => (product ? [product] : []));
 }
 export async function getProduct(id, include) {
-    const getProductsQuery = `select product.id as id, product.name as name, description, product.status, product.created_at, category_id, category.name as category_name, cover_image, avg(rating.star) as avg_star \
+    const getProductsQuery = `select product.id as id, product.name as name, description, product.status, product.created_at, category_id, category.name as category_name, cover_image, avg(rating.star) as avg_star, face_shape, glass_surface_material, water_resistance \
         from product inner join category on product.category_id = category.id left join rating on product.id = rating.product_id where product.id=? and product.deleted_at is null`;
     const [productRowDatas] = (await pool.query(getProductsQuery, [
         id,
@@ -91,8 +91,8 @@ export async function getProduct(id, include) {
 }
 export async function addProduct(information, priceInformations, images) {
     const productId = createUid(20);
-    const { name, description, categoryId, coverImage, status } = information;
-    const addProductQuery = "insert into product(`id`, `name`, `description`, `status`, `created_at`, `category_id`, `cover_image`) values (?)";
+    const { name, description, categoryId, coverImage, status, faceShape, glassSurfaceMaterial, waterResistance, } = information;
+    const addProductQuery = "insert into product(`id`, `name`, `description`, `status`, `created_at`, `category_id`, `cover_image`, `face_shape`, `glass_surface_material`, `water_resistance`) values (?)";
     const poolConnection = await pool.getConnection();
     try {
         await poolConnection.query(addProductQuery, [
@@ -104,6 +104,9 @@ export async function addProduct(information, priceInformations, images) {
                 new Date(),
                 categoryId,
                 coverImage,
+                faceShape,
+                glassSurfaceMaterial,
+                waterResistance,
             ],
         ]);
         await ProductPriceService.addProductPrices(productId, priceInformations, poolConnection);
@@ -123,8 +126,8 @@ export async function addProduct(information, priceInformations, images) {
     }
 }
 export async function updateProduct(id, productInformation, priceInformations, images) {
-    const { name, description, categoryId, status, coverImage } = productInformation;
-    const updateProductQuery = "update product set name=?, description=?, category_id=?, cover_image=?, status=? where id=? and deleted_at is null";
+    const { name, description, categoryId, status, coverImage, faceShape, glassSurfaceMaterial, waterResistance, } = productInformation;
+    const updateProductQuery = "update product set name=?, description=?, category_id=?, cover_image=?, status=?, face_shape=?, glass_surface_material=?, water_resistance=? where id=? and deleted_at is null";
     const poolConnection = await pool.getConnection();
     try {
         (await poolConnection.query(updateProductQuery, [
@@ -133,6 +136,9 @@ export async function updateProduct(id, productInformation, priceInformations, i
             categoryId,
             coverImage,
             status,
+            faceShape,
+            glassSurfaceMaterial,
+            waterResistance,
             id,
         ]));
         await ProductPriceService.updateProductPrices(id, priceInformations, poolConnection);
@@ -186,6 +192,15 @@ function createFilterSql(filter) {
     if (filter.fromPrice && filter.toPrice) {
         filterStatements.push(`product.id = product_price.product_id`);
         filterStatements.push(`product_price.price between ${escape(filter.fromPrice)} and ${escape(filter.toPrice)}`);
+    }
+    if (filter.faceShape) {
+        filterStatements.push(`product.face_shape=${escape(filter.faceShape)}`);
+    }
+    if (filter.glassSurface) {
+        filterStatements.push(`product.glass_surface_material=${escape(filter.glassSurface)}`);
+    }
+    if (filter.waterResistance) {
+        filterStatements.push(`product.water_resistance=${escape(filter.waterResistance)}`);
     }
     if (filter.searchString) {
         const subFilterStatements = [];

@@ -19,6 +19,9 @@ export interface Product {
   categoryName: string;
   coverImage: string;
   avgStar: number;
+  faceShape: string;
+  glassSurfaceMaterial: string;
+  waterResistance: string;
   images?: string[];
   priceSizeCombines?: PriceSizeCombine[];
 }
@@ -58,6 +61,9 @@ export interface GetProductFilters {
   categoryId?: string;
   fromPrice?: string;
   toPrice?: string;
+  faceShape?: string;
+  glassSurface?: string;
+  waterResistance?: string;
 }
 
 export interface GetProductOptions {
@@ -140,7 +146,7 @@ export async function getProducts(
 }
 
 export async function getProduct(id: string, include?: IncludeOptions) {
-  const getProductsQuery = `select product.id as id, product.name as name, description, product.status, product.created_at, category_id, category.name as category_name, cover_image, avg(rating.star) as avg_star \
+  const getProductsQuery = `select product.id as id, product.name as name, description, product.status, product.created_at, category_id, category.name as category_name, cover_image, avg(rating.star) as avg_star, face_shape, glass_surface_material, water_resistance \
         from product inner join category on product.category_id = category.id left join rating on product.id = rating.product_id where product.id=? and product.deleted_at is null`;
 
   const [productRowDatas] = (await pool.query(getProductsQuery, [
@@ -191,9 +197,18 @@ export async function addProduct(
   images: string[]
 ) {
   const productId = createUid(20);
-  const { name, description, categoryId, coverImage, status } = information;
+  const {
+    name,
+    description,
+    categoryId,
+    coverImage,
+    status,
+    faceShape,
+    glassSurfaceMaterial,
+    waterResistance,
+  } = information;
   const addProductQuery =
-    "insert into product(`id`, `name`, `description`, `status`, `created_at`, `category_id`, `cover_image`) values (?)";
+    "insert into product(`id`, `name`, `description`, `status`, `created_at`, `category_id`, `cover_image`, `face_shape`, `glass_surface_material`, `water_resistance`) values (?)";
   const poolConnection = await pool.getConnection();
 
   try {
@@ -206,6 +221,9 @@ export async function addProduct(
         new Date(),
         categoryId,
         coverImage,
+        faceShape,
+        glassSurfaceMaterial,
+        waterResistance,
       ],
     ]);
     await ProductPriceService.addProductPrices(
@@ -238,10 +256,18 @@ export async function updateProduct(
   priceInformations: ProductPriceService.InformationToUpdateProductPrice[],
   images: string[]
 ) {
-  const { name, description, categoryId, status, coverImage } =
-    productInformation;
+  const {
+    name,
+    description,
+    categoryId,
+    status,
+    coverImage,
+    faceShape,
+    glassSurfaceMaterial,
+    waterResistance,
+  } = productInformation;
   const updateProductQuery =
-    "update product set name=?, description=?, category_id=?, cover_image=?, status=? where id=? and deleted_at is null";
+    "update product set name=?, description=?, category_id=?, cover_image=?, status=?, face_shape=?, glass_surface_material=?, water_resistance=? where id=? and deleted_at is null";
   const poolConnection = await pool.getConnection();
 
   try {
@@ -251,6 +277,9 @@ export async function updateProduct(
       categoryId,
       coverImage,
       status,
+      faceShape,
+      glassSurfaceMaterial,
+      waterResistance,
       id,
     ])) as OkPacket[];
     await ProductPriceService.updateProductPrices(
@@ -316,6 +345,22 @@ function createFilterSql(filter: GetProductFilters) {
       `product_price.price between ${escape(filter.fromPrice)} and ${escape(
         filter.toPrice
       )}`
+    );
+  }
+
+  if (filter.faceShape) {
+    filterStatements.push(`product.face_shape=${escape(filter.faceShape)}`);
+  }
+
+  if (filter.glassSurface) {
+    filterStatements.push(
+      `product.glass_surface_material=${escape(filter.glassSurface)}`
+    );
+  }
+
+  if (filter.waterResistance) {
+    filterStatements.push(
+      `product.water_resistance=${escape(filter.waterResistance)}`
     );
   }
 

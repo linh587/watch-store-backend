@@ -26,6 +26,12 @@ export async function getProducts(req, res) {
     req.query["fromPrice"] &&
         (filter.fromPrice = req.query["fromPrice"]);
     req.query["toPrice"] && (filter.toPrice = req.query["toPrice"]);
+    req.query["faceShape"] &&
+        (filter.faceShape = req.query["faceShape"]);
+    req.query["waterResistance"] &&
+        (filter.waterResistance = req.query["waterResistance"]);
+    req.query["glassSurface"] &&
+        (filter.glassSurface = req.query["glassSurface"]);
     const page = req.query["page"];
     const pageNumber = Number(page);
     if (page && Number.isSafeInteger(pageNumber) && pageNumber > 0) {
