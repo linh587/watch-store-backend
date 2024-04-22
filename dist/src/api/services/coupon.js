@@ -73,9 +73,6 @@ export async function addCoupon(information) {
         if (appliedScopes.includes("order")) {
             const totalPriceFrom = Number(information?.totalPriceFrom);
             const totalPriceTo = Number(information?.totalPriceTo);
-            if (typeof totalPriceFrom !== "number" || isNaN(totalPriceFrom)) {
-                throw new Error("Require branch ids for coupon on branch");
-            }
             await CouponOnOrderService.addOrderCondition(couponCode, { totalPriceFrom, totalPriceTo }, poolConnection);
         }
         if (appliedScopes.includes("product")) {
@@ -123,9 +120,6 @@ export async function updateCoupon(couponCode, information) {
         if (appliedScopes.includes("order")) {
             const totalPriceFrom = Number(information.totalPriceFrom);
             const totalPriceTo = Number(information.totalPriceTo);
-            if (typeof totalPriceFrom !== "number" || isNaN(totalPriceFrom)) {
-                throw new Error("Require branch ids for coupon on branch");
-            }
             await CouponOnOrderService.updateOrderCondition(couponCode, { totalPriceFrom, totalPriceTo }, poolConnection);
         }
         else {

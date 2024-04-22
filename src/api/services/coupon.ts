@@ -136,10 +136,6 @@ export async function addCoupon(information: InformationToCreateCoupon) {
       const totalPriceFrom = Number(information?.totalPriceFrom);
       const totalPriceTo = Number(information?.totalPriceTo);
 
-      if (typeof totalPriceFrom !== "number" || isNaN(totalPriceFrom)) {
-        throw new Error("Require branch ids for coupon on branch");
-      }
-
       await CouponOnOrderService.addOrderCondition(
         couponCode,
         { totalPriceFrom, totalPriceTo },
@@ -204,10 +200,6 @@ export async function updateCoupon(
     if (appliedScopes.includes("order")) {
       const totalPriceFrom = Number(information.totalPriceFrom);
       const totalPriceTo = Number(information.totalPriceTo);
-
-      if (typeof totalPriceFrom !== "number" || isNaN(totalPriceFrom)) {
-        throw new Error("Require branch ids for coupon on branch");
-      }
 
       await CouponOnOrderService.updateOrderCondition(
         couponCode,
