@@ -7,7 +7,6 @@ import { createUid } from "../utils/uid.js";
 import * as OrderConfirmService from "./orderConfirm.js";
 import * as OrderDetailService from "./orderDetail.js";
 import * as ProductPriceService from "./productPrice.js";
-import * as StaffAccountService from "./staffAccount.js";
 dotenv.config();
 export const ORDER_STATUS = {
     waitVerify: "waitVerify",
@@ -43,7 +42,7 @@ export const TIME_TYPES = ["day", "month", "year"];
 export const SORT_TYPES = ["newest", "oldest"];
 const MYSQL_DB = process.env.MYSQL_DB || "watch_db";
 export async function getAllOrders(options, filters) {
-    let getAllOrdersQuery = `select id, customer_name, phone, email, user_account_id, branch_id, coupon_code, payment_status, received_type, received_address, received_at, delivery_charge, subtotal_price, total_price, status, note, created_at from ${MYSQL_DB}.order`;
+    let getAllOrdersQuery = `select id, customer_name, phone, email, user_account_id, coupon_code, payment_status, received_type, received_address, received_at, delivery_charge, subtotal_price, total_price, status, note, created_at from ${MYSQL_DB}.order`;
     if (filters) {
         const filterSql = createFilterSql(filters);
         if (filterSql) {
@@ -62,7 +61,7 @@ export async function getAllOrders(options, filters) {
     return orderRowDatas.map(convertUnderscorePropertiesToCamelCase);
 }
 export async function getOrdersByUserAccount(userAccountId, options, filters) {
-    let getOrdersByUserAccountQuery = `select id, customer_name, phone, email, user_account_id, branch_id, coupon_code, received_type, received_address, received_at, delivery_charge, subtotal_price, total_price, status, note, payment_status, payment_type, created_at from ${MYSQL_DB}.order where user_account_id=?`;
+    let getOrdersByUserAccountQuery = `select id, customer_name, phone, email, user_account_id, coupon_code, received_type, received_address, received_at, delivery_charge, subtotal_price, total_price, status, note, payment_status, payment_type, created_at from ${MYSQL_DB}.order where user_account_id=?`;
     if (filters) {
         const filterSql = createFilterSql(filters);
         if (filterSql) {
@@ -82,29 +81,8 @@ export async function getOrdersByUserAccount(userAccountId, options, filters) {
     ]));
     return orderRowDatas.map(convertUnderscorePropertiesToCamelCase);
 }
-export async function getOrdersByBranch(branchId, options, filters) {
-    let getOrdersByBranchQuery = `select id, customer_name, phone, email, user_account_id, branch_id, coupon_code, received_type, received_address, received_at, delivery_charge, subtotal_price, total_price, status, note, payment_status, payment_type, created_at from ${MYSQL_DB}.order where branch_id=?`;
-    if (filters) {
-        const filterSql = createFilterSql(filters);
-        if (filterSql) {
-            getOrdersByBranchQuery += ` and ${filterSql}`;
-        }
-    }
-    if (options) {
-        if (options.sort) {
-            getOrdersByBranchQuery += " " + createSortSql(options.sort);
-        }
-        if (options.limit) {
-            getOrdersByBranchQuery += " " + createLimitSql(options.limit);
-        }
-    }
-    const [orderRowDatas] = (await pool.query(getOrdersByBranchQuery, [
-        branchId,
-    ]));
-    return orderRowDatas.map(convertUnderscorePropertiesToCamelCase);
-}
 export async function getOrderById(orderId) {
-    const getOrderQuery = `select id, customer_name, phone, email, user_account_id, branch_id, coupon_code, received_type, received_address, received_at, delivery_charge, subtotal_price, total_price, status, note, payment_type, payment_status, created_at from ${MYSQL_DB}.order where id=?`;
+    const getOrderQuery = `select id, customer_name, phone, email, user_account_id, coupon_code, received_type, received_address, received_at, delivery_charge, subtotal_price, total_price, status, note, payment_type, payment_status, created_at from ${MYSQL_DB}.order where id=?`;
     const [orderRowDatas] = (await pool.query(getOrderQuery, [
         orderId,
     ]));
@@ -119,7 +97,7 @@ export async function getOrderById(orderId) {
 }
 export async function createOrder(information, amountOfDecreaseMoney, userAccountId) {
     const orderId = createUid(20);
-    const { customerName, phone, email, branchId, couponCode, note, receivedType, receivedAddress, deliveryCharge, paymentType, paymentStatus, details, } = information;
+    const { customerName, phone, email, couponCode, note, receivedType, receivedAddress, deliveryCharge, paymentType, paymentStatus, details, } = information;
     if (details.length <= 0) {
         return "";
     }
@@ -137,7 +115,7 @@ export async function createOrder(information, amountOfDecreaseMoney, userAccoun
         Number(amountOfDecreaseMoney || 0);
     const createOrderQuery = "insert into " +
         MYSQL_DB +
-        ".order(`id`, `customer_name`, `phone`, `email`, `user_account_id`, `note`, `branch_id`, `coupon_code`, `received_type`, `received_address`, `delivery_charge`, `subtotal_price`, `total_price`, `status`, `payment_type`, `payment_status`, `created_at`) values (?)";
+        ".order(`id`, `customer_name`, `phone`, `email`, `user_account_id`, `note`, `coupon_code`, `received_type`, `received_address`, `delivery_charge`, `subtotal_price`, `total_price`, `status`, `payment_type`, `payment_status`, `created_at`) values (?)";
     const poolConnection = await pool.getConnection();
     try {
         await poolConnection.beginTransaction();
@@ -149,7 +127,6 @@ export async function createOrder(information, amountOfDecreaseMoney, userAccoun
                 email,
                 userAccountId,
                 note,
-                branchId,
                 couponCode,
                 receivedType,
                 receivedAddress,
@@ -213,25 +190,20 @@ export async function updatePaymentStatusById(orderId, responseCode) {
     ]));
     return result.affectedRows > 0;
 }
-export async function verifyOrderByStaff(staffAccountId, orderId) {
-    const staffAccount = await StaffAccountService.getInformation(staffAccountId);
-    if (!staffAccount) {
-        return false;
-    }
-    const verifyOrderQuery = `update ${MYSQL_DB}.order set status=? where branch_id=? and id=? and status in ?`;
+export async function verifyOrderByStaff(orderId) {
+    const verifyOrderQuery = `update ${MYSQL_DB}.order set status=? where id=? and status in ?`;
     const poolConnection = await pool.getConnection();
     try {
         await poolConnection.beginTransaction();
         const [statusUpdateResult] = (await poolConnection.query(verifyOrderQuery, [
             ORDER_STATUS.verified,
-            staffAccount.branchId,
             orderId,
             [[ORDER_STATUS.waitVerify]],
         ]));
         if (statusUpdateResult.affectedRows <= 0) {
             throw new Error(`Don't verify order #${orderId}`);
         }
-        await OrderConfirmService.confirmOrder({ staffAccountId, orderId, action: "verify" }, poolConnection);
+        await OrderConfirmService.confirmOrder({ orderId, action: "verify" }, poolConnection);
         await poolConnection.commit();
         return true;
     }
@@ -244,25 +216,16 @@ export async function verifyOrderByStaff(staffAccountId, orderId) {
         poolConnection.release();
     }
 }
-export async function deliveryOrderByStaff(staffAccountId, orderId) {
-    const staffAccount = await StaffAccountService.getInformation(staffAccountId);
-    if (!staffAccount) {
-        return false;
-    }
-    const deliveryOrderQuery = `update ${MYSQL_DB}.order set status=? where branch_id=? and id=? and status in ?`;
+export async function deliveryOrderByStaff(orderId) {
+    const deliveryOrderQuery = `update ${MYSQL_DB}.order set status=? where id=? and status in ?`;
     const poolConnection = await pool.getConnection();
     try {
         await poolConnection.beginTransaction();
-        const [statusUpdateResult] = (await poolConnection.query(deliveryOrderQuery, [
-            ORDER_STATUS.waitReceive,
-            staffAccount.branchId,
-            orderId,
-            [[ORDER_STATUS.verified]],
-        ]));
+        const [statusUpdateResult] = (await poolConnection.query(deliveryOrderQuery, [ORDER_STATUS.waitReceive, orderId, [[ORDER_STATUS.verified]]]));
         if (statusUpdateResult.affectedRows <= 0) {
             throw new Error(`Don't delivery order #${orderId}`);
         }
-        await OrderConfirmService.confirmOrder({ staffAccountId, orderId, action: "delivery" }, poolConnection);
+        await OrderConfirmService.confirmOrder({ orderId, action: "delivery" }, poolConnection);
         await poolConnection.commit();
         return true;
     }
@@ -275,12 +238,8 @@ export async function deliveryOrderByStaff(staffAccountId, orderId) {
         poolConnection.release();
     }
 }
-export async function verifyReceivedOrderByStaff(staffAccountId, orderId) {
-    const staffAccount = await StaffAccountService.getInformation(staffAccountId);
-    if (!staffAccount) {
-        return false;
-    }
-    const verifyReceivedOrderQuery = `update ${MYSQL_DB}.order set status=?, payment_status=?, received_at=? where branch_id=? and id=? and status in ?`;
+export async function verifyReceivedOrderByStaff(orderId) {
+    const verifyReceivedOrderQuery = `update ${MYSQL_DB}.order set status=?, payment_status=?, received_at=? where id=? and status in ?`;
     const poolConnection = await pool.getConnection();
     try {
         await poolConnection.beginTransaction();
@@ -288,14 +247,13 @@ export async function verifyReceivedOrderByStaff(staffAccountId, orderId) {
             ORDER_STATUS.received,
             PAYMENT_STATUS.PAID,
             new Date(),
-            staffAccount.branchId,
             orderId,
             [[ORDER_STATUS.waitReceive]],
         ]));
         if (statusUpdateResult.affectedRows <= 0) {
             throw new Error(`Don't verify received order #${orderId}`);
         }
-        await OrderConfirmService.confirmOrder({ staffAccountId, orderId, action: "verifyReceived" }, poolConnection);
+        await OrderConfirmService.confirmOrder({ orderId, action: "verifyReceived" }, poolConnection);
         await poolConnection.commit();
         return true;
     }
@@ -308,29 +266,24 @@ export async function verifyReceivedOrderByStaff(staffAccountId, orderId) {
         poolConnection.release();
     }
 }
-export async function cancelOrderByStaff(staffAccountId, orderId, reason) {
-    const staffAccount = await StaffAccountService.getInformation(staffAccountId);
-    if (!staffAccount) {
+export async function cancelOrderByStaff(orderId, reason) {
+    if (!(await canCancelOrder(orderId))) {
         return false;
     }
-    if (!(await canCancelOrder(staffAccountId, orderId))) {
-        return false;
-    }
-    const cancelOrderQuery = `update ${MYSQL_DB}.order set status=?, note=? where branch_id=? and id=? and status in ?`;
+    const cancelOrderQuery = `update ${MYSQL_DB}.order set status=?, note=? where id=? and status in ?`;
     const poolConnection = await pool.getConnection();
     try {
         await poolConnection.beginTransaction();
         const [statusUpdateResult] = (await poolConnection.query(cancelOrderQuery, [
             ORDER_STATUS.cancelled,
             reason,
-            staffAccount.branchId,
             orderId,
             [[ORDER_STATUS.waitVerify, ORDER_STATUS.waitReceive]],
         ]));
         if (statusUpdateResult.affectedRows <= 0) {
             throw new Error(`Don't cancel order #${orderId}`);
         }
-        await OrderConfirmService.confirmOrder({ staffAccountId, orderId, action: "cancel" }, poolConnection);
+        await OrderConfirmService.confirmOrder({ orderId, action: "cancel" }, poolConnection);
         await poolConnection.commit();
         return true;
     }
@@ -343,20 +296,18 @@ export async function cancelOrderByStaff(staffAccountId, orderId, reason) {
         poolConnection.release();
     }
 }
-export async function canVerifyOrder(staffAccountId) {
+export async function canVerifyOrder() {
     return true;
 }
-export async function canDeliveryOrder(staffAccountId) {
+export async function canDeliveryOrder() {
     return true;
 }
-export async function canVerifyReceivedOrder(staffAccountId, orderId) {
-    const isDeliveryStaffOfOrder = await OrderConfirmService.isDeliveryStaffOfOrder(staffAccountId, orderId);
-    return isDeliveryStaffOfOrder;
+export async function canVerifyReceivedOrder() {
+    return true;
 }
-export async function canCancelOrder(staffAccountId, orderId) {
+export async function canCancelOrder(orderId) {
     const order = await getOrderById(orderId);
-    const staffAccount = await StaffAccountService.getInformation(staffAccountId);
-    if (!order || !staffAccount) {
+    if (!order) {
         return false;
     }
     if (order.status === ORDER_STATUS.waitReceive) {

@@ -14,7 +14,7 @@ export async function signIn(phone, password) {
     return convertUnderscorePropertiesToCamelCase(staffRowDatas[0] || null);
 }
 export async function getStaffAccounts(limit) {
-    let getStaffAccountsQuery = "select staff_account.id, branch_id, branch.name as branch_name, staff_account.name, staff_account.date_of_birth, staff_account.phone, staff_account.gender, avatar, staff_account.address, staff_account.longitude, staff_account.latitude, staff_account.identificationCard from staff_account inner join branch on branch_id=branch.id where staff_account.deleted_at is null";
+    let getStaffAccountsQuery = "select staff_account.id, staff_account.name, staff_account.date_of_birth, staff_account.phone, staff_account.gender, avatar, staff_account.address, staff_account.longitude, staff_account.latitude, staff_account.identificationCard from staff_account where staff_account.deleted_at is null";
     if (limit) {
         getStaffAccountsQuery += " " + createLimitSql(limit);
     }
@@ -22,7 +22,7 @@ export async function getStaffAccounts(limit) {
     return staffAccountRowDatas.map(convertUnderscorePropertiesToCamelCase);
 }
 export async function getInformation(staffAccountId) {
-    const getInformationQuery = "select staff_account.id, branch_id, branch.name as branch_name, staff_account.name, staff_account.phone, gender, date_of_birth, avatar, staff_account.email, staff_account.address, staff_account.longitude, staff_account.latitude, staff_account.identificationCard from staff_account inner join branch on branch_id=branch.id where staff_account.id=? and staff_account.deleted_at is null";
+    const getInformationQuery = "select staff_account.id, staff_account.name, staff_account.phone, gender, date_of_birth, avatar, staff_account.email, staff_account.address, staff_account.longitude, staff_account.latitude, staff_account.identificationCard from staff_account where staff_account.id=? and staff_account.deleted_at is null";
     const [staffRowDatas] = (await pool.query(getInformationQuery, [
         staffAccountId,
     ]));
@@ -36,17 +36,16 @@ export async function getInformation(staffAccountId) {
 }
 export async function addStaffAccount(staffInformation) {
     const id = createUid(20);
-    const { name, branchId, phone, gender, dateOfBirth, avatar, email, address, longitude, latitude, identificationCard, } = staffInformation;
+    const { name, phone, gender, dateOfBirth, avatar, email, address, longitude, latitude, identificationCard, } = staffInformation;
     const existsPhone = await checkExistsPhone(phone);
     if (existsPhone) {
-        console.log('this number is existed');
+        console.log("this number is existed");
         return false;
     }
-    const addStaffAccountQuery = "insert into staff_account(`id`, `branch_id`, `name`, `phone`, `password`, `gender`, `date_of_birth`, `avatar`, `email`, `address`, `longitude`, `latitude`, `identificationCard`) values(?)";
+    const addStaffAccountQuery = "insert into staff_account(`id`, `name`, `phone`, `password`, `gender`, `date_of_birth`, `avatar`, `email`, `address`, `longitude`, `latitude`, `identificationCard`) values(?)";
     const [result] = (await pool.query(addStaffAccountQuery, [
         [
             id,
-            branchId,
             name,
             phone,
             hashText(DEFAULT_PASSWORD),
@@ -70,14 +69,6 @@ export async function updatePassword(staffAccountId, oldPassword, newPassword) {
         hashedNewPassword,
         staffAccountId,
         hashedOldPassword,
-    ]));
-    return result.affectedRows > 0;
-}
-export async function updateBranch(staffAccountId, branchId) {
-    const updateBranchQuery = "update staff_account set branch_id=? where id=? and deleted_at is null";
-    const [result] = (await pool.query(updateBranchQuery, [
-        branchId,
-        staffAccountId,
     ]));
     return result.affectedRows > 0;
 }

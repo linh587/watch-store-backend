@@ -1,6 +1,5 @@
 import { getSocketIO } from "../../socketIO.js";
-import { ITEM_COUNT_PER_PAGE, } from "../config.js";
-import * as BranchService from "../services/branch.js";
+import { ITEM_COUNT_PER_PAGE } from "../config.js";
 import * as CartService from "../services/cart.js";
 import * as CouponService from "../services/coupon.js";
 import * as NotificationService from "../services/notification.js";
@@ -167,14 +166,9 @@ export async function createOrder(req, res) {
             amountOfDecreaseMoney = CouponService.calculateDecreaseMoneyForOrder(coupon, { ...information, details: orderDetailsBeMappingPrice });
         }
     }
-    const branchBeOrder = await BranchService.getBranch(information.branchId);
-    if (!branchBeOrder) {
-        res.status(400).json(`Branch #${information.branchId} not found`);
-        return;
-    }
     const branchCoordinate = {
-        longitude: branchBeOrder.longitude,
-        latitude: branchBeOrder.latitude,
+        longitude: "105.8455270153421",
+        latitude: "21.0049552335956",
     };
     const receivedAddressCoordinate = req.body["receivedAddressCoordinate"];
     const deliveryDistanceByMeter = await MapUtil.getLengthFromOriginToDestinationGoongIo(branchCoordinate, receivedAddressCoordinate);

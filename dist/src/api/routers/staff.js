@@ -7,7 +7,6 @@ router.get("/information", StaffController.getInformation);
 router.put("/information", extractFormData, StaffValidate.updateInformation, StaffController.updateInformation);
 router.patch("/password", StaffValidate.updatePassword, StaffController.updatePassword);
 router.post("/exists-phone", StaffValidate.checkExistsPhone, StaffController.checkExistsPhone);
-router.get("/order", StaffController.getOrders);
 router.patch("/order/:orderId/verify", StaffController.verifyOrder);
 router.patch("/order/:orderId/delivery", StaffController.deliveryOrder);
 router.patch("/order/:orderId/verify-received", StaffController.verifyReceivedOrder);

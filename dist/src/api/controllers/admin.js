@@ -1,7 +1,6 @@
 import { ITEM_COUNT_PER_PAGE } from "../config.js";
 import * as AdminService from "../services/adminAccount.js";
 import * as BannerService from "../services/banner.js";
-import * as BranchService from "../services/branch.js";
 import * as CategoryService from "../services/category.js";
 import * as CouponService from "../services/coupon.js";
 import * as NewsService from "../services/news.js";
@@ -335,37 +334,6 @@ export async function deleteProduct(req, res) {
         res.status(400).json("Delete product failure");
     }
 }
-export async function addBranch(req, res) {
-    const information = req.body;
-    const success = await BranchService.addBranch(information);
-    if (success) {
-        res.json("Add branch successful");
-    }
-    else {
-        res.status(400).json("Add branch failure");
-    }
-}
-export async function updateBranch(req, res) {
-    const information = req.body;
-    const branchId = req.params["branchId"];
-    const success = await BranchService.updateBranch(branchId, information);
-    if (success) {
-        res.json("Update branch successful");
-    }
-    else {
-        res.status(400).json("Update branch failure");
-    }
-}
-export async function deleteBranch(req, res) {
-    const branchId = req.params["branchId"];
-    const success = await BranchService.deleteBranch(branchId);
-    if (success) {
-        res.json("Update branch successful");
-    }
-    else {
-        res.status(400).json("Update branch failure");
-    }
-}
 export async function getStaffAccounts(req, res) {
     const page = req.query["page"];
     const pageNumber = Number(page);
@@ -420,17 +388,6 @@ export async function resetStaffAccountPassword(req, res) {
     }
     else {
         res.status(400).json("Reset password failure");
-    }
-}
-export async function updateBranchForStaff(req, res) {
-    const staffAccountId = req.params["staffAccountId"];
-    const branchId = String(req.body["branchId"] || "");
-    const success = await StaffService.updateBranch(staffAccountId, branchId);
-    if (success) {
-        res.json("Update branch successful");
-    }
-    else {
-        res.status(400).json("Update branch failure");
     }
 }
 export async function addNews(req, res) {
@@ -725,16 +682,6 @@ export async function unlockRating(req, res) {
     }
 }
 export async function getAllOrders(req, res) {
-    const { username } = req;
-    if (!username) {
-        res.status(400).json("Unknown error");
-        return;
-    }
-    const adminAccount = await AdminService.getInformation(username);
-    if (!adminAccount) {
-        res.status(400).json("Unknown error");
-        return;
-    }
     const options = {};
     const filters = {};
     if (req.query["sort"]) {

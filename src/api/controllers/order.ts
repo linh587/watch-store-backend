@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import * as BranchService from "../services/branch.js";
 import * as CouponService from "../services/coupon.js";
 import * as OrderService from "../services/order.js";
 import * as ProductPriceService from "../services/productPrice.js";
@@ -51,15 +50,9 @@ export async function createOrder(req: UserRequest, res: Response) {
     }
   }
 
-  const branchBeOrder = await BranchService.getBranch(information.branchId);
-  if (!branchBeOrder) {
-    res.status(400).json(`Branch #${information.branchId} not found`);
-    return;
-  }
-
   const branchCoordinate: MapUtil.GoongIoCoordinate = {
-    longitude: branchBeOrder.longitude,
-    latitude: branchBeOrder.latitude,
+    latitude: "21.0049552335956",
+    longitude: "105.8455270153421",
   };
 
   const receivedAddressCoordinate: MapUtil.GoongIoCoordinate =

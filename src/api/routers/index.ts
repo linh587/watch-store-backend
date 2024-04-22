@@ -6,7 +6,6 @@ import {
 } from "../middlewares/authorization.js";
 import adminRouter from "./admin.js";
 import bannerRouter from "./banner.js";
-import branchRouter from "./branch.js";
 import categoryRouter from "./category.js";
 import couponRouter from "./coupon.js";
 import imageRouter from "./image.js";
@@ -34,7 +33,6 @@ router.use("/sign-up", signUpRouter);
 router.use("/category", categoryRouter);
 router.use("/product-size", productSizeRouter);
 router.use("/product", productRouter);
-router.use("/branch", branchRouter);
 router.use("/image", imageRouter);
 router.use("/news", newsRouter);
 router.use("/coupon", couponRouter);

@@ -22,7 +22,6 @@ router.post(
   StaffValidate.checkExistsPhone,
   StaffController.checkExistsPhone
 );
-router.get("/order", StaffController.getOrders);
 router.patch("/order/:orderId/verify", StaffController.verifyOrder);
 router.patch("/order/:orderId/delivery", StaffController.deliveryOrder);
 router.patch(

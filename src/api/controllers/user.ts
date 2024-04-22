@@ -1,13 +1,8 @@
 import { Response } from "express";
 import { getSocketIO } from "../../socketIO.js";
-import {
-  LimitOptions,
-  ITEM_COUNT_PER_PAGE,
-  MAX_DISTANCE_ALLOWED_ORDER,
-} from "../config.js";
+import { LimitOptions, ITEM_COUNT_PER_PAGE } from "../config.js";
 import { UserRequest } from "../middlewares/authorization.js";
 import { FormDataRequest } from "../middlewares/formDataExtract.js";
-import * as BranchService from "../services/branch.js";
 import * as CartService from "../services/cart.js";
 import * as CouponService from "../services/coupon.js";
 import * as NotificationService from "../services/notification.js";
@@ -222,15 +217,9 @@ export async function createOrder(req: UserRequest, res: Response) {
     }
   }
 
-  const branchBeOrder = await BranchService.getBranch(information.branchId);
-  if (!branchBeOrder) {
-    res.status(400).json(`Branch #${information.branchId} not found`);
-    return;
-  }
-
   const branchCoordinate: MapUtil.GoongIoCoordinate = {
-    longitude: branchBeOrder.longitude,
-    latitude: branchBeOrder.latitude,
+    longitude: "105.8455270153421",
+    latitude: "21.0049552335956",
   };
 
   const receivedAddressCoordinate: MapUtil.GoongIoCoordinate =

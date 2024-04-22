@@ -13,13 +13,15 @@ router.post("/good-receipt", AdminController.createGoodReceipt);
 router.get("/good-receipt", AdminController.getAllGoodReceipts);
 router.get("/good-receipt/:goodReceiptId", AdminController.getGoodReceipt);
 router.put("/good-receipt/:goodReceiptId", AdminController.updateGoodReceipt);
-router.delete("/good-receipt/:goodReceiptId",AdminController.deleteGoodReceipt);
+router.delete(
+  "/good-receipt/:goodReceiptId",
+  AdminController.deleteGoodReceipt
+);
 
 router.post("/damage", AdminController.createDamage);
 router.get("/damage", AdminController.getAllDamages);
 router.get("/damage/:damageId", AdminController.getDamage);
-router.delete("/damage/:damageId",AdminController.deleteDamage);
-
+router.delete("/damage/:damageId", AdminController.deleteDamage);
 
 router.post(
   "/supplier",
@@ -86,14 +88,6 @@ router.put(
 );
 router.delete("/product/:productId", AdminController.deleteProduct);
 
-router.post("/branch/", AdminValidate.addBranch, AdminController.addBranch);
-router.put(
-  "/branch/:branchId",
-  AdminValidate.updateBranch,
-  AdminController.updateBranch
-);
-router.delete("/branch/:branchId", AdminController.deleteBranch);
-
 router.get("/staff-account", AdminController.getStaffAccounts);
 router.post(
   "/staff-account",
@@ -104,10 +98,6 @@ router.post(
 router.patch(
   "/staff-account/:staffAccountId/reset-password/",
   AdminController.resetStaffAccountPassword
-);
-router.patch(
-  "/staff-account/:staffAccountId/branch/",
-  AdminController.updateBranchForStaff
 );
 router.delete(
   "/staff-account/:staffAccountId",

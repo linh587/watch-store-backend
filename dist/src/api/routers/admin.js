@@ -29,13 +29,9 @@ router.delete("/product-size/:productSizeId", AdminController.deleteProductSize)
 router.post("/product", extractFormData, AdminValidate.addProduct, AdminController.addProduct);
 router.put("/product/:productId", extractFormData, AdminValidate.updateProduct, AdminController.updateProduct);
 router.delete("/product/:productId", AdminController.deleteProduct);
-router.post("/branch/", AdminValidate.addBranch, AdminController.addBranch);
-router.put("/branch/:branchId", AdminValidate.updateBranch, AdminController.updateBranch);
-router.delete("/branch/:branchId", AdminController.deleteBranch);
 router.get("/staff-account", AdminController.getStaffAccounts);
 router.post("/staff-account", extractFormData, AdminValidate.addStaffAccount, AdminController.addStaffAccount);
 router.patch("/staff-account/:staffAccountId/reset-password/", AdminController.resetStaffAccountPassword);
-router.patch("/staff-account/:staffAccountId/branch/", AdminController.updateBranchForStaff);
 router.delete("/staff-account/:staffAccountId", AdminController.deleteStaffAccount);
 router.post("/news", extractFormData, AdminValidate.addNews, AdminController.addNews);
 router.put("/news/:newsId", extractFormData, AdminValidate.updateNews, AdminController.updateNews);

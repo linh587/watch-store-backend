@@ -63,30 +63,9 @@ const informationToUpdateProductPriceSchema = Joi.object({
   productPriceId: Joi.string().allow(""),
 }).unknown();
 
-const addBranchShema = Joi.object({
-  name: Joi.string().required(),
-  phone: GeneralValidate.phoneSchema.required(),
-  address: Joi.string().required(),
-  openedAt: GeneralValidate.timeSchema.required(),
-  closedAt: GeneralValidate.timeSchema.required(),
-  longitude: Joi.string().regex(GeneralValidate.COORDINATE_REGEX).required(),
-  latitude: Joi.string().regex(GeneralValidate.COORDINATE_REGEX).required(),
-}).unknown();
-
-const updateBranchShema = Joi.object({
-  name: Joi.string().required(),
-  phone: GeneralValidate.phoneSchema.required(),
-  address: Joi.string().required(),
-  openedAt: GeneralValidate.timeSchema.required(),
-  closedAt: GeneralValidate.timeSchema.required(),
-  longitude: Joi.string().regex(GeneralValidate.COORDINATE_REGEX).required(),
-  latitude: Joi.string().regex(GeneralValidate.COORDINATE_REGEX).required(),
-}).unknown();
-
 const addStaffAccountSchema = Joi.object({
   phone: GeneralValidate.phoneSchema.required(),
   name: GeneralValidate.vietnameseSchema.required(),
-  branchId: Joi.string().required(),
   gender: GeneralValidate.genderSchema.required(),
   dateOfBirth: Joi.string().isoDate().required(),
   email: Joi.string().email(),
@@ -94,10 +73,6 @@ const addStaffAccountSchema = Joi.object({
   longitude: Joi.string().regex(GeneralValidate.COORDINATE_REGEX).required(),
   latitude: Joi.string().regex(GeneralValidate.COORDINATE_REGEX).required(),
   identificationCard: Joi.string().required(),
-}).unknown();
-
-const updateBranchForStaff = Joi.object({
-  branchId: Joi.string().required(),
 }).unknown();
 
 const addNewsSchema = Joi.object({
@@ -123,7 +98,6 @@ const addCouponSchema = Joi.object({
     .unique()
     .min(1)
     .required(),
-  branchIds: Joi.array().items(Joi.string()),
   productPriceIds: Joi.array().items(Joi.string()),
   totalPriceFrom: Joi.number().min(0),
   totalPriceTo: Joi.number().min(Joi.ref("totalPriceFrom")),
@@ -140,7 +114,6 @@ const updateCouponSchema = Joi.object({
     .unique()
     .min(1)
     .required(),
-  branchIds: Joi.array().items(Joi.string()),
   productPriceIds: Joi.array().items(Joi.string()),
   totalPriceFrom: Joi.number().min(0),
   totalPriceTo: Joi.alternatives(
@@ -218,10 +191,7 @@ const temporaryDamageDetailSchema = Joi.object({
 
 const createDamageSchema = Joi.object({
   creator: Joi.string(),
-  details: Joi.array()
-    .items(temporaryDamageDetailSchema)
-    .min(1)
-    .required(),
+  details: Joi.array().items(temporaryDamageDetailSchema).min(1).required(),
 });
 
 export default class AdminValidate {
@@ -235,9 +205,9 @@ export default class AdminValidate {
     next();
   }
 
-  static addDamge (req: Request, res: Response, next: NextFunction){
+  static addDamge(req: Request, res: Response, next: NextFunction) {
     const validationResult = createDamageSchema.validate(req.body);
-    if(validationResult.error){
+    if (validationResult.error) {
       res.status(400).json(validationResult.error.message);
       return;
     }
@@ -472,26 +442,6 @@ export default class AdminValidate {
     next();
   }
 
-  static addBranch(req: AdminRequest, res: Response, next: NextFunction) {
-    const validationResult = addBranchShema.validate(req.body);
-    if (validationResult.error) {
-      res.status(400).json(validationResult.error.message);
-      return;
-    }
-
-    next();
-  }
-
-  static updateBranch(req: AdminRequest, res: Response, next: NextFunction) {
-    const validationResult = updateBranchShema.validate(req.body);
-    if (validationResult.error) {
-      res.status(400).json(validationResult.error.message);
-      return;
-    }
-
-    next();
-  }
-
   static addStaffAccount(
     req: FormDataRequest<AdminRequest>,
     res: Response,
@@ -512,20 +462,6 @@ export default class AdminValidate {
         return;
       }
     }
-    next();
-  }
-
-  static updateBranchForStaff(
-    req: AdminRequest,
-    res: Response,
-    next: NextFunction
-  ) {
-    const validationResult = updateBranchForStaff.validate(req.body);
-    if (validationResult.error) {
-      res.status(400).json(validationResult.error.message);
-      return;
-    }
-
     next();
   }
 

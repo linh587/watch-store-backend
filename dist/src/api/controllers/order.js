@@ -1,4 +1,3 @@
-import * as BranchService from "../services/branch.js";
 import * as CouponService from "../services/coupon.js";
 import * as OrderService from "../services/order.js";
 import * as ProductPriceService from "../services/productPrice.js";
@@ -35,14 +34,9 @@ export async function createOrder(req, res) {
             amountOfDecreaseMoney = CouponService.calculateDecreaseMoneyForOrder(coupon, { ...information, details: orderDetailsBeMappingPrice });
         }
     }
-    const branchBeOrder = await BranchService.getBranch(information.branchId);
-    if (!branchBeOrder) {
-        res.status(400).json(`Branch #${information.branchId} not found`);
-        return;
-    }
     const branchCoordinate = {
-        longitude: branchBeOrder.longitude,
-        latitude: branchBeOrder.latitude,
+        latitude: "21.0049552335956",
+        longitude: "105.8455270153421",
     };
     const receivedAddressCoordinate = req.body["receivedAddressCoordinate"];
     const deliveryDistanceByMeter = await MapUtil.getLengthFromOriginToDestinationGoongIo(branchCoordinate, receivedAddressCoordinate);

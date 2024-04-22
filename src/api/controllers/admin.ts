@@ -4,7 +4,6 @@ import { AdminRequest } from "../middlewares/authorization.js";
 import { FormDataRequest } from "../middlewares/formDataExtract.js";
 import * as AdminService from "../services/adminAccount.js";
 import * as BannerService from "../services/banner.js";
-import * as BranchService from "../services/branch.js";
 import * as CategoryService from "../services/category.js";
 import * as CouponService from "../services/coupon.js";
 import * as NewsService from "../services/news.js";
@@ -22,7 +21,6 @@ import * as DamageService from "../services/damage.js";
 import { deleteImage, uploadImage } from "../utils/storageImage.js";
 import { getSocketIO } from "../../socketIO.js";
 import * as OrderService from "../services/order.js";
-import { date } from "joi";
 
 export async function getInformation(req: AdminRequest, res: Response) {
   const { username } = req;
@@ -166,7 +164,6 @@ export async function createGoodReceipt(req: Request, res: Response) {
   }
 }
 
-
 export async function updateGoodReceipt(req: Request, res: Response) {
   const { goodReceiptId } = req.params;
   const updatedInformation: GoodReceiptService.InformationToUpdateGoodReceipt =
@@ -233,23 +230,23 @@ export async function getDamage(req: Request, res: Response) {
   res.json(damage);
 }
 
-
 export async function createDamage(req: Request, res: Response) {
-  const information: DamageService.InfomationToCreateDamage = req.body["damage"];
+  const information: DamageService.InfomationToCreateDamage =
+    req.body["damage"];
   const damageId = await DamageService.createDamage(information);
-  if(damageId){
+  if (damageId) {
     res.json(damageId);
-  }else{
+  } else {
     res.status(400).json("Error when created damage");
   }
 }
-export async function deleteDamage(req: Request, res: Response ) {
+export async function deleteDamage(req: Request, res: Response) {
   const damageId = req.params["damageId"];
   const success = await DamageService.deleteDamage(damageId);
 
-  if(success){
+  if (success) {
     res.json("Delete damage successful");
-  }else{
+  } else {
     res.status(400).json("Delete damage failure");
   }
 }
@@ -429,40 +426,6 @@ export async function deleteProduct(req: AdminRequest, res: Response) {
   }
 }
 
-export async function addBranch(req: AdminRequest, res: Response) {
-  const information = req.body as BranchService.InformationToCreateBranch;
-  const success = await BranchService.addBranch(information);
-  if (success) {
-    res.json("Add branch successful");
-  } else {
-    res.status(400).json("Add branch failure");
-  }
-}
-
-export async function updateBranch(req: AdminRequest, res: Response) {
-  const information = req.body as BranchService.InformationToUpdateBranch;
-  const branchId = req.params["branchId"];
-
-  const success = await BranchService.updateBranch(branchId, information);
-
-  if (success) {
-    res.json("Update branch successful");
-  } else {
-    res.status(400).json("Update branch failure");
-  }
-}
-
-export async function deleteBranch(req: AdminRequest, res: Response) {
-  const branchId = req.params["branchId"];
-  const success = await BranchService.deleteBranch(branchId);
-
-  if (success) {
-    res.json("Update branch successful");
-  } else {
-    res.status(400).json("Update branch failure");
-  }
-}
-
 export async function getStaffAccounts(req: AdminRequest, res: Response) {
   const page = req.query["page"];
   const pageNumber = Number(page);
@@ -530,17 +493,6 @@ export async function resetStaffAccountPassword(
     res.json("Reset password successful");
   } else {
     res.status(400).json("Reset password failure");
-  }
-}
-
-export async function updateBranchForStaff(req: AdminRequest, res: Response) {
-  const staffAccountId = req.params["staffAccountId"];
-  const branchId = String(req.body["branchId"] || "");
-  const success = await StaffService.updateBranch(staffAccountId, branchId);
-  if (success) {
-    res.json("Update branch successful");
-  } else {
-    res.status(400).json("Update branch failure");
   }
 }
 
@@ -888,20 +840,7 @@ export async function unlockRating(req: AdminRequest, res: Response) {
   }
 }
 
-export async function getAllOrders(req: AdminRequest, res: Response) {
-  const { username } = req;
-
-  if (!username) {
-    res.status(400).json("Unknown error");
-    return;
-  }
-
-  const adminAccount = await AdminService.getInformation(username);
-  if (!adminAccount) {
-    res.status(400).json("Unknown error");
-    return;
-  }
-
+export async function getAllOrders(req: Request, res: Response) {
   const options: OrderService.GetOrderOptions = {};
   const filters: OrderService.OrderFilters = {};
 
