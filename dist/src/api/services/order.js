@@ -332,7 +332,7 @@ export async function statisOrdersByBranch(fromDate, toDate, timeType = "day", s
     date_format(created_at, ?) as date\
     from ${MYSQL_DB}.order \
     where date(created_at) >= date(?) and date(created_at) <= date(?)\
-    group by date order by created_at`;
+    group by date order by date`;
     const DAY_SPECIFIER = "%d";
     const MONTH_SPECIFIER = "%m";
     const YEAR_SPECIFIER = "%Y";
