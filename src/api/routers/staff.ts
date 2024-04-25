@@ -41,6 +41,10 @@ router.post(
   StaffController.canVerifyReceivedOrder
 );
 router.post("/order/:orderId/can-cancel", StaffController.canCancelOrder);
-router.get("/statis", StaffValidate.statisOrders, StaffController.statisOrders);
+router.get(
+  "/statis/income",
+  StaffValidate.statisOrders,
+  StaffController.statisOrders
+);
 
 export default router;
