@@ -50,7 +50,8 @@ export async function getAllRatings(
   filters: RatingFilters
 ) {
   let getAllRatingsQuery =
-    "select product_id, user_account_id, star, content, status, created_at, updated_at, user_account.name as user_name from rating inner join user_account on rating.user_account_id = user_account.id";
+    "select product_id, user_account_id, star, content, status, created_at, updated_at, user_account.name as user_name\
+    from rating inner join user_account on rating.user_account_id = user_account.id";
 
   if (filters) {
     const filterSql = createFilterSql(filters);

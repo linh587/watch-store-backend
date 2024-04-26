@@ -13,7 +13,7 @@ export async function getAllDamages() {
 }
 export async function createDamage(information) {
     const damageId = createUid(20);
-    const creatAt = new Date();
+    const createdAt = new Date();
     const { creator, note, details } = information;
     if (details.length <= 0) {
         return "";
@@ -33,13 +33,7 @@ export async function createDamage(information) {
     try {
         await poolConnection.beginTransaction();
         await poolConnection.query(createDamageQuery, [
-            [
-                damageId,
-                creator,
-                creatAt,
-                note,
-                totalAmount
-            ],
+            [damageId, creator, createdAt, note, totalAmount],
         ]);
         await DamageDetailService.addDamageDetails(damageId, temporaryDamageDetails, poolConnection);
         await poolConnection.commit();
@@ -54,8 +48,8 @@ export async function createDamage(information) {
         poolConnection.release();
     }
 }
-export async function updateGoodReceipt(damageId, information) {
-    const { creator, createdAt, note, details } = information;
+export async function updateDamage(damageId, information) {
+    const { creator, note, details } = information;
     if (details.length <= 0) {
         return false;
     }
@@ -67,18 +61,17 @@ export async function updateGoodReceipt(damageId, information) {
         return { ...detail };
     }))).flatMap((detail) => (detail ? [detail] : []));
     const totalAmount = calculateTemporaryTotalQuantity(temporaryDamageDetails);
-    const updateGoodReceiptQuery = "UPDATE " +
+    const updateDamage = "UPDATE " +
         MYSQL_DB +
-        ".damage SET creator = ?, created_at = ? note = ?, total_amount = ? WHERE id = ?";
+        ".damage SET creator = ?, note = ?, total_amount = ? WHERE id = ?";
     const poolConnection = await pool.getConnection();
     try {
         await poolConnection.beginTransaction();
-        await poolConnection.query(updateGoodReceiptQuery, [
+        await poolConnection.query(updateDamage, [
             creator,
-            createdAt,
             note,
             totalAmount,
-            damageId
+            damageId,
         ]);
         await DamageDetailService.updateDamageDetails(damageId, temporaryDamageDetails, poolConnection);
         await poolConnection.commit();

@@ -19,6 +19,7 @@ router.delete(
 );
 
 router.post("/damage", AdminController.createDamage);
+router.put("/damage/:damageId", AdminController.updateDamage);
 router.get("/damage", AdminController.getAllDamages);
 router.get("/damage/:damageId", AdminController.getDamage);
 router.delete("/damage/:damageId", AdminController.deleteDamage);

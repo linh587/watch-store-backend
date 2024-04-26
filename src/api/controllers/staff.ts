@@ -1,7 +1,6 @@
 import dotenv from "dotenv";
 import { Response } from "express";
 import { getSocketIO } from "../../socketIO.js";
-import { ITEM_COUNT_PER_PAGE } from "../config.js";
 import { StaffRequest } from "../middlewares/authorization.js";
 import { FormDataRequest } from "../middlewares/formDataExtract.js";
 import * as NotificationService from "../services/notification.js";

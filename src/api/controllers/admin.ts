@@ -240,6 +240,30 @@ export async function createDamage(req: Request, res: Response) {
     res.status(400).json("Error when created damage");
   }
 }
+
+export async function updateDamage(req: Request, res: Response) {
+  const { damageId } = req.params;
+  const updatedInformation: DamageService.InformationToUpdateDamage =
+    req.body["damage"];
+
+  const existingGoodReceipt = await DamageService.getDamageById(damageId);
+  if (!existingGoodReceipt) {
+    res.status(404).json(`Damage with ID ${damageId} not found`);
+    return;
+  }
+
+  const isSuccess = await DamageService.updateDamage(
+    damageId,
+    updatedInformation
+  );
+
+  if (isSuccess) {
+    res.json({ message: "Damage updated successfully" });
+  } else {
+    res.status(400).json("Error when updating damage");
+  }
+}
+
 export async function deleteDamage(req: Request, res: Response) {
   const damageId = req.params["damageId"];
   const success = await DamageService.deleteDamage(damageId);

@@ -2,12 +2,12 @@ import pool from "../db.js";
 import { convertUnderscorePropertiesToCamelCase } from "../utils/dataMapping.js";
 export async function getDamageDetails(damageId, continueWithConnection) {
     const connection = continueWithConnection || pool;
-    const getDamageDetailsQuery = "select damage_id, product_id, size_id, quantity, descript from damage_detail where damage_id=?";
+    const getDamageDetailsQuery = "select damage_id, product_id, size_id, quantity, description from damage_detail where damage_id=?";
     const [DamageDetailRowDatas] = (await connection.query(getDamageDetailsQuery, [damageId]));
     return DamageDetailRowDatas.map(convertUnderscorePropertiesToCamelCase);
 }
 export async function addDamageDetails(damageId, details, connection) {
-    const addDamagesQuery = "insert into damage_detail(`damage_id`, `product_id`, `size_id`,`quantity`, `descript`) VALUES (?)";
+    const addDamagesQuery = "insert into damage_detail(`damage_id`, `product_id`, `size_id`,`quantity`, `description`) VALUES (?)";
     const updateQuantityQuery = "update product_price\
   set quantity = product_price.quantity - ?\
   where product_price.product_id= ? \
@@ -17,7 +17,7 @@ export async function addDamageDetails(damageId, details, connection) {
         detail.productId,
         detail.sizeId,
         detail.quantity,
-        detail.descript,
+        detail.description,
     ]);
     for (const detail of damageDetailRowDatas) {
         await connection.query(addDamagesQuery, [detail]);
@@ -35,7 +35,7 @@ export async function updateDamageDetails(damageId, details, connection) {
         const values = [
             detail.quantity,
             detail.sizeId,
-            detail.descript,
+            detail.description,
             damageId,
             detail.productId,
         ];

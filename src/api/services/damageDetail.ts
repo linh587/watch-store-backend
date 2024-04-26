@@ -12,12 +12,12 @@ export interface DamageDetail {
 }
 
 export async function getDamageDetails(
-    damageId: string,
+  damageId: string,
   continueWithConnection?: PoolConnection
 ) {
   const connection = continueWithConnection || pool;
   const getDamageDetailsQuery =
-    "select damage_id, product_id, size_id, quantity, descript from damage_detail where damage_id=?";
+    "select damage_id, product_id, size_id, quantity, description from damage_detail where damage_id=?";
   const [DamageDetailRowDatas] = (await connection.query(
     getDamageDetailsQuery,
     [damageId]
@@ -33,7 +33,7 @@ export async function addDamageDetails(
   connection: PoolConnection
 ) {
   const addDamagesQuery =
-    "insert into damage_detail(`damage_id`, `product_id`, `size_id`,`quantity`, `descript`) VALUES (?)";
+    "insert into damage_detail(`damage_id`, `product_id`, `size_id`,`quantity`, `description`) VALUES (?)";
 
   const updateQuantityQuery =
     "update product_price\
@@ -46,7 +46,7 @@ export async function addDamageDetails(
     detail.productId,
     detail.sizeId,
     detail.quantity,
-    detail.descript,
+    detail.description,
   ]);
 
   for (const detail of damageDetailRowDatas) {
@@ -72,7 +72,7 @@ export async function updateDamageDetails(
     const values = [
       detail.quantity,
       detail.sizeId,
-      detail.descript,
+      detail.description,
       damageId,
       detail.productId,
     ];

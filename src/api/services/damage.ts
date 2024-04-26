@@ -6,8 +6,6 @@ import * as ProductService from "./product.js";
 import { RowDataPacket } from "mysql2";
 import { convertUnderscorePropertiesToCamelCase } from "../utils/dataMapping.js";
 import { PoolConnection } from "mysql2/promise";
-import { date } from "joi";
-import { now } from "lodash";
 
 const MYSQL_DB = process.env.MYSQL_DB || "watch_db";
 
@@ -28,19 +26,18 @@ export interface TemporaryDamageDetail {
   productId: string;
   sizeId: string;
   quantity: number;
-  descript?: string;
+  description?: string;
 }
 
 export interface InfomationToCreateDamage {
-    creator?: string;
-    createdAt: Date;
+  creator?: string;
+  createdAt: Date;
   note: string;
   details: Omit<TemporaryDamageDetail, "product">[];
 }
 
 export interface InformationToUpdateDamage {
-    creator?: string;
-    createdAt: Date;
+  creator?: string;
   note: string;
   details: Omit<TemporaryDamageDetail, "product">[];
 }
@@ -53,19 +50,14 @@ export async function getAllDamages() {
   const [damageRowDatas] = (await pool.query(
     getAllDamagisQuery
   )) as RowDataPacket[][];
-  return damageRowDatas.map(
-    convertUnderscorePropertiesToCamelCase
-  ) as Damage[];
+  return damageRowDatas.map(convertUnderscorePropertiesToCamelCase) as Damage[];
 }
 
-export async function createDamage(
-  information: InfomationToCreateDamage
-) {
+export async function createDamage(information: InfomationToCreateDamage) {
   const damageId = createUid(20);
-  const creatAt= new Date();
+  const createdAt = new Date();
 
-  const {creator, note, details } =
-    information;
+  const { creator, note, details } = information;
 
   if (details.length <= 0) {
     return "";
@@ -93,13 +85,7 @@ export async function createDamage(
   try {
     await poolConnection.beginTransaction();
     await poolConnection.query(createDamageQuery, [
-      [
-        damageId,
-        creator,
-        creatAt,
-        note,
-        totalAmount
-      ],
+      [damageId, creator, createdAt, note, totalAmount],
     ]);
     await DamageDetailService.addDamageDetails(
       damageId,
@@ -117,12 +103,11 @@ export async function createDamage(
   }
 }
 
-export async function updateGoodReceipt(
+export async function updateDamage(
   damageId: string,
   information: InformationToUpdateDamage
 ) {
-  const {  creator, createdAt, note, details } =
-    information;
+  const { creator, note, details } = information;
 
   if (details.length <= 0) {
     return false;
@@ -142,19 +127,18 @@ export async function updateGoodReceipt(
 
   const totalAmount = calculateTemporaryTotalQuantity(temporaryDamageDetails);
 
-  const updateGoodReceiptQuery =
+  const updateDamage =
     "UPDATE " +
     MYSQL_DB +
-    ".damage SET creator = ?, created_at = ? note = ?, total_amount = ? WHERE id = ?";
+    ".damage SET creator = ?, note = ?, total_amount = ? WHERE id = ?";
   const poolConnection = await pool.getConnection();
   try {
     await poolConnection.beginTransaction();
-    await poolConnection.query(updateGoodReceiptQuery, [
+    await poolConnection.query(updateDamage, [
       creator,
-      createdAt,
       note,
       totalAmount,
-      damageId
+      damageId,
     ]);
     await DamageDetailService.updateDamageDetails(
       damageId,
@@ -172,8 +156,13 @@ export async function updateGoodReceipt(
   }
 }
 
-export function calculateTemporaryTotalQuantity(damageItems: TemporaryDamageDetail[]) {
-  const totalAmount = damageItems.reduce((totalAmount, {quantity}) => totalAmount + quantity, 0);
+export function calculateTemporaryTotalQuantity(
+  damageItems: TemporaryDamageDetail[]
+) {
+  const totalAmount = damageItems.reduce(
+    (totalAmount, { quantity }) => totalAmount + quantity,
+    0
+  );
 
   return totalAmount;
 }
@@ -187,9 +176,7 @@ export async function getDamageById(damageId: string) {
     return null;
   }
 
-  const details = await DamageDetailService.getDamageDetails(
-    damageId
-  );
+  const details = await DamageDetailService.getDamageDetails(damageId);
 
   return convertUnderscorePropertiesToCamelCase({
     ...damageRowDatas[0],
@@ -207,10 +194,7 @@ export async function deleteDamage(
   try {
     await connection.beginTransaction();
     await connection.query(deleteDamageQuery, [deletedDateTime, id]);
-    await DamageDetailService.deleteDamageId(
-      id,
-      connection
-    );
+    await DamageDetailService.deleteDamageId(id, connection);
     await connection.commit();
     return true;
   } catch (error) {

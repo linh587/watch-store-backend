@@ -9,7 +9,8 @@ const RATING_STATUS = {
 };
 export const SORT_TYPES = ["newest", "oldest"];
 export async function getAllRatings(options, filters) {
-    let getAllRatingsQuery = "select product_id, user_account_id, star, content, status, created_at, updated_at, user_account.name as user_name from rating inner join user_account on rating.user_account_id = user_account.id";
+    let getAllRatingsQuery = "select product_id, user_account_id, star, content, status, created_at, updated_at, user_account.name as user_name\
+    from rating inner join user_account on rating.user_account_id = user_account.id";
     if (filters) {
         const filterSql = createFilterSql(filters);
         if (filterSql) {
