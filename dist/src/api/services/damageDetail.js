@@ -30,7 +30,7 @@ export async function addDamageDetails(damageId, details, connection) {
     return true;
 }
 export async function updateDamageDetails(damageId, details, connection) {
-    const updateDamagesQuery = "UPDATE damage_detail SET quantity = ?, size_id=?, descript = ? WHERE damage_id = ? AND product_id = ?";
+    const updateDamagesQuery = "UPDATE damage_detail SET quantity = ?, size_id=?, description = ? WHERE damage_id = ? AND product_id = ?";
     const updateOperations = details.map(async (detail) => {
         const values = [
             detail.quantity,

@@ -149,7 +149,7 @@ const createGoodRecieptSchema = Joi.object({
 const temporaryDamageDetailSchema = Joi.object({
     productId: Joi.string(),
     quantity: Joi.number(),
-    descript: Joi.string(),
+    description: Joi.string(),
 });
 const createDamageSchema = Joi.object({
     creator: Joi.string(),

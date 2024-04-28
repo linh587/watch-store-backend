@@ -8,7 +8,7 @@ export interface DamageDetail {
   productId: string;
   sizeId: string;
   quantity: number;
-  descript?: string;
+  description?: string;
 }
 
 export async function getDamageDetails(
@@ -66,7 +66,7 @@ export async function updateDamageDetails(
   connection: PoolConnection
 ) {
   const updateDamagesQuery =
-    "UPDATE damage_detail SET quantity = ?, size_id=?, descript = ? WHERE damage_id = ? AND product_id = ?";
+    "UPDATE damage_detail SET quantity = ?, size_id=?, description = ? WHERE damage_id = ? AND product_id = ?";
 
   const updateOperations = details.map(async (detail) => {
     const values = [
