@@ -202,13 +202,11 @@ export async function createDamage(req, res) {
 export async function updateDamage(req, res) {
     const { damageId } = req.params;
     const updatedInformation = req.body["damage"];
-    // Kiểm tra xem phiếu nhập có tồn tại không
     const existingGoodReceipt = await DamageService.getDamageById(damageId);
     if (!existingGoodReceipt) {
         res.status(404).json(`Damage with ID ${damageId} not found`);
         return;
     }
-    // Thực hiện cập nhật thông tin phiếu nhập
     const isSuccess = await DamageService.updateDamage(damageId, updatedInformation);
     if (isSuccess) {
         res.json({ message: "Damage updated successfully" });

@@ -8,7 +8,6 @@ import { createUid } from "../utils/uid.js";
 import * as OrderConfirmService from "./orderConfirm.js";
 import * as OrderDetailService from "./orderDetail.js";
 import * as ProductPriceService from "./productPrice.js";
-import * as StaffAccountService from "./staffAccount.js";
 
 export interface Order {
   id: string;

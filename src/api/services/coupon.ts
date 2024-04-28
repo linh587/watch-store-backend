@@ -376,6 +376,7 @@ export async function getRelationCouponCodes(
     await CouponOnOrderService.getRelationCouponCodes(totalPriceOfOrder);
   const relationCouponCodesOnProduct =
     await CouponOnProductService.getRelationCouponCodes(productPriceIdsOfOrder);
+
   return Array.from(
     new Set([...relationCouponCodesOnOrder, ...relationCouponCodesOnProduct])
   );

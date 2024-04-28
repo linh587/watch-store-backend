@@ -29,7 +29,11 @@ export interface GetProductPriceOptions {
 
 export async function getProductPrices() {
   const getProductPricesQuery =
-    "select id, product_id, product_size_id, price, quantity from product_price where deleted_at is null";
+    "select product_price.id, product_id, product_size_id, product_price.price, quantity, product.name as productName, product_size.name as productSizeName\
+    from product_price\
+    inner join product on product_price.product_id = product.id\
+    inner join product_size on product_price.product_size_id = product_size.id\
+    where product_price.deleted_at is null";
   const [productPriceRowDatas] = (await pool.query(
     getProductPricesQuery
   )) as RowDataPacket[][];
@@ -43,9 +47,13 @@ export async function getProductPrice(
   options?: GetProductPriceOptions
 ) {
   let getProductPriceQuery =
-    "select id, product_id, product_size_id, price, quantity from product_price where id=?";
+    "select product_price.id, product_id, product_size_id, product_price.price, quantity, product.name as productName, product_size.name as productSizeName\
+    from product_price\
+    inner join product on product_price.product_id = product.id\
+    inner join product_size on product_price.product_size_id = product_size.id\
+    where product_price.id=?";
   if (!options || !options.includeDeleted) {
-    getProductPriceQuery += `and deleted_at is null`;
+    getProductPriceQuery += `and product_price.deleted_at is null`;
   }
   const [productPriceRowDatas] = (await pool.query(getProductPriceQuery, [
     id,
@@ -78,8 +86,8 @@ export async function addProductPrices(
 ) {
   const productPriceRowDatas = informations.map((information) => {
     const productPriceId = createUid(20);
-    if(information.quantity==null){
-      information.quantity=0;
+    if (information.quantity == null) {
+      information.quantity = 0;
     }
     const { productSizeId, price, quantity } = information;
     const createdAt = new Date();
