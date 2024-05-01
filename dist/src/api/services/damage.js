@@ -6,6 +6,8 @@ import * as ProductService from "./product.js";
 import { convertUnderscorePropertiesToCamelCase } from "../utils/dataMapping.js";
 const MYSQL_DB = process.env.MYSQL_DB || "watch_db";
 dotenv.config();
+export const TIME_TYPES = ["day", "month", "year"];
+export const SORT_TYPES = ["newest", "oldest"];
 export async function getAllDamages() {
     let getAllDamagisQuery = `select id, total_amount, creator, created_at, note from ${MYSQL_DB}.damage where deleted_at is null`;
     const [damageRowDatas] = (await pool.query(getAllDamagisQuery));
@@ -122,5 +124,39 @@ export async function deleteDamage(id, continueWithConnection) {
     }
     finally {
         connection.release();
+    }
+}
+export async function statisDamage(fromDate, toDate, timeType = "day", separated = "-") {
+    const statisOrdersQuery = `select sum(good_receipt_detail.price) as total_price,\
+    sum(damage.total_amount) as total, date_format(damage.created_at, ?) as date\
+    from ${MYSQL_DB}.damage\
+    inner join watch_db.damage_detail on damage.id = damage_detail.damage_id\
+    inner join watch_db.good_receipt_detail on damage_detail.product_id = good_receipt_detail.product_id\
+    and damage_detail.size_id = good_receipt_detail.size_id\
+    where date(damage.created_at) >= date(?) and date(damage.created_at) <= date(?)\
+    group by date order by date;`;
+    const DAY_SPECIFIER = "%d";
+    const MONTH_SPECIFIER = "%m";
+    const YEAR_SPECIFIER = "%Y";
+    const STATIS_DATE_FORMATE = {
+        day: [DAY_SPECIFIER, MONTH_SPECIFIER, YEAR_SPECIFIER].join(separated),
+        month: [MONTH_SPECIFIER, YEAR_SPECIFIER].join(separated),
+        year: [YEAR_SPECIFIER].join(separated),
+    };
+    const [statisOrdersRowDatas] = (await pool.query(statisOrdersQuery, [
+        STATIS_DATE_FORMATE[timeType],
+        fromDate,
+        toDate,
+    ]));
+    return statisOrdersRowDatas.map(convertUnderscorePropertiesToCamelCase);
+}
+function createSortSql(sort) {
+    switch (sort) {
+        case "newest":
+            return "order by created_at desc";
+        case "oldest":
+            return "order by created_at asc";
+        default:
+            return "";
     }
 }

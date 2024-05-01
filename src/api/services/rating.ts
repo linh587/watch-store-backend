@@ -29,6 +29,18 @@ export interface RatingFilters {
   searchString?: string; // content or user name of rating
 }
 
+export interface StatisRatingItem {
+  totalCount: number;
+  totalCountStarFive: number;
+  totalCountStarFour: number;
+  totalCountStarThree: number;
+  totalCountStarTwo: number;
+  totalCountStarOne: number;
+  date: string;
+}
+
+const MYSQL_DB = process.env.MYSQL_DB || "watch_db";
+export type TimeType = (typeof TIME_TYPES)[number];
 export type RatingStatus = "lock" | "unavailable";
 export type SortType = (typeof SORT_TYPES)[number];
 
@@ -43,6 +55,8 @@ const RATING_STATUS = {
   unavailable: "unavailable",
 };
 
+
+export const TIME_TYPES = ["day", "month", "year"] as const;
 export const SORT_TYPES = ["newest", "oldest"] as const;
 
 export async function getAllRatings(
@@ -245,4 +259,36 @@ function createFilterSql(filters: RatingFilters) {
   }
 
   return filterConditions.join(" and ");
+}
+
+export async function statisRating(
+  fromDate: Date,
+  toDate: Date,
+  //timeType: TimeType = "day",
+  separated = "-"
+) {
+  const statisOrdersQuery = `select count(*) as total_count,\
+    sum(if(rating.star = 5, 1, 0)) as start_five_count,\
+    sum(if(rating.star = 4, 1, 0)) as start_four_count,\
+    sum(if(rating.star = 3, 1, 0)) as start_three_count,\
+    sum(if(rating.star = 2, 1, 0)) as start_two_count,\
+    sum(if(rating.star = 1, 1, 0)) as start_one_count\
+  from ${MYSQL_DB}.rating where date (rating.created_at) >= date(?) and date(rating.created_at) <= date(?);`;
+    
+  const DAY_SPECIFIER = "%d";
+  const MONTH_SPECIFIER = "%m";
+  const YEAR_SPECIFIER = "%Y";
+  // const STATIS_DATE_FORMATE: Record<TimeType, string> = {
+  //   day: [DAY_SPECIFIER, MONTH_SPECIFIER, YEAR_SPECIFIER].join(separated),
+  //   month: [MONTH_SPECIFIER, YEAR_SPECIFIER].join(separated),
+  //   year: [YEAR_SPECIFIER].join(separated),
+  // };
+
+  const [statisOrdersRowDatas] = (await pool.query(statisOrdersQuery, [
+    fromDate,
+    toDate,
+  ])) as RowDataPacket[][];
+  return statisOrdersRowDatas.map(
+    convertUnderscorePropertiesToCamelCase
+  ) as StatisRatingItem[];
 }

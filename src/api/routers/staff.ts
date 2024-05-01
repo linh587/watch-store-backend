@@ -46,5 +46,15 @@ router.get(
   StaffValidate.statisOrders,
   StaffController.statisOrders
 );
+router.get(
+  "/statis/damage",
+  StaffValidate.statisDamages,
+  StaffController.statisDamages
+);
+router.get(
+  "/statis/rating",
+  StaffValidate.statisRating,
+  StaffController.statisRating
+);
 
 export default router;

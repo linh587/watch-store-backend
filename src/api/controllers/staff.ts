@@ -5,6 +5,8 @@ import { StaffRequest } from "../middlewares/authorization.js";
 import { FormDataRequest } from "../middlewares/formDataExtract.js";
 import * as NotificationService from "../services/notification.js";
 import * as OrderService from "../services/order.js";
+import * as DamageService from "../services/damage.js";
+import * as RatingService from "../services/rating.js";
 import * as StaffAccountService from "../services/staffAccount.js";
 import { deleteImage, uploadImage } from "../utils/storageImage.js";
 
@@ -279,6 +281,31 @@ export async function statisOrders(req: StaffRequest, res: Response) {
     fromDate,
     toDate,
     timeType
+  );
+  res.json(result);
+}
+
+export async function statisDamages(req: StaffRequest, res: Response) {
+  const timeType = req.query["timeType"] as DamageService.TimeType;
+  const fromDate = new Date(String(req.query["fromDate"]));
+  const toDate = new Date(String(req.query["toDate"]));
+
+  const result = await DamageService.statisDamage(
+    fromDate,
+    toDate,
+    timeType
+  );
+  res.json(result);
+}
+
+export async function statisRating(req: StaffRequest, res: Response) {
+  //const timeType = req.query["timeType"] as DamageService.TimeType;
+  const fromDate = new Date(String(req.query["fromDate"]));
+  const toDate = new Date(String(req.query["toDate"]));
+
+  const result = await RatingService.statisRating(
+    fromDate,
+    toDate
   );
   res.json(result);
 }
