@@ -16,4 +16,6 @@ router.post("/order/:orderId/can-delivery", StaffController.canDeliveryOrder);
 router.post("/order/:orderId/can-verify-received", StaffController.canVerifyReceivedOrder);
 router.post("/order/:orderId/can-cancel", StaffController.canCancelOrder);
 router.get("/statis/income", StaffValidate.statisOrders, StaffController.statisOrders);
+router.get("/statis/damage", StaffValidate.statisDamages, StaffController.statisDamages);
+router.get("/statis/rating", StaffValidate.statisRating, StaffController.statisRating);
 export default router;

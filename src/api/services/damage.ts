@@ -42,7 +42,26 @@ export interface InformationToUpdateDamage {
   details: Omit<TemporaryDamageDetail, "product">[];
 }
 
+export interface DamageFilters {
+  status?: string;
+  createdFrom?: Date;
+  createdTo?: Date;
+  searchString?: string; // customer name or phone in order
+}
+
+export interface StatisDamageItem {
+  totalCount: number; //tổng số lượng sản phẩm xử lý hư hỏng
+  totalPrice: number; //tổng giá tiền sản phẩm hư hỏng
+  date: string;
+}
+
+export type TimeType = (typeof TIME_TYPES)[number];
+export type SortType = (typeof SORT_TYPES)[number];
+
 dotenv.config();
+
+export const TIME_TYPES = ["day", "month", "year"] as const;
+export const SORT_TYPES = ["newest", "oldest"] as const;
 
 export async function getAllDamages() {
   let getAllDamagisQuery = `select id, total_amount, creator, created_at, note from ${MYSQL_DB}.damage where deleted_at is null`;
@@ -203,5 +222,50 @@ export async function deleteDamage(
     return false;
   } finally {
     connection.release();
+  }
+}
+
+export async function statisDamage(
+  fromDate: Date,
+  toDate: Date,
+  timeType: TimeType = "day",
+  separated = "-"
+) {
+  const statisOrdersQuery = `select sum(good_receipt_detail.price) as total_price,\
+    sum(damage.total_amount) as total, date_format(damage.created_at, ?) as date\
+    from ${MYSQL_DB}.damage\
+    inner join watch_db.damage_detail on damage.id = damage_detail.damage_id\
+    inner join watch_db.good_receipt_detail on damage_detail.product_id = good_receipt_detail.product_id\
+    and damage_detail.size_id = good_receipt_detail.size_id\
+    where date(damage.created_at) >= date(?) and date(damage.created_at) <= date(?)\
+    group by date order by date;`;
+    
+  const DAY_SPECIFIER = "%d";
+  const MONTH_SPECIFIER = "%m";
+  const YEAR_SPECIFIER = "%Y";
+  const STATIS_DATE_FORMATE: Record<TimeType, string> = {
+    day: [DAY_SPECIFIER, MONTH_SPECIFIER, YEAR_SPECIFIER].join(separated),
+    month: [MONTH_SPECIFIER, YEAR_SPECIFIER].join(separated),
+    year: [YEAR_SPECIFIER].join(separated),
+  };
+
+  const [statisOrdersRowDatas] = (await pool.query(statisOrdersQuery, [
+    STATIS_DATE_FORMATE[timeType],
+    fromDate,
+    toDate,
+  ])) as RowDataPacket[][];
+  return statisOrdersRowDatas.map(
+    convertUnderscorePropertiesToCamelCase
+  ) as StatisDamageItem[];
+}
+
+function createSortSql(sort: SortType) {
+  switch (sort) {
+    case "newest":
+      return "order by created_at desc";
+    case "oldest":
+      return "order by created_at asc";
+    default:
+      return "";
   }
 }

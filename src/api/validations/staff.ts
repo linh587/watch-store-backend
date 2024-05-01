@@ -32,6 +32,18 @@ const statisOrdersSchema = Joi.object({
   timeType: Joi.valid(...TIME_TYPES),
 }).unknown();
 
+const statisDamagesSchema = Joi.object({
+  fromDate: Joi.string().isoDate().required(),
+  toDate: Joi.string().isoDate().required(),
+  timeType: Joi.valid(...TIME_TYPES),
+}).unknown();
+
+const statisRatingSchema = Joi.object({
+  fromDate: Joi.string().isoDate().required(),
+  toDate: Joi.string().isoDate().required(),
+  // timeType: Joi.valid(...TIME_TYPES),
+}).unknown();
+
 export default class StaffValidate {
   static updateInformation(
     req: FormDataRequest<StaffRequest>,
@@ -94,6 +106,26 @@ export default class StaffValidate {
 
   static statisOrders(req: StaffRequest, res: Response, next: NextFunction) {
     const validationResult = statisOrdersSchema.validate(req.query);
+    if (validationResult.error) {
+      res.status(400).json(validationResult.error.message);
+      return;
+    }
+
+    next();
+  }
+
+  static statisDamages(req: StaffRequest, res: Response, next: NextFunction) {
+    const validationResult = statisDamagesSchema.validate(req.query);
+    if (validationResult.error) {
+      res.status(400).json(validationResult.error.message);
+      return;
+    }
+
+    next();
+  }
+
+  static statisRating(req: StaffRequest, res: Response, next: NextFunction) {
+    const validationResult = statisRatingSchema.validate(req.query);
     if (validationResult.error) {
       res.status(400).json(validationResult.error.message);
       return;

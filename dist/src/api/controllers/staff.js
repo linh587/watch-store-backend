@@ -2,6 +2,8 @@ import dotenv from "dotenv";
 import { getSocketIO } from "../../socketIO.js";
 import * as NotificationService from "../services/notification.js";
 import * as OrderService from "../services/order.js";
+import * as DamageService from "../services/damage.js";
+import * as RatingService from "../services/rating.js";
 import * as StaffAccountService from "../services/staffAccount.js";
 import { deleteImage, uploadImage } from "../utils/storageImage.js";
 dotenv.config();
@@ -224,5 +226,19 @@ export async function statisOrders(req, res) {
     const fromDate = new Date(String(req.query["fromDate"]));
     const toDate = new Date(String(req.query["toDate"]));
     const result = await OrderService.statisOrdersByBranch(fromDate, toDate, timeType);
+    res.json(result);
+}
+export async function statisDamages(req, res) {
+    const timeType = req.query["timeType"];
+    const fromDate = new Date(String(req.query["fromDate"]));
+    const toDate = new Date(String(req.query["toDate"]));
+    const result = await DamageService.statisDamage(fromDate, toDate, timeType);
+    res.json(result);
+}
+export async function statisRating(req, res) {
+    //const timeType = req.query["timeType"] as DamageService.TimeType;
+    const fromDate = new Date(String(req.query["fromDate"]));
+    const toDate = new Date(String(req.query["toDate"]));
+    const result = await RatingService.statisRating(fromDate, toDate);
     res.json(result);
 }

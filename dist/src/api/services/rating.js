@@ -3,10 +3,12 @@ import pool from "../db.js";
 import { convertUnderscorePropertiesToCamelCase } from "../utils/dataMapping.js";
 import { createLimitSql } from "../utils/misc.js";
 import * as OrderDetailService from "./orderDetail.js";
+const MYSQL_DB = process.env.MYSQL_DB || "watch_db";
 const RATING_STATUS = {
     lock: "lock",
     unavailable: "unavailable",
 };
+export const TIME_TYPES = ["day", "month", "year"];
 export const SORT_TYPES = ["newest", "oldest"];
 export async function getAllRatings(options, filters) {
     let getAllRatingsQuery = "select product_id, user_account_id, star, content, status, created_at, updated_at, user_account.name as user_name\
@@ -149,4 +151,28 @@ function createFilterSql(filters) {
         filterConditions.push(`(${searchStringConditions.join(" or ")})`);
     }
     return filterConditions.join(" and ");
+}
+export async function statisRating(fromDate, toDate, 
+//timeType: TimeType = "day",
+separated = "-") {
+    const statisOrdersQuery = `select count(*) as total_count,\
+    sum(if(rating.star = 5, 1, 0)) as start_five_count,\
+    sum(if(rating.star = 4, 1, 0)) as start_four_count,\
+    sum(if(rating.star = 3, 1, 0)) as start_three_count,\
+    sum(if(rating.star = 2, 1, 0)) as start_two_count,\
+    sum(if(rating.star = 1, 1, 0)) as start_one_count\
+  from ${MYSQL_DB}.rating where date (rating.created_at) >= date(?) and date(rating.created_at) <= date(?);`;
+    const DAY_SPECIFIER = "%d";
+    const MONTH_SPECIFIER = "%m";
+    const YEAR_SPECIFIER = "%Y";
+    // const STATIS_DATE_FORMATE: Record<TimeType, string> = {
+    //   day: [DAY_SPECIFIER, MONTH_SPECIFIER, YEAR_SPECIFIER].join(separated),
+    //   month: [MONTH_SPECIFIER, YEAR_SPECIFIER].join(separated),
+    //   year: [YEAR_SPECIFIER].join(separated),
+    // };
+    const [statisOrdersRowDatas] = (await pool.query(statisOrdersQuery, [
+        fromDate,
+        toDate,
+    ]));
+    return statisOrdersRowDatas.map(convertUnderscorePropertiesToCamelCase);
 }
