@@ -173,19 +173,15 @@ export async function cancelOrderById(orderId) {
 }
 export async function updatePaymentStatusById(orderId, responseCode) {
     let paymentStatus;
-    let orderStatus;
     if (responseCode === VNP_RESPONSE_CODE.SUCCESS) {
         paymentStatus = PAYMENT_STATUS.PAID;
-        orderStatus = ORDER_STATUS.verified;
     }
     else {
         paymentStatus = PAYMENT_STATUS.NOT_PAID;
-        orderStatus = ORDER_STATUS.waitVerify;
     }
-    const updatePaymentQuery = `update ${MYSQL_DB}.order set payment_status=?, status=? where id=?`;
+    const updatePaymentQuery = `update ${MYSQL_DB}.order set payment_status=? where id=?`;
     const [result] = (await pool.query(updatePaymentQuery, [
         paymentStatus,
-        orderStatus,
         orderId,
     ]));
     return result.affectedRows > 0;

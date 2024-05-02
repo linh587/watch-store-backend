@@ -51,15 +51,40 @@ export interface TemporaryGoodRecieptDetail {
   note?: string;
 }
 
+const SORT_TYPES = ["newest", "oldest"] as const;
+
+export interface GetGoodReceiptOptions {
+  sort?: (typeof SORT_TYPES)[number];
+}
+
 dotenv.config();
 
-export async function getAllGoodReceipts() {
+export type SortType = (typeof SORT_TYPES)[number];
+
+function createSortSql(sort: SortType) {
+  switch (sort) {
+    case "newest":
+      return "order by delivery_date desc";
+    case "oldest":
+      return "order by delivery_date asc";
+    default:
+      return "";
+  }
+}
+
+export async function getAllGoodReceipts(options?: GetGoodReceiptOptions) {
   let getAllGoodReceiptsQuery = `select id, total_amount, deliver, delivery_date, creator, note, supplier_id from ${MYSQL_DB}.good_receipt where deleted_at is null`;
 
-  const [goodReceiptRowDatas] = (await pool.query(
+  if (options) {
+    if (options.sort) {
+      getAllGoodReceiptsQuery += " " + createSortSql(options.sort);
+    }
+  }
+
+  const [orderRowDatas] = (await pool.query(
     getAllGoodReceiptsQuery
   )) as RowDataPacket[][];
-  return goodReceiptRowDatas.map(
+  return orderRowDatas.map(
     convertUnderscorePropertiesToCamelCase
   ) as GoodReceipt[];
 }

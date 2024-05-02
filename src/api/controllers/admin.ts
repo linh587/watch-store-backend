@@ -203,7 +203,19 @@ export async function deleteGoodReceipt(req: Request, res: Response) {
 }
 
 export async function getAllGoodReceipts(req: Request, res: Response) {
-  const goodReceipts = await GoodReceiptService.getAllGoodReceipts();
+  const options: GoodReceiptService.GetGoodReceiptOptions = {};
+
+  if (req.query["sort"]) {
+    const sortType = String(
+      req.query["sort"] || ""
+    ) as GoodReceiptService.SortType;
+    if (OrderService.SORT_TYPES.includes(sortType)) {
+      options.sort = sortType;
+    }
+  }
+
+  const goodReceipts = await GoodReceiptService.getAllGoodReceipts(options);
+
   res.json({
     data: goodReceipts,
   });

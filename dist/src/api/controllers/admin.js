@@ -168,7 +168,14 @@ export async function deleteGoodReceipt(req, res) {
     }
 }
 export async function getAllGoodReceipts(req, res) {
-    const goodReceipts = await GoodReceiptService.getAllGoodReceipts();
+    const options = {};
+    if (req.query["sort"]) {
+        const sortType = String(req.query["sort"] || "");
+        if (OrderService.SORT_TYPES.includes(sortType)) {
+            options.sort = sortType;
+        }
+    }
+    const goodReceipts = await GoodReceiptService.getAllGoodReceipts(options);
     res.json({
         data: goodReceipts,
     });

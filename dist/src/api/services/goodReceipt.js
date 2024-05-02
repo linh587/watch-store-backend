@@ -5,11 +5,27 @@ import * as GoodReceiptDetailService from "./goodReceiptDetail.js";
 import * as ProductService from "./product.js";
 import { convertUnderscorePropertiesToCamelCase } from "../utils/dataMapping.js";
 const MYSQL_DB = process.env.MYSQL_DB || "watch_db";
+const SORT_TYPES = ["newest", "oldest"];
 dotenv.config();
-export async function getAllGoodReceipts() {
+function createSortSql(sort) {
+    switch (sort) {
+        case "newest":
+            return "order by delivery_date desc";
+        case "oldest":
+            return "order by delivery_date asc";
+        default:
+            return "";
+    }
+}
+export async function getAllGoodReceipts(options) {
     let getAllGoodReceiptsQuery = `select id, total_amount, deliver, delivery_date, creator, note, supplier_id from ${MYSQL_DB}.good_receipt where deleted_at is null`;
-    const [goodReceiptRowDatas] = (await pool.query(getAllGoodReceiptsQuery));
-    return goodReceiptRowDatas.map(convertUnderscorePropertiesToCamelCase);
+    if (options) {
+        if (options.sort) {
+            getAllGoodReceiptsQuery += " " + createSortSql(options.sort);
+        }
+    }
+    const [orderRowDatas] = (await pool.query(getAllGoodReceiptsQuery));
+    return orderRowDatas.map(convertUnderscorePropertiesToCamelCase);
 }
 export async function createGoodReciept(information) {
     const goodReceiptId = createUid(20);

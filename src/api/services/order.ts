@@ -311,21 +311,17 @@ export async function updatePaymentStatusById(
   responseCode: string
 ) {
   let paymentStatus;
-  let orderStatus;
 
   if (responseCode === VNP_RESPONSE_CODE.SUCCESS) {
     paymentStatus = PAYMENT_STATUS.PAID;
-    orderStatus = ORDER_STATUS.verified;
   } else {
     paymentStatus = PAYMENT_STATUS.NOT_PAID;
-    orderStatus = ORDER_STATUS.waitVerify;
   }
 
-  const updatePaymentQuery = `update ${MYSQL_DB}.order set payment_status=?, status=? where id=?`;
+  const updatePaymentQuery = `update ${MYSQL_DB}.order set payment_status=? where id=?`;
 
   const [result] = (await pool.query(updatePaymentQuery, [
     paymentStatus,
-    orderStatus,
     orderId,
   ])) as OkPacket[];
   return result.affectedRows > 0;
@@ -511,7 +507,7 @@ export async function statisOrdersByBranch(
     from ${MYSQL_DB}.order \
     where date(created_at) >= date(?) and date(created_at) <= date(?)\
     group by date order by date`;
-    
+
   const DAY_SPECIFIER = "%d";
   const MONTH_SPECIFIER = "%m";
   const YEAR_SPECIFIER = "%Y";
