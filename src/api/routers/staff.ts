@@ -28,6 +28,9 @@ router.patch(
   "/order/:orderId/verify-received",
   StaffController.verifyReceivedOrder
 );
+
+router.patch("/order/:orderId/complete", StaffController.completedOrder);
+
 router.patch(
   "/order/:orderId/cancel",
   StaffValidate.cancelOrder,
@@ -40,6 +43,7 @@ router.post(
   "/order/:orderId/can-verify-received",
   StaffController.canVerifyReceivedOrder
 );
+router.post("/order/:orderId/can-complete", StaffController.canCompletedOrder);
 router.post("/order/:orderId/can-cancel", StaffController.canCancelOrder);
 router.get(
   "/statis/income",

@@ -10,10 +10,12 @@ router.post("/exists-phone", StaffValidate.checkExistsPhone, StaffController.che
 router.patch("/order/:orderId/verify", StaffController.verifyOrder);
 router.patch("/order/:orderId/delivery", StaffController.deliveryOrder);
 router.patch("/order/:orderId/verify-received", StaffController.verifyReceivedOrder);
+router.patch("/order/:orderId/complete", StaffController.completedOrder);
 router.patch("/order/:orderId/cancel", StaffValidate.cancelOrder, StaffController.cancelOrder);
 router.post("/order/:orderId/can-verify", StaffController.canVerifyOrder);
 router.post("/order/:orderId/can-delivery", StaffController.canDeliveryOrder);
 router.post("/order/:orderId/can-verify-received", StaffController.canVerifyReceivedOrder);
+router.post("/order/:orderId/can-complete", StaffController.canCompletedOrder);
 router.post("/order/:orderId/can-cancel", StaffController.canCancelOrder);
 router.get("/statis/income", StaffValidate.statisOrders, StaffController.statisOrders);
 router.get("/statis/damage", StaffValidate.statisDamages, StaffController.statisDamages);

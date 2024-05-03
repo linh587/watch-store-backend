@@ -82,7 +82,7 @@ export async function verifyOrder(req, res) {
         res.status(400).json("Unknown error");
         return;
     }
-    const success = await OrderService.verifyOrderByStaff(orderId);
+    const success = await OrderService.verifyOrder(orderId);
     if (success) {
         const order = await OrderService.getOrderById(orderId);
         if (order && order.userAccountId) {
@@ -109,7 +109,7 @@ export async function deliveryOrder(req, res) {
         res.status(400).json("Unknown error");
         return;
     }
-    const success = await OrderService.deliveryOrderByStaff(orderId);
+    const success = await OrderService.deliveryOrder(orderId);
     if (success) {
         const order = await OrderService.getOrderById(orderId);
         if (order && order.userAccountId) {
@@ -136,7 +136,7 @@ export async function verifyReceivedOrder(req, res) {
         res.status(400).json("Unknown error");
         return;
     }
-    const success = await OrderService.verifyReceivedOrderByStaff(orderId);
+    const success = await OrderService.verifyReceivedOrder(orderId);
     if (success) {
         const order = await OrderService.getOrderById(orderId);
         if (order && order.userAccountId) {
@@ -152,6 +152,20 @@ export async function verifyReceivedOrder(req, res) {
             socketIO.to(order.userAccountId).emit("newNotification");
         }
         res.json("received");
+    }
+    else {
+        res.status(400).json("Failure");
+    }
+}
+export async function completedOrder(req, res) {
+    const orderId = req.params["orderId"];
+    if (!orderId) {
+        res.status(400).json("Unknown error");
+        return;
+    }
+    const success = await OrderService.completedOrder(orderId);
+    if (success) {
+        res.json("completed");
     }
     else {
         res.status(400).json("Failure");
@@ -191,7 +205,7 @@ export async function canVerifyOrder(req, res) {
         res.status(400).json("Unknown error");
         return;
     }
-    const result = await OrderService.canVerifyOrder();
+    const result = await OrderService.canVerifyOrder(orderId);
     res.json(result);
 }
 export async function canDeliveryOrder(req, res) {
@@ -200,7 +214,7 @@ export async function canDeliveryOrder(req, res) {
         res.status(400).json("Unknown error");
         return;
     }
-    const result = await OrderService.canDeliveryOrder();
+    const result = await OrderService.canDeliveryOrder(orderId);
     res.json(result);
 }
 export async function canVerifyReceivedOrder(req, res) {
@@ -209,7 +223,16 @@ export async function canVerifyReceivedOrder(req, res) {
         res.status(400).json("Unknown error");
         return;
     }
-    const result = await OrderService.canVerifyReceivedOrder();
+    const result = await OrderService.canVerifyReceivedOrder(orderId);
+    res.json(result);
+}
+export async function canCompletedOrder(req, res) {
+    const orderId = req.params["orderId"];
+    if (!orderId) {
+        res.status(400).json("Unknown error");
+        return;
+    }
+    const result = await OrderService.canCompletedOrder(orderId);
     res.json(result);
 }
 export async function canCancelOrder(req, res) {
@@ -225,7 +248,7 @@ export async function statisOrders(req, res) {
     const timeType = req.query["timeType"];
     const fromDate = new Date(String(req.query["fromDate"]));
     const toDate = new Date(String(req.query["toDate"]));
-    const result = await OrderService.statisOrdersByBranch(fromDate, toDate, timeType);
+    const result = await OrderService.statisOrders(fromDate, toDate, timeType);
     res.json(result);
 }
 export async function statisDamages(req, res) {

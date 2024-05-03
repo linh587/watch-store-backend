@@ -10,6 +10,9 @@ export interface ProductPrice {
   productSizeId: string;
   price: number;
   quantity: number;
+  productCoverImage: string;
+  productSizeName: string;
+  productName: string;
 }
 
 export interface InformationToCreateProductPrice {
@@ -29,7 +32,7 @@ export interface GetProductPriceOptions {
 
 export async function getProductPrices() {
   const getProductPricesQuery =
-    "select product_price.id, product_id, product_size_id, product_price.price, quantity, product.name as productName, product_size.name as productSizeName\
+    "select product_price.id, product_id, product_size_id, product_price.price, quantity, product.name as productName, product.cover_image as productCoverImage, product_size.name as productSizeName\
     from product_price\
     inner join product on product_price.product_id = product.id\
     inner join product_size on product_price.product_size_id = product_size.id\
@@ -47,7 +50,7 @@ export async function getProductPrice(
   options?: GetProductPriceOptions
 ) {
   let getProductPriceQuery =
-    "select product_price.id, product_id, product_size_id, product_price.price, quantity, product.name as productName, product_size.name as productSizeName\
+    "select product_price.id, product_id, product_size_id, product_price.price, quantity, product.name as productName, product.cover_image as productCoverImage, product_size.name as productSizeName\
     from product_price\
     inner join product on product_price.product_id = product.id\
     inner join product_size on product_price.product_size_id = product_size.id\

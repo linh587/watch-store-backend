@@ -13,12 +13,17 @@ export const ORDER_STATUS = {
     verified: "verified",
     waitReceive: "waitReceive",
     received: "received",
+    completed: "completed",
     cancelled: "cancelled",
 };
 export const PAYMENT_STATUS = {
     NOT_PAID: "not-paid",
     PAID: "paid",
     PAY_FAILED: "pay-failed",
+};
+export const PAYMENT_TYPE = {
+    COD: "0",
+    CARD: "1",
 };
 export const VNP_RESPONSE_CODE = {
     SUCCESS: "00",
@@ -186,7 +191,7 @@ export async function updatePaymentStatusById(orderId, responseCode) {
     ]));
     return result.affectedRows > 0;
 }
-export async function verifyOrderByStaff(orderId) {
+export async function verifyOrder(orderId) {
     const verifyOrderQuery = `update ${MYSQL_DB}.order set status=? where id=? and status in ?`;
     const poolConnection = await pool.getConnection();
     try {
@@ -212,7 +217,7 @@ export async function verifyOrderByStaff(orderId) {
         poolConnection.release();
     }
 }
-export async function deliveryOrderByStaff(orderId) {
+export async function deliveryOrder(orderId) {
     const deliveryOrderQuery = `update ${MYSQL_DB}.order set status=? where id=? and status in ?`;
     const poolConnection = await pool.getConnection();
     try {
@@ -234,7 +239,7 @@ export async function deliveryOrderByStaff(orderId) {
         poolConnection.release();
     }
 }
-export async function verifyReceivedOrderByStaff(orderId) {
+export async function verifyReceivedOrder(orderId) {
     const verifyReceivedOrderQuery = `update ${MYSQL_DB}.order set status=?, payment_status=?, received_at=? where id=? and status in ?`;
     const poolConnection = await pool.getConnection();
     try {
@@ -250,6 +255,27 @@ export async function verifyReceivedOrderByStaff(orderId) {
             throw new Error(`Don't verify received order #${orderId}`);
         }
         await OrderConfirmService.confirmOrder({ orderId, action: "verifyReceived" }, poolConnection);
+        await poolConnection.commit();
+        return true;
+    }
+    catch (error) {
+        console.log(error);
+        await poolConnection.rollback();
+        return false;
+    }
+    finally {
+        poolConnection.release();
+    }
+}
+export async function completedOrder(orderId) {
+    const verifyReceivedOrderQuery = `update ${MYSQL_DB}.order set status=? where id=? and status in ?`;
+    const poolConnection = await pool.getConnection();
+    try {
+        await poolConnection.beginTransaction();
+        const [statusUpdateResult] = (await poolConnection.query(verifyReceivedOrderQuery, [ORDER_STATUS.completed, orderId, [[ORDER_STATUS.received]]]));
+        if (statusUpdateResult.affectedRows <= 0) {
+            throw new Error(`Don't verify completed order #${orderId}`);
+        }
         await poolConnection.commit();
         return true;
     }
@@ -292,13 +318,44 @@ export async function cancelOrderByStaff(orderId, reason) {
         poolConnection.release();
     }
 }
-export async function canVerifyOrder() {
+export async function canVerifyOrder(orderId) {
+    const order = await getOrderById(orderId);
+    if (!order) {
+        return false;
+    }
+    if (!(order.status === ORDER_STATUS.waitReceive)) {
+        return false;
+    }
     return true;
 }
-export async function canDeliveryOrder() {
+export async function canDeliveryOrder(orderId) {
+    const order = await getOrderById(orderId);
+    if (!order) {
+        return false;
+    }
+    if (!(order.status === ORDER_STATUS.verified)) {
+        return false;
+    }
     return true;
 }
-export async function canVerifyReceivedOrder() {
+export async function canVerifyReceivedOrder(orderId) {
+    const order = await getOrderById(orderId);
+    if (!order) {
+        return false;
+    }
+    if (!(order.status === ORDER_STATUS.waitReceive)) {
+        return false;
+    }
+    return true;
+}
+export async function canCompletedOrder(orderId) {
+    const order = await getOrderById(orderId);
+    if (!order) {
+        return false;
+    }
+    if (!(order.status === ORDER_STATUS.received)) {
+        return false;
+    }
     return true;
 }
 export async function canCancelOrder(orderId) {
@@ -306,7 +363,7 @@ export async function canCancelOrder(orderId) {
     if (!order) {
         return false;
     }
-    if (order.status === ORDER_STATUS.waitReceive) {
+    if (order.status === ORDER_STATUS.verified) {
         return false;
     }
     return true;
@@ -317,13 +374,13 @@ export function calculateTemporaryTotalPrice(orderItems) {
         .reduce((totalPrice, price) => totalPrice + price, 0);
     return totalPrice;
 }
-export async function statisOrdersByBranch(fromDate, toDate, timeType = "day", separated = "-") {
+export async function statisOrders(fromDate, toDate, timeType = "day", separated = "-") {
     const statisOrdersQuery = `select\ 
-    sum(if(status = 'received', 1, 0 )) as received_count,\
-    sum(if (status='received' or status='cancelled',  1, 0)) as total_count,\
+    sum(if(status = 'completed', 1, 0 )) as completed_count,\
+    sum(if (status='completed' or status='cancelled',  1, 0)) as total_count,\
     sum(if(status='cancelled', 1, 0)) as cancelled_count,\
-    sum(if(status = 'received', total_price, 0 )) as received_total_price,\
-    sum(if (status='received' or status='cancelled',  total_price, 0)) as total_price,\
+    sum(if(status = 'completed', total_price, 0 )) as completed_total_price,\
+    sum(if (status='completed' or status='cancelled',  total_price, 0)) as total_price,\
     sum(if(status='cancelled', total_price, 0)) as cancelled_total_price,\
     date_format(created_at, ?) as date\
     from ${MYSQL_DB}.order \

@@ -2,7 +2,7 @@ import pool from "../db.js";
 import { convertUnderscorePropertiesToCamelCase } from "../utils/dataMapping.js";
 import { createUid } from "../utils/uid.js";
 export async function getProductPrices() {
-    const getProductPricesQuery = "select product_price.id, product_id, product_size_id, product_price.price, quantity, product.name as productName, product_size.name as productSizeName\
+    const getProductPricesQuery = "select product_price.id, product_id, product_size_id, product_price.price, quantity, product.name as productName, product.cover_image as productCoverImage, product_size.name as productSizeName\
     from product_price\
     inner join product on product_price.product_id = product.id\
     inner join product_size on product_price.product_size_id = product_size.id\
@@ -11,7 +11,7 @@ export async function getProductPrices() {
     return productPriceRowDatas.map(convertUnderscorePropertiesToCamelCase);
 }
 export async function getProductPrice(id, options) {
-    let getProductPriceQuery = "select product_price.id, product_id, product_size_id, product_price.price, quantity, product.name as productName, product_size.name as productSizeName\
+    let getProductPriceQuery = "select product_price.id, product_id, product_size_id, product_price.price, quantity, product.name as productName, product.cover_image as productCoverImage, product_size.name as productSizeName\
     from product_price\
     inner join product on product_price.product_id = product.id\
     inner join product_size on product_price.product_size_id = product_size.id\
