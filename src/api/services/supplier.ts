@@ -1,4 +1,4 @@
-import { OkPacket, RowDataPacket } from "mysql2";
+import {escape, OkPacket, RowDataPacket } from "mysql2";
 import pool from "../db.js";
 import { convertUnderscorePropertiesToCamelCase } from "../utils/dataMapping.js";
 import { createUid } from "../utils/uid.js";
@@ -13,12 +13,22 @@ interface Supplier {
   status?: string;
 }
 
+export interface GetSupplierFilters {
+  searchString?: string; // for name, email, sdt, address
+}
+
+
 export type InformationToCreateSupplier = Omit<Supplier, "id">;
 export type InformationToUpdateSupplier = Omit<Supplier, "id">;
 
-export async function getSuppliers() {
-  const getSuppliersQuery =
+export async function getSuppliers(filters?: GetSupplierFilters) {
+  let getSuppliersQuery =
     "select id, name, email, phone, address, note, status from supplier where deleted_at is null";
+
+    if (filters) {
+      const filterSql = createFilterSql(filters);
+      getSuppliersQuery += filterSql ? ` and ${filterSql}` : "";
+    }
   const [supplierRowDatas] = (await pool.query(
     getSuppliersQuery
   )) as RowDataPacket[][];
@@ -89,4 +99,26 @@ export async function search(text: string) {
   return supplierRowDatas.map(
     convertUnderscorePropertiesToCamelCase
   ) as Supplier[];
+}
+function createFilterSql(filter: GetSupplierFilters) {
+  let filterStatements: any = [];
+// for name, email, sdt, address
+  if (filter.searchString) {
+    const subFilterStatements: any = [];
+    subFilterStatements.push(
+      `supplier.name like ${escape(`%${filter.searchString}%`)}`
+    );
+    subFilterStatements.push(
+      `supplier.email like ${escape(`%${filter.searchString}%`)}`
+    );
+    subFilterStatements.push(
+      `supplier.phone like ${escape(`%${filter.searchString}%`)}`
+    );
+    subFilterStatements.push(
+      `supplier.address like ${escape(`%${filter.searchString}%`)}`
+    );
+    filterStatements.push(`(${subFilterStatements.join(" or ")})`);
+  }
+
+  return filterStatements.join(" and ");
 }

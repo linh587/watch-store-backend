@@ -1,3 +1,4 @@
+import { escape } from "mysql2";
 import pool from "../db.js";
 import { convertUnderscorePropertiesToCamelCase, decodeGender, encodeGender, } from "../utils/dataMapping.js";
 import { createLimitSql, hashText } from "../utils/misc.js";
@@ -12,10 +13,14 @@ export async function signIn(email, password) {
     ]));
     return convertUnderscorePropertiesToCamelCase(userAccountRowDatas[0] || null);
 }
-export async function getUserAccounts(limit) {
+export async function getUserAccounts(limit, filters) {
     let getUserAccountsQuery = "select id, name, phone, gender, date_of_birth, email, address, locked from user_account where deleted_at is null";
     if (limit) {
         getUserAccountsQuery += " " + createLimitSql(limit);
+    }
+    if (filters) {
+        const filterSql = createFilterSql(filters);
+        getUserAccountsQuery += filterSql ? ` and ${filterSql}` : "";
     }
     const [userAccountRowDatas] = (await pool.query(getUserAccountsQuery));
     return userAccountRowDatas.map(convertUnderscorePropertiesToCamelCase);
@@ -174,4 +179,17 @@ export async function checkLock(userAccountId) {
         userAccountId,
     ]));
     return Boolean(rowDatas[0]["locked_count"]);
+}
+function createFilterSql(filter) {
+    let filterStatements = [];
+    // for name, email, sdt, address
+    if (filter.searchString) {
+        const subFilterStatements = [];
+        subFilterStatements.push(`user_account.name like ${escape(`%${filter.searchString}%`)}`);
+        subFilterStatements.push(`user_account.email like ${escape(`%${filter.searchString}%`)}`);
+        subFilterStatements.push(`user_account.phone like ${escape(`%${filter.searchString}%`)}`);
+        subFilterStatements.push(`user_account.address like ${escape(`%${filter.searchString}%`)}`);
+        filterStatements.push(`(${subFilterStatements.join(" or ")})`);
+    }
+    return filterStatements.join(" and ");
 }

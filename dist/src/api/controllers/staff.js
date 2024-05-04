@@ -264,9 +264,9 @@ export async function statisDamages(req, res) {
     res.json(result);
 }
 export async function statisRating(req, res) {
-    //const timeType = req.query["timeType"] as DamageService.TimeType;
+    const timeType = req.query["timeType"];
     const fromDate = new Date(String(req.query["fromDate"]));
     const toDate = new Date(String(req.query["toDate"]));
-    const result = await RatingService.statisRating(fromDate, toDate);
+    const result = await RatingService.statisRating(fromDate, toDate, timeType);
     res.json(result);
 }

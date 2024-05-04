@@ -37,9 +37,7 @@ router.put(
 );
 
 router.delete("/supplier/:supplierId", AdminController.deleteSupplier);
-
 router.get("/supplier", AdminController.getSuppliers);
-
 router.get("/supplier/:id", AdminController.getSupplier);
 
 router.put(
@@ -48,16 +46,8 @@ router.put(
   AdminController.updatePassword
 );
 
-router.post(
-  "/category",
-  AdminValidate.addCategory,
-  AdminController.addCategory
-);
-router.put(
-  "/category/:categoryId",
-  AdminValidate.updateCategory,
-  AdminController.updateCategory
-);
+router.post("/category",AdminValidate.addCategory,AdminController.addCategory);
+router.put("/category/:categoryId",AdminValidate.updateCategory,AdminController.updateCategory);
 router.delete("/category/:categoryId", AdminController.deleteCategory);
 
 router.post(
