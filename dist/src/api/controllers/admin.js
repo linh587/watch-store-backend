@@ -1,6 +1,5 @@
 import { ITEM_COUNT_PER_PAGE } from "../config.js";
 import * as AdminService from "../services/adminAccount.js";
-import * as BannerService from "../services/banner.js";
 import * as CategoryService from "../services/category.js";
 import * as CouponService from "../services/coupon.js";
 import * as NewsService from "../services/news.js";
@@ -540,55 +539,6 @@ export async function deletePromotion(req, res) {
     }
     else {
         res.status(400).json("Delete news failure");
-    }
-}
-export async function addBanner(req, res) {
-    if (!req.fields || !req.files || !req.files.imageFile) {
-        res.status(400).json("Unknown error");
-        return;
-    }
-    const information = req.fields;
-    const imageFile = Array.isArray(req.files.imageFile)
-        ? req.files.imageFile[0]
-        : req.files.imageFile;
-    information.image = await uploadImage(imageFile.filepath);
-    const success = await BannerService.addBanner(information);
-    if (success) {
-        res.json("Add banner successful");
-    }
-    else {
-        res.status(400).json("Add banner failure");
-    }
-}
-export async function updateBanner(req, res) {
-    if (!req.fields) {
-        res.status(400).json("Unknown error");
-        return;
-    }
-    const bannerId = req.params["bannerId"];
-    const information = req.fields;
-    if (req.files && req.files.imageFile) {
-        const imageFile = Array.isArray(req.files.imageFile)
-            ? req.files.imageFile[0]
-            : req.files.imageFile;
-        information.image = await uploadImage(imageFile.filepath);
-    }
-    const success = await BannerService.updateBanner(bannerId, information);
-    if (success) {
-        res.json("Update banner successful");
-    }
-    else {
-        res.status(400).json("Update banner failure");
-    }
-}
-export async function deleteBanner(req, res) {
-    const bannerId = req.params["bannerId"];
-    const success = await BannerService.deleteBanner(bannerId);
-    if (success) {
-        res.json("Delete banner successful");
-    }
-    else {
-        res.status(400).json("Delete banner failure");
     }
 }
 export async function getUserAccounts(req, res) {

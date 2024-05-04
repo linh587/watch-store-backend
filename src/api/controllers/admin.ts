@@ -692,66 +692,6 @@ export async function deletePromotion(req: AdminRequest, res: Response) {
   }
 }
 
-export async function addBanner(
-  req: FormDataRequest<AdminRequest>,
-  res: Response
-) {
-  if (!req.fields || !req.files || !req.files.imageFile) {
-    res.status(400).json("Unknown error");
-    return;
-  }
-
-  const information = req.fields as BannerService.InformationToCreateBanner;
-  const imageFile = Array.isArray(req.files.imageFile)
-    ? req.files.imageFile[0]
-    : req.files.imageFile;
-  information.image = await uploadImage(imageFile.filepath);
-  const success = await BannerService.addBanner(information);
-
-  if (success) {
-    res.json("Add banner successful");
-  } else {
-    res.status(400).json("Add banner failure");
-  }
-}
-
-export async function updateBanner(
-  req: FormDataRequest<AdminRequest>,
-  res: Response
-) {
-  if (!req.fields) {
-    res.status(400).json("Unknown error");
-    return;
-  }
-
-  const bannerId = req.params["bannerId"];
-  const information = req.fields as BannerService.InformationToUpdateBanner;
-
-  if (req.files && req.files.imageFile) {
-    const imageFile = Array.isArray(req.files.imageFile)
-      ? req.files.imageFile[0]
-      : req.files.imageFile;
-    information.image = await uploadImage(imageFile.filepath);
-  }
-
-  const success = await BannerService.updateBanner(bannerId, information);
-  if (success) {
-    res.json("Update banner successful");
-  } else {
-    res.status(400).json("Update banner failure");
-  }
-}
-
-export async function deleteBanner(req: AdminRequest, res: Response) {
-  const bannerId = req.params["bannerId"];
-  const success = await BannerService.deleteBanner(bannerId);
-  if (success) {
-    res.json("Delete banner successful");
-  } else {
-    res.status(400).json("Delete banner failure");
-  }
-}
-
 export async function getUserAccounts(req: AdminRequest, res: Response) {
   const page = req.query["page"];
   const pageNumber = Number(page);

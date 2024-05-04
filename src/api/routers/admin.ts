@@ -141,20 +141,6 @@ router.put(
 );
 router.delete("/promotion/:promotionId", AdminController.deletePromotion);
 
-router.post(
-  "/banner",
-  extractFormData,
-  AdminValidate.addBanner,
-  AdminController.addBanner
-);
-router.put(
-  "/banner/:bannerId",
-  extractFormData,
-  AdminController.updateBanner,
-  AdminController.updateBanner
-);
-router.delete("/banner/:bannerId", AdminController.deleteBanner);
-
 router.get("/user-account", AdminController.getUserAccounts);
 router.patch(
   "/user-account/:userAccountId/lock",
