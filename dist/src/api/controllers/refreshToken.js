@@ -8,12 +8,12 @@ export function refreshTokenForAdmin(req, res) {
         const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || "token";
         const JWT_REFRESH_SECRET_KEY = process.env.JWT_REFRESH_SECRET_KEY || "refresh";
         const adminPayload = jwt.verify(refreshToken, JWT_REFRESH_SECRET_KEY);
-        const { username, type, role } = adminPayload;
-        if (username && type && role === "admin") {
-            const accessToken = jwt.sign({ username, type, role }, JWT_SECRET_KEY, {
+        const { id, username, type, role } = adminPayload;
+        if (id && role === "admin") {
+            const accessToken = jwt.sign({ id, username, type, role }, JWT_SECRET_KEY, {
                 expiresIn: EXPIRE_TIME_OF_ACCESS_TOKEN,
             });
-            const refreshToken = jwt.sign({ username, type, role }, JWT_REFRESH_SECRET_KEY, { expiresIn: EXPIRE_TIME_OF_REFRESH_TOKEN });
+            const refreshToken = jwt.sign({ id, username, type, role }, JWT_REFRESH_SECRET_KEY, { expiresIn: EXPIRE_TIME_OF_REFRESH_TOKEN });
             res.json({ accessToken, refreshToken });
             return;
         }

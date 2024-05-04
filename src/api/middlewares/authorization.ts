@@ -65,10 +65,6 @@ export function authorizationUser(
       const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || "token";
       const userPayload = jwt.verify(accessToken, JWT_SECRET_KEY) as JwtPayload;
 
-      //   if (userPayload.role !== "user") {
-      //     res.status(403).json("Not permisson");
-      //     return;
-      //   }
       req.userAccountId = userPayload.id;
       next();
     } catch (error) {

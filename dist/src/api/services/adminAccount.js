@@ -2,7 +2,7 @@ import pool from "../db.js";
 import { convertUnderscorePropertiesToCamelCase } from "../utils/dataMapping.js";
 import { hashText } from "../utils/misc.js";
 export async function signIn(username, password) {
-    const findAdminAccountQuery = `select id from admin_account where username=? and password=?`;
+    const findAdminAccountQuery = `select id, username, type from admin_account where username=? and password=?`;
     const [adminAccountRowDatas] = (await pool.query(findAdminAccountQuery, [
         username,
         password,

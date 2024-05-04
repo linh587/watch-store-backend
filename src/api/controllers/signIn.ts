@@ -63,8 +63,6 @@ export async function signInUser(req: Request, res: Response) {
     res.json({
       accessToken,
       refreshToken,
-      verified: userSignInResult.verified,
-      id: userSignInResult.id,
     });
   } else {
     res.status(404).json("Not found this user");

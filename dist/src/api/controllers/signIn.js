@@ -32,8 +32,6 @@ export async function signInUser(req, res) {
         res.json({
             accessToken,
             refreshToken,
-            verified: userSignInResult.verified,
-            id: userSignInResult.id,
         });
     }
     else {

@@ -14,7 +14,7 @@ interface AdminSignInResult {
 type AdminAccount = AdminSignInResult;
 
 export async function signIn(username: string, password: string) {
-  const findAdminAccountQuery = `select id from admin_account where username=? and password=?`;
+  const findAdminAccountQuery = `select id, username, type from admin_account where username=? and password=?`;
   const [adminAccountRowDatas] = (await pool.query(findAdminAccountQuery, [
     username,
     password,

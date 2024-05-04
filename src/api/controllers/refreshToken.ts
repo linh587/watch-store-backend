@@ -18,14 +18,18 @@ export function refreshTokenForAdmin(req: Request, res: Response) {
       refreshToken,
       JWT_REFRESH_SECRET_KEY
     ) as JwtPayload;
-    const { username, type, role } = adminPayload;
+    const { id, username, type, role } = adminPayload;
 
-    if (username && type && role === "admin") {
-      const accessToken = jwt.sign({ username, type, role }, JWT_SECRET_KEY, {
-        expiresIn: EXPIRE_TIME_OF_ACCESS_TOKEN,
-      });
+    if (id && role === "admin") {
+      const accessToken = jwt.sign(
+        { id, username, type, role },
+        JWT_SECRET_KEY,
+        {
+          expiresIn: EXPIRE_TIME_OF_ACCESS_TOKEN,
+        }
+      );
       const refreshToken = jwt.sign(
-        { username, type, role },
+        { id, username, type, role },
         JWT_REFRESH_SECRET_KEY,
         { expiresIn: EXPIRE_TIME_OF_REFRESH_TOKEN }
       );
