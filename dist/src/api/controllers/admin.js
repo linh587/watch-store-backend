@@ -17,9 +17,9 @@ import { deleteImage, uploadImage } from "../utils/storageImage.js";
 import { getSocketIO } from "../../socketIO.js";
 import * as OrderService from "../services/order.js";
 export async function getInformation(req, res) {
-    const { username } = req;
-    if (username) {
-        const information = await AdminService.getInformation(username);
+    const { id } = req;
+    if (id) {
+        const information = await AdminService.getInformation(id);
         if (information) {
             res.json(information);
         }

@@ -6,6 +6,7 @@ import { hashText } from "../utils/misc.js";
 type AdminAccountType = "store" | "website";
 
 interface AdminSignInResult {
+  id: string;
   username: string;
   type: AdminAccountType;
 }
@@ -13,7 +14,7 @@ interface AdminSignInResult {
 type AdminAccount = AdminSignInResult;
 
 export async function signIn(username: string, password: string) {
-  const findAdminAccountQuery = `select username, type from admin_account where username=? and password=?`;
+  const findAdminAccountQuery = `select id from admin_account where username=? and password=?`;
   const [adminAccountRowDatas] = (await pool.query(findAdminAccountQuery, [
     username,
     password,
@@ -24,11 +25,11 @@ export async function signIn(username: string, password: string) {
   return adminAccount;
 }
 
-export async function getInformation(username: string) {
+export async function getInformation(id?: string) {
   const getInformationQuery =
-    "select username, type from admin_account where username=?";
+    "select id, username, type from admin_account where id=?";
   const [adminAccountRowDatas] = (await pool.query(getInformationQuery, [
-    username,
+    id,
   ])) as RowDataPacket[][];
 
   return (
@@ -44,7 +45,7 @@ export async function updatePassword(
   newPassword: string
 ) {
   const updatePasswordQuery =
-    "update admin_account set password=? where username=? and password=?";
+    "update admin_account set password=? where id=? and password=?";
   const hashedOldPassword = hashText(oldPassword);
   const hashedNewPassword = hashText(newPassword);
   const [result] = (await pool.query(updatePasswordQuery, [

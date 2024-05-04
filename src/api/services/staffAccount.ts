@@ -76,7 +76,7 @@ export async function getStaffAccounts(limit?: LimitOptions) {
   ) as StaffAccount[];
 }
 
-export async function getInformation(staffAccountId: string) {
+export async function getInformation(staffAccountId?: string) {
   const getInformationQuery =
     "select staff_account.id, staff_account.name, staff_account.phone, gender, date_of_birth, avatar, staff_account.email, staff_account.address, staff_account.longitude, staff_account.latitude, staff_account.identificationCard from staff_account where staff_account.id=? and staff_account.deleted_at is null";
   const [staffRowDatas] = (await pool.query(getInformationQuery, [

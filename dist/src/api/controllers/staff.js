@@ -77,12 +77,13 @@ export async function checkExistsPhone(req, res) {
     res.json(exists);
 }
 export async function verifyOrder(req, res) {
+    const { staffAccountId, id } = req;
     const orderId = req.params["orderId"];
     if (!orderId) {
         res.status(400).json("Unknown error");
         return;
     }
-    const success = await OrderService.verifyOrder(orderId);
+    const success = await OrderService.verifyOrder(orderId, staffAccountId, id);
     if (success) {
         const order = await OrderService.getOrderById(orderId);
         if (order && order.userAccountId) {
@@ -104,12 +105,13 @@ export async function verifyOrder(req, res) {
     }
 }
 export async function deliveryOrder(req, res) {
+    const { staffAccountId, id } = req;
     const orderId = req.params["orderId"];
     if (!orderId) {
         res.status(400).json("Unknown error");
         return;
     }
-    const success = await OrderService.deliveryOrder(orderId);
+    const success = await OrderService.deliveryOrder(orderId, staffAccountId, id);
     if (success) {
         const order = await OrderService.getOrderById(orderId);
         if (order && order.userAccountId) {
@@ -131,12 +133,13 @@ export async function deliveryOrder(req, res) {
     }
 }
 export async function verifyReceivedOrder(req, res) {
+    const { staffAccountId, id } = req;
     const orderId = req.params["orderId"];
     if (!orderId) {
         res.status(400).json("Unknown error");
         return;
     }
-    const success = await OrderService.verifyReceivedOrder(orderId);
+    const success = await OrderService.verifyReceivedOrder(orderId, staffAccountId, id);
     if (success) {
         const order = await OrderService.getOrderById(orderId);
         if (order && order.userAccountId) {
@@ -158,12 +161,13 @@ export async function verifyReceivedOrder(req, res) {
     }
 }
 export async function completedOrder(req, res) {
+    const { staffAccountId, id } = req;
     const orderId = req.params["orderId"];
     if (!orderId) {
         res.status(400).json("Unknown error");
         return;
     }
-    const success = await OrderService.completedOrder(orderId);
+    const success = await OrderService.completedOrder(orderId, staffAccountId, id);
     if (success) {
         res.json("completed");
     }
@@ -172,13 +176,14 @@ export async function completedOrder(req, res) {
     }
 }
 export async function cancelOrder(req, res) {
+    const { staffAccountId, id } = req;
     const orderId = req.params["orderId"];
     const reason = req.body["reason"];
     if (!orderId || !reason) {
         res.status(400).json("Unknown error");
         return;
     }
-    const success = await OrderService.cancelOrderByStaff(orderId, reason);
+    const success = await OrderService.cancelOrderByStaff(orderId, reason, staffAccountId, id);
     if (success) {
         const order = await OrderService.getOrderById(orderId);
         if (order && order.userAccountId) {

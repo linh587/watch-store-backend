@@ -3,7 +3,6 @@ import { LimitOptions, ITEM_COUNT_PER_PAGE } from "../config.js";
 import { AdminRequest } from "../middlewares/authorization.js";
 import { FormDataRequest } from "../middlewares/formDataExtract.js";
 import * as AdminService from "../services/adminAccount.js";
-import * as BannerService from "../services/banner.js";
 import * as CategoryService from "../services/category.js";
 import * as CouponService from "../services/coupon.js";
 import * as NewsService from "../services/news.js";
@@ -23,9 +22,9 @@ import { getSocketIO } from "../../socketIO.js";
 import * as OrderService from "../services/order.js";
 
 export async function getInformation(req: AdminRequest, res: Response) {
-  const { username } = req;
-  if (username) {
-    const information = await AdminService.getInformation(username);
+  const { id } = req;
+  if (id) {
+    const information = await AdminService.getInformation(id);
     if (information) {
       res.json(information);
     } else {

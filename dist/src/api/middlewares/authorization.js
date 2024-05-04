@@ -11,8 +11,8 @@ export function authorizationAdmin(req, res, next) {
                 res.status(403).json("Not permisson");
                 return;
             }
+            req.id = payload.id;
             req.username = payload.username;
-            req.adminType = payload.type;
             next();
         }
         catch (error) {

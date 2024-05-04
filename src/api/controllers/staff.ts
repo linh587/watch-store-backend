@@ -1,7 +1,10 @@
 import dotenv from "dotenv";
 import { Response } from "express";
 import { getSocketIO } from "../../socketIO.js";
-import { StaffRequest } from "../middlewares/authorization.js";
+import {
+  ApproveOrderRequest,
+  StaffRequest,
+} from "../middlewares/authorization.js";
 import { FormDataRequest } from "../middlewares/formDataExtract.js";
 import * as NotificationService from "../services/notification.js";
 import * as OrderService from "../services/order.js";
@@ -106,14 +109,15 @@ export async function checkExistsPhone(req: StaffRequest, res: Response) {
   res.json(exists);
 }
 
-export async function verifyOrder(req: StaffRequest, res: Response) {
+export async function verifyOrder(req: ApproveOrderRequest, res: Response) {
+  const { staffAccountId, id } = req;
   const orderId = req.params["orderId"];
   if (!orderId) {
     res.status(400).json("Unknown error");
     return;
   }
 
-  const success = await OrderService.verifyOrder(orderId);
+  const success = await OrderService.verifyOrder(orderId, staffAccountId, id);
   if (success) {
     const order = await OrderService.getOrderById(orderId);
     if (order && order.userAccountId) {
@@ -137,14 +141,16 @@ export async function verifyOrder(req: StaffRequest, res: Response) {
   }
 }
 
-export async function deliveryOrder(req: StaffRequest, res: Response) {
+export async function deliveryOrder(req: ApproveOrderRequest, res: Response) {
+  const { staffAccountId, id } = req;
+
   const orderId = req.params["orderId"];
   if (!orderId) {
     res.status(400).json("Unknown error");
     return;
   }
 
-  const success = await OrderService.deliveryOrder(orderId);
+  const success = await OrderService.deliveryOrder(orderId, staffAccountId, id);
   if (success) {
     const order = await OrderService.getOrderById(orderId);
     if (order && order.userAccountId) {
@@ -167,14 +173,23 @@ export async function deliveryOrder(req: StaffRequest, res: Response) {
   }
 }
 
-export async function verifyReceivedOrder(req: StaffRequest, res: Response) {
+export async function verifyReceivedOrder(
+  req: ApproveOrderRequest,
+  res: Response
+) {
+  const { staffAccountId, id } = req;
+
   const orderId = req.params["orderId"];
   if (!orderId) {
     res.status(400).json("Unknown error");
     return;
   }
 
-  const success = await OrderService.verifyReceivedOrder(orderId);
+  const success = await OrderService.verifyReceivedOrder(
+    orderId,
+    staffAccountId,
+    id
+  );
   if (success) {
     const order = await OrderService.getOrderById(orderId);
     if (order && order.userAccountId) {
@@ -197,14 +212,20 @@ export async function verifyReceivedOrder(req: StaffRequest, res: Response) {
   }
 }
 
-export async function completedOrder(req: StaffRequest, res: Response) {
+export async function completedOrder(req: ApproveOrderRequest, res: Response) {
+  const { staffAccountId, id } = req;
+
   const orderId = req.params["orderId"];
   if (!orderId) {
     res.status(400).json("Unknown error");
     return;
   }
 
-  const success = await OrderService.completedOrder(orderId);
+  const success = await OrderService.completedOrder(
+    orderId,
+    staffAccountId,
+    id
+  );
   if (success) {
     res.json("completed");
   } else {
@@ -212,7 +233,8 @@ export async function completedOrder(req: StaffRequest, res: Response) {
   }
 }
 
-export async function cancelOrder(req: StaffRequest, res: Response) {
+export async function cancelOrder(req: ApproveOrderRequest, res: Response) {
+  const { staffAccountId, id } = req;
   const orderId = req.params["orderId"];
   const reason = req.body["reason"];
   if (!orderId || !reason) {
@@ -220,7 +242,12 @@ export async function cancelOrder(req: StaffRequest, res: Response) {
     return;
   }
 
-  const success = await OrderService.cancelOrderByStaff(orderId, reason);
+  const success = await OrderService.cancelOrderByStaff(
+    orderId,
+    reason,
+    staffAccountId,
+    id
+  );
   if (success) {
     const order = await OrderService.getOrderById(orderId);
     if (order && order.userAccountId) {

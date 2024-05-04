@@ -6,6 +6,7 @@ dotenv.config();
 
 // override request inteface of express
 export interface AdminRequest extends Request {
+  id?: string;
   username?: string;
   adminType?: string;
 }
@@ -16,6 +17,11 @@ export interface UserRequest extends Request {
 
 export interface StaffRequest extends Request {
   staffAccountId?: string;
+}
+
+export interface ApproveOrderRequest extends Request {
+  staffAccountId?: string;
+  id?: string;
 }
 
 export function authorizationAdmin(
@@ -34,8 +40,8 @@ export function authorizationAdmin(
         return;
       }
 
+      req.id = payload.id;
       req.username = payload.username;
-      req.adminType = payload.type;
 
       next();
     } catch (error) {

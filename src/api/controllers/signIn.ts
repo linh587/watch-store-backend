@@ -24,14 +24,14 @@ export async function signInAdmin(req: Request, res: Response) {
     const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || "token";
     const JWT_REFRESH_SECRET_KEY =
       process.env.JWT_REFRESH_SECRET_KEY || "refresh";
-    const { username, type } = adminSignInResult;
+    const { id, username, type } = adminSignInResult;
     const accessToken = jwt.sign(
-      { username, type, role: "admin" },
+      { id, username, type, role: "admin" },
       JWT_SECRET_KEY,
       { expiresIn: EXPIRE_TIME_OF_ACCESS_TOKEN }
     );
     const refreshToken = jwt.sign(
-      { username, type, role: "admin" },
+      { id, username, type, role: "admin" },
       JWT_REFRESH_SECRET_KEY,
       { expiresIn: EXPIRE_TIME_OF_REFRESH_TOKEN }
     );

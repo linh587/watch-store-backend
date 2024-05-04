@@ -191,7 +191,7 @@ export async function updatePaymentStatusById(orderId, responseCode) {
     ]));
     return result.affectedRows > 0;
 }
-export async function verifyOrder(orderId) {
+export async function verifyOrder(orderId, staffAccountId, id) {
     const verifyOrderQuery = `update ${MYSQL_DB}.order set status=? where id=? and status in ?`;
     const poolConnection = await pool.getConnection();
     try {
@@ -204,7 +204,7 @@ export async function verifyOrder(orderId) {
         if (statusUpdateResult.affectedRows <= 0) {
             throw new Error(`Don't verify order #${orderId}`);
         }
-        await OrderConfirmService.confirmOrder({ orderId, action: "verify" }, poolConnection);
+        await OrderConfirmService.confirmOrder({ accountId: staffAccountId || id, orderId, action: "verify" }, poolConnection);
         await poolConnection.commit();
         return true;
     }
@@ -217,7 +217,7 @@ export async function verifyOrder(orderId) {
         poolConnection.release();
     }
 }
-export async function deliveryOrder(orderId) {
+export async function deliveryOrder(orderId, staffAccountId, id) {
     const deliveryOrderQuery = `update ${MYSQL_DB}.order set status=? where id=? and status in ?`;
     const poolConnection = await pool.getConnection();
     try {
@@ -226,7 +226,7 @@ export async function deliveryOrder(orderId) {
         if (statusUpdateResult.affectedRows <= 0) {
             throw new Error(`Don't delivery order #${orderId}`);
         }
-        await OrderConfirmService.confirmOrder({ orderId, action: "delivery" }, poolConnection);
+        await OrderConfirmService.confirmOrder({ accountId: staffAccountId || id, orderId, action: "delivery" }, poolConnection);
         await poolConnection.commit();
         return true;
     }
@@ -239,7 +239,7 @@ export async function deliveryOrder(orderId) {
         poolConnection.release();
     }
 }
-export async function verifyReceivedOrder(orderId) {
+export async function verifyReceivedOrder(orderId, staffAccountId, id) {
     const verifyReceivedOrderQuery = `update ${MYSQL_DB}.order set status=?, payment_status=?, received_at=? where id=? and status in ?`;
     const poolConnection = await pool.getConnection();
     try {
@@ -254,7 +254,7 @@ export async function verifyReceivedOrder(orderId) {
         if (statusUpdateResult.affectedRows <= 0) {
             throw new Error(`Don't verify received order #${orderId}`);
         }
-        await OrderConfirmService.confirmOrder({ orderId, action: "verifyReceived" }, poolConnection);
+        await OrderConfirmService.confirmOrder({ accountId: staffAccountId || id, orderId, action: "verifyReceived" }, poolConnection);
         await poolConnection.commit();
         return true;
     }
@@ -267,7 +267,7 @@ export async function verifyReceivedOrder(orderId) {
         poolConnection.release();
     }
 }
-export async function completedOrder(orderId) {
+export async function completedOrder(orderId, staffAccountId, id) {
     const verifyReceivedOrderQuery = `update ${MYSQL_DB}.order set status=? where id=? and status in ?`;
     const poolConnection = await pool.getConnection();
     try {
@@ -276,6 +276,7 @@ export async function completedOrder(orderId) {
         if (statusUpdateResult.affectedRows <= 0) {
             throw new Error(`Don't verify completed order #${orderId}`);
         }
+        await OrderConfirmService.confirmOrder({ accountId: staffAccountId || id, orderId, action: "completed" }, poolConnection);
         await poolConnection.commit();
         return true;
     }
@@ -288,7 +289,7 @@ export async function completedOrder(orderId) {
         poolConnection.release();
     }
 }
-export async function cancelOrderByStaff(orderId, reason) {
+export async function cancelOrderByStaff(orderId, reason, staffAccountId, id) {
     if (!(await canCancelOrder(orderId))) {
         return false;
     }
@@ -305,7 +306,7 @@ export async function cancelOrderByStaff(orderId, reason) {
         if (statusUpdateResult.affectedRows <= 0) {
             throw new Error(`Don't cancel order #${orderId}`);
         }
-        await OrderConfirmService.confirmOrder({ orderId, action: "cancel" }, poolConnection);
+        await OrderConfirmService.confirmOrder({ accountId: staffAccountId || id, orderId, action: "cancel" }, poolConnection);
         await poolConnection.commit();
         return true;
     }

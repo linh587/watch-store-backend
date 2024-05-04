@@ -333,7 +333,11 @@ export async function updatePaymentStatusById(
   return result.affectedRows > 0;
 }
 
-export async function verifyOrder(orderId: string) {
+export async function verifyOrder(
+  orderId: string,
+  staffAccountId?: string,
+  id?: string
+) {
   const verifyOrderQuery = `update ${MYSQL_DB}.order set status=? where id=? and status in ?`;
   const poolConnection = await pool.getConnection();
 
@@ -348,7 +352,7 @@ export async function verifyOrder(orderId: string) {
       throw new Error(`Don't verify order #${orderId}`);
     }
     await OrderConfirmService.confirmOrder(
-      { orderId, action: "verify" },
+      { accountId: staffAccountId || id, orderId, action: "verify" },
       poolConnection
     );
     await poolConnection.commit();
@@ -362,7 +366,11 @@ export async function verifyOrder(orderId: string) {
   }
 }
 
-export async function deliveryOrder(orderId: string) {
+export async function deliveryOrder(
+  orderId: string,
+  staffAccountId?: string,
+  id?: string
+) {
   const deliveryOrderQuery = `update ${MYSQL_DB}.order set status=? where id=? and status in ?`;
   const poolConnection = await pool.getConnection();
 
@@ -377,7 +385,7 @@ export async function deliveryOrder(orderId: string) {
     }
 
     await OrderConfirmService.confirmOrder(
-      { orderId, action: "delivery" },
+      { accountId: staffAccountId || id, orderId, action: "delivery" },
       poolConnection
     );
     await poolConnection.commit();
@@ -391,7 +399,11 @@ export async function deliveryOrder(orderId: string) {
   }
 }
 
-export async function verifyReceivedOrder(orderId: string) {
+export async function verifyReceivedOrder(
+  orderId: string,
+  staffAccountId?: string,
+  id?: string
+) {
   const verifyReceivedOrderQuery = `update ${MYSQL_DB}.order set status=?, payment_status=?, received_at=? where id=? and status in ?`;
   const poolConnection = await pool.getConnection();
 
@@ -412,7 +424,7 @@ export async function verifyReceivedOrder(orderId: string) {
     }
 
     await OrderConfirmService.confirmOrder(
-      { orderId, action: "verifyReceived" },
+      { accountId: staffAccountId || id, orderId, action: "verifyReceived" },
       poolConnection
     );
     await poolConnection.commit();
@@ -426,7 +438,11 @@ export async function verifyReceivedOrder(orderId: string) {
   }
 }
 
-export async function completedOrder(orderId: string) {
+export async function completedOrder(
+  orderId: string,
+  staffAccountId?: string,
+  id?: string
+) {
   const verifyReceivedOrderQuery = `update ${MYSQL_DB}.order set status=? where id=? and status in ?`;
   const poolConnection = await pool.getConnection();
 
@@ -440,6 +456,11 @@ export async function completedOrder(orderId: string) {
       throw new Error(`Don't verify completed order #${orderId}`);
     }
 
+    await OrderConfirmService.confirmOrder(
+      { accountId: staffAccountId || id, orderId, action: "completed" },
+      poolConnection
+    );
+
     await poolConnection.commit();
     return true;
   } catch (error) {
@@ -451,7 +472,12 @@ export async function completedOrder(orderId: string) {
   }
 }
 
-export async function cancelOrderByStaff(orderId: string, reason: string) {
+export async function cancelOrderByStaff(
+  orderId: string,
+  reason: string,
+  staffAccountId?: string,
+  id?: string
+) {
   if (!(await canCancelOrder(orderId))) {
     return false;
   }
@@ -472,7 +498,7 @@ export async function cancelOrderByStaff(orderId: string, reason: string) {
     }
 
     await OrderConfirmService.confirmOrder(
-      { orderId, action: "cancel" },
+      { accountId: staffAccountId || id, orderId, action: "cancel" },
       poolConnection
     );
     await poolConnection.commit();
