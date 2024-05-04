@@ -1,8 +1,13 @@
+import { escape } from "mysql2";
 import pool from "../db.js";
 import { convertUnderscorePropertiesToCamelCase } from "../utils/dataMapping.js";
 import { createUid } from "../utils/uid.js";
-export async function getSuppliers() {
-    const getSuppliersQuery = "select id, name, email, phone, address, note, status from supplier where deleted_at is null";
+export async function getSuppliers(filters) {
+    let getSuppliersQuery = "select id, name, email, phone, address, note, status from supplier where deleted_at is null";
+    if (filters) {
+        const filterSql = createFilterSql(filters);
+        getSuppliersQuery += filterSql ? ` and ${filterSql}` : "";
+    }
     const [supplierRowDatas] = (await pool.query(getSuppliersQuery));
     return supplierRowDatas.map(convertUnderscorePropertiesToCamelCase);
 }
@@ -51,4 +56,17 @@ export async function search(text) {
         `%${text}%`,
     ]));
     return supplierRowDatas.map(convertUnderscorePropertiesToCamelCase);
+}
+function createFilterSql(filter) {
+    let filterStatements = [];
+    // for name, email, sdt, address
+    if (filter.searchString) {
+        const subFilterStatements = [];
+        subFilterStatements.push(`supplier.name like ${escape(`%${filter.searchString}%`)}`);
+        subFilterStatements.push(`supplier.email like ${escape(`%${filter.searchString}%`)}`);
+        subFilterStatements.push(`supplier.phone like ${escape(`%${filter.searchString}%`)}`);
+        subFilterStatements.push(`supplier.address like ${escape(`%${filter.searchString}%`)}`);
+        filterStatements.push(`(${subFilterStatements.join(" or ")})`);
+    }
+    return filterStatements.join(" and ");
 }

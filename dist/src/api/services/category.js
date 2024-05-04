@@ -1,9 +1,14 @@
+import { escape } from "mysql2";
 import pool from "../db.js";
 import { convertUnderscorePropertiesToCamelCase } from "../utils/dataMapping.js";
 import { createUid } from "../utils/uid.js";
 import * as ProductService from "./product.js";
-export async function getCategories() {
-    const getCategoriesQuery = "select id, name from category where deleted_at is null";
+export async function getCategories(filters) {
+    let getCategoriesQuery = "select id, name from category where deleted_at is null";
+    if (filters) {
+        const filterSql = createFilterSql(filters);
+        getCategoriesQuery += filterSql ? ` and ${filterSql}` : "";
+    }
     const [categoryRowDatas] = (await pool.query(getCategoriesQuery));
     return categoryRowDatas;
 }
@@ -60,4 +65,13 @@ export async function deleteCategory(id) {
     finally {
         poolConnection.release();
     }
+}
+function createFilterSql(filter) {
+    let filterStatements = [];
+    if (filter.searchString) {
+        const subFilterStatements = [];
+        subFilterStatements.push(`category.name like ${escape(`%${filter.searchString}%`)}`);
+        filterStatements.push(`(${subFilterStatements.join(" or ")})`);
+    }
+    return filterStatements;
 }

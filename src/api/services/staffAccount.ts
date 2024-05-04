@@ -40,8 +40,10 @@ interface ExtraStaffAccount {
   latitude: string;
   identificationCard: string;
 }
+export interface GetStaffFilters {
+  searchString?: string; // for name, email, sdt, address
+}
 
-// còn thiếu căn cước công dân, địa chỉ
 
 export type InformationToCreateStaffAccount = Omit<ExtraStaffAccount, "id">;
 export type InformationToUpdateStaffAccount = Omit<ExtraStaffAccount, "id">;
@@ -61,13 +63,16 @@ export async function signIn(phone: string, password: string) {
   ) as StaffSignInResult | null;
 }
 
-export async function getStaffAccounts(limit?: LimitOptions) {
+export async function getStaffAccounts(limit?: LimitOptions, filters?: GetStaffFilters) {
   let getStaffAccountsQuery =
     "select staff_account.id, staff_account.name, staff_account.date_of_birth, staff_account.phone, staff_account.gender, avatar, staff_account.address, staff_account.longitude, staff_account.latitude, staff_account.identificationCard from staff_account where staff_account.deleted_at is null";
   if (limit) {
     getStaffAccountsQuery += " " + createLimitSql(limit);
   }
-
+  if (filters) {
+    const filterSql = createFilterSql(filters);
+    getStaffAccountsQuery += filterSql ? ` and ${filterSql}` : "";
+  }
   const [staffAccountRowDatas] = (await pool.query(
     getStaffAccountsQuery
   )) as RowDataPacket[][];
@@ -232,4 +237,26 @@ export async function checkExistsPhone(phone: string, staffAccountId?: string) {
     phone,
   ])) as RowDataPacket[][];
   return result.length > 0;
+}
+function createFilterSql(filter: GetStaffFilters) {
+  let filterStatements: any = [];
+// for name, email, sdt, address
+  if (filter.searchString) {
+    const subFilterStatements: any = [];
+    subFilterStatements.push(
+      `staff_account.name like ${escape(`%${filter.searchString}%`)}`
+    );
+    subFilterStatements.push(
+      `staff_account.email like ${escape(`%${filter.searchString}%`)}`
+    );
+    subFilterStatements.push(
+      `staff_account.phone like ${escape(`%${filter.searchString}%`)}`
+    );
+    subFilterStatements.push(
+      `staff_account.address like ${escape(`%${filter.searchString}%`)}`
+    );
+    filterStatements.push(`(${subFilterStatements.join(" or ")})`);
+  }
+
+  return filterStatements.join(" and ");
 }

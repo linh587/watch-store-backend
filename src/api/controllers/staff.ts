@@ -344,10 +344,10 @@ export async function statisDamages(req: StaffRequest, res: Response) {
 }
 
 export async function statisRating(req: StaffRequest, res: Response) {
-  //const timeType = req.query["timeType"] as DamageService.TimeType;
+  const timeType = req.query["timeType"] as DamageService.TimeType;
   const fromDate = new Date(String(req.query["fromDate"]));
   const toDate = new Date(String(req.query["toDate"]));
 
-  const result = await RatingService.statisRating(fromDate, toDate);
+  const result = await RatingService.statisRating(fromDate, toDate, timeType);
   res.json(result);
 }

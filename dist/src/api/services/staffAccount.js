@@ -13,10 +13,14 @@ export async function signIn(phone, password) {
     ]));
     return convertUnderscorePropertiesToCamelCase(staffRowDatas[0] || null);
 }
-export async function getStaffAccounts(limit) {
+export async function getStaffAccounts(limit, filters) {
     let getStaffAccountsQuery = "select staff_account.id, staff_account.name, staff_account.date_of_birth, staff_account.phone, staff_account.gender, avatar, staff_account.address, staff_account.longitude, staff_account.latitude, staff_account.identificationCard from staff_account where staff_account.deleted_at is null";
     if (limit) {
         getStaffAccountsQuery += " " + createLimitSql(limit);
+    }
+    if (filters) {
+        const filterSql = createFilterSql(filters);
+        getStaffAccountsQuery += filterSql ? ` and ${filterSql}` : "";
     }
     const [staffAccountRowDatas] = (await pool.query(getStaffAccountsQuery));
     return staffAccountRowDatas.map(convertUnderscorePropertiesToCamelCase);
@@ -121,4 +125,17 @@ export async function checkExistsPhone(phone, staffAccountId) {
         phone,
     ]));
     return result.length > 0;
+}
+function createFilterSql(filter) {
+    let filterStatements = [];
+    // for name, email, sdt, address
+    if (filter.searchString) {
+        const subFilterStatements = [];
+        subFilterStatements.push(`staff_account.name like ${escape(`%${filter.searchString}%`)}`);
+        subFilterStatements.push(`staff_account.email like ${escape(`%${filter.searchString}%`)}`);
+        subFilterStatements.push(`staff_account.phone like ${escape(`%${filter.searchString}%`)}`);
+        subFilterStatements.push(`staff_account.address like ${escape(`%${filter.searchString}%`)}`);
+        filterStatements.push(`(${subFilterStatements.join(" or ")})`);
+    }
+    return filterStatements.join(" and ");
 }

@@ -125,8 +125,15 @@ export async function deleteSupplier(req: AdminRequest, res: Response) {
 }
 
 export async function getSuppliers(req: Request, res: Response) {
+  let filter: SupplierService.GetSupplierFilters = {};
+    if(req.query["s"]){
+      req.query["s"] && (filter.searchString = req.query["s"] as string);
+      const suppliers = await SupplierService.getSuppliers(filter);
+       res.json(suppliers);
+    }else{
   const suppliers = await SupplierService.getSuppliers();
   res.json(suppliers);
+  }
 }
 
 export async function getSupplier(req: Request, res: Response) {
@@ -465,6 +472,11 @@ export async function getStaffAccounts(req: AdminRequest, res: Response) {
   const page = req.query["page"];
   const pageNumber = Number(page);
   let limit: LimitOptions | undefined;
+  let filter: UserAccountService.GetCustomerFilters = {};
+
+  if(req.query["s"]){
+    req.query["s"] && (filter.searchString = req.query["s"] as string);
+  }
   if (page && Number.isSafeInteger(pageNumber) && pageNumber > 0) {
     limit = {
       amount: ITEM_COUNT_PER_PAGE,
@@ -472,7 +484,7 @@ export async function getStaffAccounts(req: AdminRequest, res: Response) {
     };
   }
 
-  const staffAccounts = await StaffService.getStaffAccounts(limit);
+  const staffAccounts = await StaffService.getStaffAccounts(limit,filter);
 
   res.json({
     hasNextPage: staffAccounts.length === ITEM_COUNT_PER_PAGE,
@@ -695,13 +707,19 @@ export async function getUserAccounts(req: AdminRequest, res: Response) {
   const page = req.query["page"];
   const pageNumber = Number(page);
   let limit: LimitOptions | undefined;
+  let filter: UserAccountService.GetCustomerFilters = {};
+
+  if(req.query["s"]){
+    req.query["s"] && (filter.searchString = req.query["s"] as string);
+  }
+
   if (page && Number.isSafeInteger(pageNumber) && pageNumber > 0) {
     limit = {
       amount: ITEM_COUNT_PER_PAGE,
       offset: ITEM_COUNT_PER_PAGE * (pageNumber - 1),
     };
   }
-  const userAccounts = await UserAccountService.getUserAccounts(limit);
+  const userAccounts = await UserAccountService.getUserAccounts(limit,filter);
   res.json({
     hasNextPage: userAccounts.length === ITEM_COUNT_PER_PAGE,
     data: userAccounts,

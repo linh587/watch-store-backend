@@ -1,4 +1,4 @@
-import { OkPacket, RowDataPacket } from "mysql2";
+import { escape, OkPacket, RowDataPacket } from "mysql2";
 import { PoolConnection } from "mysql2/promise";
 import { LimitOptions } from "../config.js";
 import pool from "../db.js";
@@ -34,6 +34,10 @@ interface ShortUserAccount {
   locked: boolean;
 }
 
+export interface GetCustomerFilters {
+  searchString?: string; // for name, email, sdt, address
+}
+
 export type InformationToCreateUserAccount = Omit<UserAccount, "id"> & {
   password: string;
 };
@@ -52,11 +56,15 @@ export async function signIn(email: string, password: string) {
   ) as UserSignInResult | null;
 }
 
-export async function getUserAccounts(limit?: LimitOptions) {
+export async function getUserAccounts(limit?: LimitOptions, filters?: GetCustomerFilters) {
   let getUserAccountsQuery =
     "select id, name, phone, gender, date_of_birth, email, address, locked from user_account where deleted_at is null";
   if (limit) {
     getUserAccountsQuery += " " + createLimitSql(limit);
+  }
+  if (filters) {
+    const filterSql = createFilterSql(filters);
+    getUserAccountsQuery += filterSql ? ` and ${filterSql}` : "";
   }
 
   const [userAccountRowDatas] = (await pool.query(
@@ -291,3 +299,27 @@ export async function checkLock(userAccountId: string) {
   ])) as RowDataPacket[][];
   return Boolean(rowDatas[0]["locked_count"]);
 }
+
+function createFilterSql(filter: GetCustomerFilters) {
+  let filterStatements: any = [];
+// for name, email, sdt, address
+  if (filter.searchString) {
+    const subFilterStatements: any = [];
+    subFilterStatements.push(
+      `user_account.name like ${escape(`%${filter.searchString}%`)}`
+    );
+    subFilterStatements.push(
+      `user_account.email like ${escape(`%${filter.searchString}%`)}`
+    );
+    subFilterStatements.push(
+      `user_account.phone like ${escape(`%${filter.searchString}%`)}`
+    );
+    subFilterStatements.push(
+      `user_account.address like ${escape(`%${filter.searchString}%`)}`
+    );
+    filterStatements.push(`(${subFilterStatements.join(" or ")})`);
+  }
+
+  return filterStatements.join(" and ");
+}
+

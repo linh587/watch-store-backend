@@ -1,4 +1,4 @@
-import { OkPacket, RowDataPacket } from "mysql2";
+import { escape, OkPacket, RowDataPacket } from "mysql2";
 import pool from "../db.js";
 import { convertUnderscorePropertiesToCamelCase } from "../utils/dataMapping.js";
 import { createUid } from "../utils/uid.js";
@@ -9,14 +9,26 @@ interface Category {
   name: string;
 }
 
-export async function getCategories() {
-  const getCategoriesQuery =
+export interface GetCategoryFilters {
+  searchString?: string; // for id, name
+}
+
+export async function getCategories(filters?: GetCategoryFilters) {
+  
+  let getCategoriesQuery =
     "select id, name from category where deleted_at is null";
+
+    if (filters) {
+      const filterSql = createFilterSql(filters);
+      getCategoriesQuery += filterSql ? ` and ${filterSql}` : "";
+    }
+
   const [categoryRowDatas] = (await pool.query(
     getCategoriesQuery
   )) as RowDataPacket[];
   return categoryRowDatas as Category[];
 }
+
 
 export async function getCategory(id: string) {
   const getCategoryQuery =
@@ -92,4 +104,16 @@ export async function deleteCategory(id: string) {
   } finally {
     poolConnection.release();
   }
+}
+
+function createFilterSql(filter: GetCategoryFilters) {
+  let filterStatements: any = [];
+  if (filter.searchString) {
+    const subFilterStatements: any = [];
+    subFilterStatements.push(
+      `category.name like ${escape(`%${filter.searchString}%`)}`
+    );
+    filterStatements.push(`(${subFilterStatements.join(" or ")})`)
+  }
+  return filterStatements
 }
