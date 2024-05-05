@@ -358,7 +358,7 @@ export function getEmailTemplate(order, details, amountOfDecreaseMoney) {
                           'Apple Color Emoji', 'Segoe UI Emoji',
                           'Segoe UI Symbol';
                       ">
-                      Trạng thái thanh toán
+                      Trạng thái thanh toán:
                       <b
                         style="
                           font-family: -apple-system, BlinkMacSystemFont,
@@ -653,7 +653,7 @@ export function getEmailTemplate(order, details, amountOfDecreaseMoney) {
                     Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji',
                     'Segoe UI Emoji', 'Segoe UI Symbol';
                 "
-                >- ${formatPrice(amountOfDecreaseMoney)}đ</span
+                >- ${order?.couponCode ? formatPrice(amountOfDecreaseMoney) : 0}đ</span
               >
             </div>
               <div
