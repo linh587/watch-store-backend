@@ -4,7 +4,6 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { FormDataRequest } from "../middlewares/formDataExtract.js";
 import * as UserAccountService from "../services/userAccount.js";
 import { sendMail } from "../utils/mail.js";
-import { uploadImage } from "../utils/storageImage.js";
 
 dotenv.config();
 

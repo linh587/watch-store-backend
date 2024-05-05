@@ -13,6 +13,11 @@ import * as UserAccountService from "../services/userAccount.js";
 import * as MapUtil from "../utils/map.js";
 import { calculateDeliveryCharge } from "../utils/misc.js";
 import * as PaymentService from "../services/payment.js";
+import { sendMail } from "../utils/mail.js";
+import {
+  getEmailTemplate,
+  listProductTemplate,
+} from "../utils/emailTemplate.js";
 
 export async function getInformation(req: UserRequest, res: Response) {
   const { userAccountId } = req;
@@ -268,6 +273,7 @@ export async function createOrder(req: UserRequest, res: Response) {
     });
     const socketIO = getSocketIO();
     socketIO.to(userAccountId).emit("newNotification");
+
     if (information.paymentType === "1") {
       const vpnUrl = await PaymentService.createPayment(
         req,
@@ -276,6 +282,27 @@ export async function createOrder(req: UserRequest, res: Response) {
         totalPrice
       );
       return res.json({ orderId, vpnUrl });
+    } else {
+      const order = await OrderService.getOrderById(orderId);
+      if (!order) return;
+
+      const userEmailAddress = order?.email;
+      const mailSubject = `Đơn hàng #${order?.id} đã đặt thành công`;
+      let details: string = "";
+
+      order?.details?.forEach((item) => {
+        if (item) {
+          details += listProductTemplate(item);
+        }
+      });
+
+      const mailContent = getEmailTemplate(
+        order,
+        details,
+        amountOfDecreaseMoney
+      );
+
+      sendMail(userEmailAddress, mailContent, mailSubject);
     }
     return res.json(orderId);
   } else {

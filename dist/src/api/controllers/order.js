@@ -4,6 +4,8 @@ import * as ProductPriceService from "../services/productPrice.js";
 import * as MapUtil from "../utils/map.js";
 import { calculateDeliveryCharge } from "../utils/misc.js";
 import * as PaymentService from "../services/payment.js";
+import { getEmailTemplate, listProductTemplate, } from "../utils/emailTemplate.js";
+import { sendMail } from "../utils/mail.js";
 export async function getOrder(req, res) {
     const orderId = req.params["orderId"];
     const order = await OrderService.getOrderById(orderId);
@@ -57,6 +59,19 @@ export async function createOrder(req, res) {
 export async function updatePaymentStatus(req, res) {
     const body = await PaymentService.queryDr(req, res);
     const update = await OrderService.updatePaymentStatusById(body.vnp_TxnRef, body.vnp_ResponseCode);
+    const order = await OrderService.getOrderById(body.vnp_TxnRef);
+    if (!order)
+        return;
+    const userEmailAddress = order?.email;
+    const mailSubject = `Đơn hàng #${order?.id} đã đặt thành công`;
+    let details = "";
+    order?.details?.forEach((item) => {
+        if (item) {
+            details += listProductTemplate(item);
+        }
+    });
+    const mailContent = getEmailTemplate(order, details, order.couponDecrease);
+    sendMail(userEmailAddress, mailContent, mailSubject);
     if (update)
         res.json(update);
 }

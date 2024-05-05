@@ -4,7 +4,12 @@ import { ORDER_STATUS } from "./order.js";
 import * as ProductPriceService from "./productPrice.js";
 export async function getOrderDetails(orderId, continueWithConnection) {
     const connection = continueWithConnection || pool;
-    const getOrderDetailsQuery = "select order_id, product_price_id, quality, price_at_purchase from order_detail where order_id=?";
+    const getOrderDetailsQuery = "select order_id, product_price_id, quality, price_at_purchase, product.name as product_name,\
+    product_size.name as product_size_name, product.cover_image as product_cover_image, category.name as category_name\
+     from order_detail inner join product_price on order_detail.product_price_id = product_price.id\
+     inner join product on product_price.product_id = product.id\
+     inner join category on product.category_id = category.id\
+     inner join product_size on product_price.product_size_id = product_size.id where order_id=?";
     const [orderDetailRowDatas] = (await connection.query(getOrderDetailsQuery, [
         orderId,
     ]));
@@ -23,10 +28,7 @@ export async function addOrderDetails(orderId, details, connection) {
     ]);
     for (const detail of orderDetailRowDatas) {
         await connection.query(addOrderDetailsQuery, [detail]);
-        await connection.query(updateQuantityQuery, [
-            detail[2],
-            detail[1],
-        ]);
+        await connection.query(updateQuantityQuery, [detail[2], detail[1]]);
     }
     return true;
     // const [result] = (await connection.query(addOrderDetailsQuery, [

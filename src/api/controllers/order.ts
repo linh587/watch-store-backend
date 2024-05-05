@@ -6,6 +6,11 @@ import * as MapUtil from "../utils/map.js";
 import { calculateDeliveryCharge } from "../utils/misc.js";
 import * as PaymentService from "../services/payment.js";
 import { UserRequest } from "../middlewares/authorization.js";
+import {
+  getEmailTemplate,
+  listProductTemplate,
+} from "../utils/emailTemplate.js";
+import { sendMail } from "../utils/mail.js";
 
 export async function getOrder(req: Request, res: Response) {
   const orderId = req.params["orderId"];
@@ -91,6 +96,23 @@ export async function updatePaymentStatus(req: Request, res: Response) {
     body.vnp_TxnRef,
     body.vnp_ResponseCode
   );
+
+  const order = await OrderService.getOrderById(body.vnp_TxnRef);
+  if (!order) return;
+
+  const userEmailAddress = order?.email;
+  const mailSubject = `Đơn hàng #${order?.id} đã đặt thành công`;
+  let details: string = "";
+
+  order?.details?.forEach((item) => {
+    if (item) {
+      details += listProductTemplate(item);
+    }
+  });
+
+  const mailContent = getEmailTemplate(order, details, order.couponDecrease);
+
+  sendMail(userEmailAddress, mailContent, mailSubject);
 
   if (update) res.json(update);
 }

@@ -27,6 +27,7 @@ export interface Order {
   paymentStatus: string;
   paymentType: string;
   createdAt: Date | string;
+  couponDecrease: number;
   details: OrderDetailService.OrderDetail[];
 }
 
@@ -187,7 +188,9 @@ export async function getOrdersByUserAccount(
 }
 
 export async function getOrderById(orderId: string) {
-  const getOrderQuery = `select id, customer_name, phone, email, user_account_id, coupon_code, received_type, received_address, received_at, delivery_charge, subtotal_price, total_price, status, note, payment_type, payment_status, created_at from ${MYSQL_DB}.order where id=?`;
+  const getOrderQuery = `select id, customer_name, phone, email, user_account_id, coupon_code as couponCode, (select decrease from coupon where coupon_code = couponCode) as coupon_decrease,\
+  received_type, received_address, received_at, delivery_charge, subtotal_price, total_price, status, note, payment_type, payment_status, created_at\
+  from ${MYSQL_DB}.order where id=?`;
   const [orderRowDatas] = (await pool.query(getOrderQuery, [
     orderId,
   ])) as RowDataPacket[][];

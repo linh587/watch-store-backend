@@ -1,18 +1,23 @@
-import dotenv from 'dotenv';
-import nodemailer from 'nodemailer';
+import dotenv from "dotenv";
+import nodemailer from "nodemailer";
 dotenv.config();
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    service: "gmail",
     auth: {
-        user: process.env.MAIL_USER || '',
-        pass: process.env.MAIL_PASSWORD || ''
-    }
+        user: process.env.MAIL_USER || "",
+        pass: process.env.MAIL_PASSWORD || "",
+    },
 });
-export async function sendMail(to, content, subject = '') {
+export async function sendMail(to, content, subject = "") {
     if (!to || !content) {
         return false;
     }
-    const mailOptions = { from: process.env.MAIL_USER || '', to, subject, text: content };
+    const mailOptions = {
+        from: process.env.MAIL_USER || "",
+        to,
+        subject,
+        html: content,
+    };
     try {
         const result = await transporter.sendMail(mailOptions);
         return !!result.messageId;

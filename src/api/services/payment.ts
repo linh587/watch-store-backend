@@ -3,8 +3,6 @@ import moment from "moment";
 import { createHmac } from "crypto";
 import QueryString from "qs";
 import request from "request";
-import { reject } from "lodash";
-import { resolve } from "path";
 
 export async function createPayment(
   req: Request,
