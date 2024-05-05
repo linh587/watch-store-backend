@@ -268,11 +268,11 @@ export async function verifyReceivedOrder(orderId, staffAccountId, id) {
     }
 }
 export async function completedOrder(orderId, staffAccountId, id) {
-    const verifyReceivedOrderQuery = `update ${MYSQL_DB}.order set status=? where id=? and status in ?`;
+    const verifyReceivedOrderQuery = `update ${MYSQL_DB}.order set status=? where id=? and status not in ?`;
     const poolConnection = await pool.getConnection();
     try {
         await poolConnection.beginTransaction();
-        const [statusUpdateResult] = (await poolConnection.query(verifyReceivedOrderQuery, [ORDER_STATUS.completed, orderId, [[ORDER_STATUS.received]]]));
+        const [statusUpdateResult] = (await poolConnection.query(verifyReceivedOrderQuery, [ORDER_STATUS.completed, orderId, [[ORDER_STATUS.cancelled]]]));
         if (statusUpdateResult.affectedRows <= 0) {
             throw new Error(`Don't verify completed order #${orderId}`);
         }
@@ -354,7 +354,7 @@ export async function canCompletedOrder(orderId) {
     if (!order) {
         return false;
     }
-    if (!(order.status === ORDER_STATUS.received)) {
+    if (order.status === ORDER_STATUS.cancelled) {
         return false;
     }
     return true;
