@@ -13,6 +13,7 @@ import * as NotificationService from "../services/notification.js";
 import * as SupplierService from "../services/supplier.js";
 import * as GoodReceiptService from "../services/goodReceipt.js";
 import * as DamageService from "../services/damage.js";
+import * as ReturnServie from "../services/returnOrder.js";
 import { deleteImage, uploadImage } from "../utils/storageImage.js";
 import { getSocketIO } from "../../socketIO.js";
 import * as OrderService from "../services/order.js";
@@ -191,6 +192,31 @@ export async function getGoodReceipt(req, res) {
     const goodReceiptId = req.params["goodReceiptId"];
     const goodReceipt = await GoodReceiptService.getGoodReceiptById(goodReceiptId);
     res.json(goodReceipt);
+}
+export async function createReturnOrder(req, res) {
+    const information = req.body["return"];
+    const returnOrderId = await ReturnServie.createReturnOrder({
+        ...information,
+    });
+    if (returnOrderId) {
+        res.json(returnOrderId);
+    }
+    else {
+        res.status(400).json("Error when create return order");
+    }
+}
+export async function getAllReturnOrders(req, res) {
+    const options = {};
+    if (req.query["sort"]) {
+        const sortType = String(req.query["sort"] || "");
+        if (OrderService.SORT_TYPES.includes(sortType)) {
+            options.sort = sortType;
+        }
+    }
+    const returns = await ReturnServie.getAllReturnOrders(options);
+    res.json({
+        data: returns,
+    });
 }
 export async function getAllDamages(req, res) {
     const options = {};

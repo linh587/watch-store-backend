@@ -17,6 +17,7 @@ import * as NotificationService from "../services/notification.js";
 import * as SupplierService from "../services/supplier.js";
 import * as GoodReceiptService from "../services/goodReceipt.js";
 import * as DamageService from "../services/damage.js";
+import * as ReturnServie from "../services/returnOrder.js";
 import { deleteImage, uploadImage } from "../utils/storageImage.js";
 import { getSocketIO } from "../../socketIO.js";
 import * as OrderService from "../services/order.js";
@@ -151,9 +152,7 @@ export async function createGoodReceipt(req: Request, res: Response) {
   const information: GoodReceiptService.InfomationToCreateGoodReciept =
     req.body["receipt"];
 
-  const supplierBeGoodReceipt = await SupplierService.getSupplier(
-    information.supplierId
-  );
+  const supplierBeGoodReceipt = await SupplierService.getSupplier(information.supplierId);
   if (!supplierBeGoodReceipt) {
     res.status(400).json(`Supplier #${information.supplierId} not found`);
     return;
@@ -234,6 +233,39 @@ export async function getGoodReceipt(req: Request, res: Response) {
   );
   res.json(goodReceipt);
 }
+
+export async function createReturnOrder(req: Request, res: Response) {
+  const information: ReturnServie.InfomationToCreateReturnOrder =
+    req.body["return"];
+    
+  const returnOrderId = await ReturnServie.createReturnOrder({
+    ...information,
+  });
+
+  if (returnOrderId) {
+    res.json(returnOrderId);
+  } else {
+    res.status(400).json("Error when create return order");
+  }
+}
+export async function getAllReturnOrders(req: Request, res: Response) {
+  const options: ReturnServie.GetReturnOrderOptions = {};
+
+  if (req.query["sort"]) {
+    const sortType = String(
+      req.query["sort"] || ""
+    ) as ReturnServie.SortType;
+    if (OrderService.SORT_TYPES.includes(sortType)) {
+      options.sort = sortType;
+    }
+  }
+
+  const returns = await ReturnServie.getAllReturnOrders(options);
+  res.json({
+    data: returns,
+  });
+}
+
 
 export async function getAllDamages(req: Request, res: Response) {
   const options: GoodReceiptService.GetGoodReceiptOptions = {};
