@@ -8,8 +8,13 @@ const MYSQL_DB = process.env.MYSQL_DB || "watch_db";
 dotenv.config();
 export const TIME_TYPES = ["day", "month", "year"];
 export const SORT_TYPES = ["newest", "oldest"];
-export async function getAllDamages() {
+export async function getAllDamages(options) {
     let getAllDamagisQuery = `select id, total_amount, creator, created_at, note from ${MYSQL_DB}.damage where deleted_at is null`;
+    if (options) {
+        if (options.sort) {
+            getAllDamagisQuery += " " + createSortSql(options.sort);
+        }
+    }
     const [damageRowDatas] = (await pool.query(getAllDamagisQuery));
     return damageRowDatas.map(convertUnderscorePropertiesToCamelCase);
 }

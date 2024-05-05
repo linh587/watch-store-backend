@@ -42,17 +42,14 @@ export interface InformationToUpdateDamage {
   details: Omit<TemporaryDamageDetail, "product">[];
 }
 
-export interface DamageFilters {
-  status?: string;
-  createdFrom?: Date;
-  createdTo?: Date;
-  searchString?: string; // customer name or phone in order
-}
-
 export interface StatisDamageItem {
   totalCount: number; //tổng số lượng sản phẩm xử lý hư hỏng
   totalPrice: number; //tổng giá tiền sản phẩm hư hỏng
   date: string;
+}
+
+export interface GetDamageOptions {
+  sort?: (typeof SORT_TYPES)[number];
 }
 
 export type TimeType = (typeof TIME_TYPES)[number];
@@ -63,8 +60,14 @@ dotenv.config();
 export const TIME_TYPES = ["day", "month", "year"] as const;
 export const SORT_TYPES = ["newest", "oldest"] as const;
 
-export async function getAllDamages() {
+export async function getAllDamages(options?: GetDamageOptions) {
   let getAllDamagisQuery = `select id, total_amount, creator, created_at, note from ${MYSQL_DB}.damage where deleted_at is null`;
+
+  if (options) {
+    if (options.sort) {
+      getAllDamagisQuery += " " + createSortSql(options.sort);
+    }
+  }
 
   const [damageRowDatas] = (await pool.query(
     getAllDamagisQuery
@@ -239,7 +242,7 @@ export async function statisDamage(
     and damage_detail.size_id = good_receipt_detail.size_id\
     where date(damage.created_at) >= date(?) and date(damage.created_at) <= date(?)\
     group by date order by date;`;
-    
+
   const DAY_SPECIFIER = "%d";
   const MONTH_SPECIFIER = "%m";
   const YEAR_SPECIFIER = "%Y";

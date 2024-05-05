@@ -193,7 +193,14 @@ export async function getGoodReceipt(req, res) {
     res.json(goodReceipt);
 }
 export async function getAllDamages(req, res) {
-    const damages = await DamageService.getAllDamages();
+    const options = {};
+    if (req.query["sort"]) {
+        const sortType = String(req.query["sort"] || "");
+        if (OrderService.SORT_TYPES.includes(sortType)) {
+            options.sort = sortType;
+        }
+    }
+    const damages = await DamageService.getAllDamages(options);
     res.json({
         data: damages,
     });
