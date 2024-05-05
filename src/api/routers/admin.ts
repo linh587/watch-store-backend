@@ -9,6 +9,9 @@ router.get("/all-orders", AdminController.getAllOrders);
 
 router.get("/information", AdminController.getInformation);
 
+router.post("/return-order", AdminController.createReturnOrder);
+router.get("/return-order", AdminController.getAllReturnOrders);
+
 router.post("/good-receipt", AdminController.createGoodReceipt);
 router.get("/good-receipt", AdminController.getAllGoodReceipts);
 router.get("/good-receipt/:goodReceiptId", AdminController.getGoodReceipt);
