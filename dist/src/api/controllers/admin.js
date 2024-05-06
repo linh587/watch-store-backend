@@ -218,6 +218,39 @@ export async function getAllReturnOrders(req, res) {
         data: returns,
     });
 }
+export async function getReturnOrder(req, res) {
+    const returnOrderId = req.params["returnOrderId"];
+    const returnOrder = await ReturnServie.getReturnOrderById(returnOrderId);
+    res.json(returnOrder);
+}
+export async function updateStatusReturn(req, res) {
+    const { returnOrderId } = req.params;
+    const updatedInformation = req.body["return"];
+    // Kiểm tra xem phiếu nhập có tồn tại không
+    const existingGoodReceipt = await ReturnServie.getReturnOrderById(returnOrderId);
+    if (!existingGoodReceipt) {
+        res.status(404).json(`Good receipt with ID ${returnOrderId} not found`);
+        return;
+    }
+    // Thực hiện cập nhật thông tin phiếu nhập
+    const isSuccess = await ReturnServie.updateStatusReturnOrder(returnOrderId, updatedInformation);
+    if (isSuccess) {
+        res.json({ message: "Return Order updated successfully" });
+    }
+    else {
+        res.status(400).json("Error when updating Return Order");
+    }
+}
+export async function deleteReturnOrder(req, res) {
+    const returnOrderId = req.params["returnOrderId"];
+    const success = await ReturnServie.deleteReturnOrder(returnOrderId);
+    if (success) {
+        res.json("Delete Return Order successful");
+    }
+    else {
+        res.status(400).json("Delete Return Order failure");
+    }
+}
 export async function getAllDamages(req, res) {
     const options = {};
     if (req.query["sort"]) {
