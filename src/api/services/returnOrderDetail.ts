@@ -5,11 +5,12 @@ import { TemporaryReturnOrderDetail } from "./returnOrder.js";
 
 export interface ReturnOrderDetail {
   returnOrderId: string;
-  productId: string;
-  sizeId: string;
-  price: number;
+  productPriceId: string;
+  //sizeId: string;
+  pricePurchase: number;
   quantity: number;
   reason?: string;
+  returnType: string;
 }
 
 const MYSQL_DB = process.env.MYSQL_DB || "watch_db";
@@ -20,7 +21,7 @@ export async function getReturnOrderDetails(
 ) {
   const connection = continueWithConnection || pool;
   const getReturnOrderDetailsQuery =
-    "select return_order_id, product_id, size_id, price_id, quantity, reason from return_order_details where return_order_id=?";
+    "select return_order_id, product_price_id, price_purchase, quantity, reason, return_type from return_order_details where return_order_id=?";
   const [returOrderDetailRowDatas] = (await connection.query(
     getReturnOrderDetailsQuery,
     [returnOrderId]
@@ -37,13 +38,13 @@ export async function addReturnOrderDetails(
   connection: PoolConnection
 ) {
   const addReturnOrderDetailsQuery =
-    "insert into return_order_details(`return_order_id`, `product_id`, `size_id`, `price_id`, `quantity`, `reason`) VALUES (?)";
+    "insert into return_order_details(`return_order_id`, `product_price_id`, `price_purchase`, `quantity`, `reason`, `return_type`) VALUES (?)";
 
-  const updateQuantityQuery =
-    "update product_price\
-  set quantity = product_price.quantity + ?\
-  where product_price.product_id= ? \
-  and product_price.product_size_id= ?";
+  // const updateQuantityQuery =
+  //   "update product_price\
+  // set quantity = product_price.quantity + ?\
+  // where product_price.product_id= ? \
+  // and product_price.product_size_id= ?";
 
   // const returnOrderDetailRowDatas = details.map((detail) => [
   //   returnOrderId,
@@ -68,19 +69,19 @@ export async function addReturnOrderDetails(
   //   }
   // }
   for (const detail of details) {
-    const { productId, sizeId, price, quantity, reason } = detail;
+    const { productPriceId, pricePurchase, quantity, reason, returnType } = detail;
 
     await connection.query(addReturnOrderDetailsQuery, [
-      [returnOrderId, productId, sizeId, price, quantity, reason],
+      [returnOrderId, productPriceId, pricePurchase, quantity, reason, returnType],
     ]);
 
-    await connection.query(updateQuantityQuery, [quantity, productId, sizeId]);
+    //await connection.query(updateQuantityQuery, [quantity, productId, sizeId]);
 
     // Kiểm tra sản phẩm có tồn tại trong đơn hàng đã mua hay không
-    const existsInOrder = await checkExistsProductInOrder(productId, orderId);
+    const existsInOrder = await checkExistsProductInOrder(productPriceId, orderId);
     if (!existsInOrder) {
       throw new Error(
-        `Sản phẩm với ID ${productId} không tồn tại trong đơn hàng đã mua.`
+        `Sản phẩm với ID ${productPriceId} không tồn tại trong đơn hàng đã mua.`
       );
     }
   }
@@ -93,16 +94,16 @@ export async function updateReturnOrderDetails(
   connection: PoolConnection
 ) {
   const updateReturnOrderDetailsQuery =
-    "UPDATE return_order_details SET quantity = ?, size_id=?, price_id = ?, reason = ? WHERE return_order_id = ? AND product_id = ?";
+    "UPDATE return_order_details SET quantity = ?, price_purchase = ?, reason = ?, return_type =? WHERE return_order_id = ? AND product_price_id = ?";
 
   const updateOperations = details.map(async (detail) => {
     const values = [
       detail.quantity,
-      detail.sizeId,
-      detail.price,
+      detail.pricePurchase,
       detail.reason,
+      detail.returnType,
       returnOrderId,
-      detail.productId,
+      detail.productPriceId,
     ];
     await connection.query(updateReturnOrderDetailsQuery, values);
   });
@@ -122,6 +123,7 @@ export async function deleteReturOrderById(
   ])) as OkPacket[];
   return result.affectedRows > 0;
 }
+
 export async function checkExistsProductInOrder(
   productId?: string,
   orderId?: string

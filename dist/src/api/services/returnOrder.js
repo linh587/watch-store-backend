@@ -18,7 +18,7 @@ function createSortSql(sort) {
     }
 }
 export async function getAllReturnOrders(options) {
-    let getAllReturnOrdersQuery = `select id, order_id, request_date, created_at, updated_at, status, total_product from ${MYSQL_DB}.return_order`;
+    let getAllReturnOrdersQuery = `select id, order_id, request_date, total_product, status, creator, updated_at from ${MYSQL_DB}.return_order where deleted_at is null`;
     if (options) {
         if (options.sort) {
             getAllReturnOrdersQuery += " " + createSortSql(options.sort);
@@ -29,24 +29,24 @@ export async function getAllReturnOrders(options) {
 }
 export async function createReturnOrder(information) {
     const returnOrderId = createUid(20);
-    const { orderId, requestDate, status, updatedAt, details } = information;
+    const { orderId, requestDate, status, creator, updatedAt, details } = information;
     if (details.length <= 0) {
         return "";
     }
     const temporaryReturnOrderDetails = (await Promise.all(details.map(async (detail) => {
-        const productId = await ProductService.getProduct(detail.productId);
+        const productId = await ProductService.getProduct(detail.productPriceId);
         if (!productId) {
             return null;
         }
         return { ...detail };
     }))).flatMap((detail) => (detail ? [detail] : []));
     const totalAmount = calculateTemporaryTotalPrice(temporaryReturnOrderDetails);
-    const createReturnOrderQuery = "insert into return_order(`id`, `order_id`, `request_date`, `status`, `updated_at`, `total_product`) values (?)";
+    const createReturnOrderQuery = "insert into return_order(`id`, `order_id`, `request_date`,`total_product`, `status`, `creator`, `updated_at`) values (?)";
     const poolConnection = await pool.getConnection();
     try {
         await poolConnection.beginTransaction();
         await poolConnection.query(createReturnOrderQuery, [
-            [returnOrderId, orderId, requestDate, status, updatedAt, totalAmount],
+            [returnOrderId, orderId, requestDate, totalAmount, status, creator, updatedAt],
         ]);
         await ReturnOrdertDetailService.addReturnOrderDetails(returnOrderId, orderId, temporaryReturnOrderDetails, poolConnection);
         await poolConnection.commit();
@@ -61,13 +61,39 @@ export async function createReturnOrder(information) {
         poolConnection.release();
     }
 }
+export async function updateStatusReturnOrder(returnOrderId, information) {
+    const { status, creator, updatedAt } = information;
+    const updateReturnOrderQuery = "UPDATE " +
+        MYSQL_DB +
+        ".return_order SET status=?, creator=?, updated_at=? WHERE id=?";
+    const poolConnection = await pool.getConnection();
+    try {
+        await poolConnection.beginTransaction();
+        await poolConnection.query(updateReturnOrderQuery, [
+            status,
+            creator,
+            updatedAt,
+            returnOrderId,
+        ]);
+        await poolConnection.commit();
+        return true;
+    }
+    catch (error) {
+        await poolConnection.rollback();
+        console.log(error);
+        return false;
+    }
+    finally {
+        poolConnection.release();
+    }
+}
 export async function updateReturnOrder(returnOrderId, information) {
-    const { orderId, requestDate, status, updatedAt, details } = information;
+    const { orderId, requestDate, status, creator, updatedAt, details } = information;
     if (details.length <= 0) {
         return false;
     }
     const temporaryReturnOrderDetails = (await Promise.all(details.map(async (detail) => {
-        const productId = await ProductService.getProduct(detail.productId);
+        const productId = await ProductService.getProduct(detail.productPriceId);
         if (!productId) {
             return null;
         }
@@ -76,17 +102,17 @@ export async function updateReturnOrder(returnOrderId, information) {
     const totalAmount = calculateTemporaryTotalPrice(temporaryReturnOrderDetails);
     const updateReturnOrderQuery = "UPDATE " +
         MYSQL_DB +
-        ".return_order SET status = ?, updated_at = ?, total_product = ? WHERE id = ?";
+        ".return_order SET reques_date=?, status = ?, creator=?, updated_at = ?, total_product = ? WHERE id = ?";
     const poolConnection = await pool.getConnection();
     try {
         await poolConnection.beginTransaction();
         await poolConnection.query(updateReturnOrderQuery, [
-            returnOrderId,
-            orderId,
             requestDate,
             status,
+            creator,
             updatedAt,
             totalAmount,
+            returnOrderId
         ]);
         await ReturnOrdertDetailService.updateReturnOrderDetails(returnOrderId, temporaryReturnOrderDetails, poolConnection);
         await poolConnection.commit();
@@ -106,7 +132,7 @@ export function calculateTemporaryTotalPrice(returnOrderItems) {
     return totalAmount;
 }
 export async function getReturnOrderById(returnOrderId) {
-    const getReturnOrderQuery = `select id, order_id, request_date, status, updated_at, total_product from ${MYSQL_DB}.return_order where id=?`;
+    const getReturnOrderQuery = `select id, order_id, request_date, status, creator, updated_at, total_product from ${MYSQL_DB}.return_order where id=? and deleted_at is null`;
     const [returnOrderRowDatas] = (await pool.query(getReturnOrderQuery, [
         returnOrderId,
     ]));
@@ -119,27 +145,23 @@ export async function getReturnOrderById(returnOrderId) {
         details,
     });
 }
-// export async function deleteReturnOrder(
-//   id: string,
-//   continueWithConnection?: PoolConnection
-// ) {
-//   const deleteReceiptQuery = "update good_receipt set deleted_at=? where id=?";
-//   const connection = continueWithConnection || (await pool.getConnection());
-//   const deletedDateTime = new Date();
-//   try {
-//     await connection.beginTransaction();
-//     await connection.query(deleteReceiptQuery, [deletedDateTime, id]);
-//     await GoodReceiptDetailService.deleteReceiptDetailByReceipId(
-//       id,
-//       connection
-//     );
-//     await connection.commit();
-//     return true;
-//   } catch (error) {
-//     console.log(error);
-//     await connection.rollback();
-//     return false;
-//   } finally {
-//     connection.release();
-//   }
-// }
+export async function deleteReturnOrder(id, continueWithConnection) {
+    const deleteReceiptQuery = "update return_order set deleted_at=? where id=?";
+    const connection = continueWithConnection || (await pool.getConnection());
+    const deletedDateTime = new Date();
+    try {
+        await connection.beginTransaction();
+        await connection.query(deleteReceiptQuery, [deletedDateTime, id]);
+        await ReturnOrdertDetailService.deleteReturOrderById(id, connection);
+        await connection.commit();
+        return true;
+    }
+    catch (error) {
+        console.log(error);
+        await connection.rollback();
+        return false;
+    }
+    finally {
+        connection.release();
+    }
+}

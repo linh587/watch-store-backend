@@ -11,6 +11,9 @@ router.get("/information", AdminController.getInformation);
 
 router.post("/return-order", AdminController.createReturnOrder);
 router.get("/return-order", AdminController.getAllReturnOrders);
+router.get("/return-order/:returnOrderId", AdminController.getReturnOrder);
+router.put("/return-order/:returnOrderId", AdminController.updateStatusReturn);
+router.delete("/return-order/:returnOrderId",AdminController.deleteReturnOrder);
 
 router.post("/good-receipt", AdminController.createGoodReceipt);
 router.get("/good-receipt", AdminController.getAllGoodReceipts);
