@@ -11,8 +11,8 @@ const RATING_STATUS = {
 export const TIME_TYPES = ["day", "month", "year"];
 export const SORT_TYPES = ["newest", "oldest"];
 export async function getAllRatings(options, filters) {
-    let getAllRatingsQuery = "select product_id, user_account_id, star, content, status, created_at, updated_at, user_account.name as user_name\
-    from rating inner join user_account on rating.user_account_id = user_account.id";
+    let getAllRatingsQuery = "select product_id, product.name as product_name, user_account_id, rating.star, rating.content, rating.status, rating.created_at, rating.updated_at, user_account.name as user_name\
+    from rating inner join user_account on rating.user_account_id = user_account.id inner join product on rating.product_id = product.id";
     if (filters) {
         const filterSql = createFilterSql(filters);
         if (filterSql) {
